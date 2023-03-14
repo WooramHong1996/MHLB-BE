@@ -1,10 +1,12 @@
 package com.gigajet.mhlb.domain.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity(name = "users")
 @Getter
@@ -31,6 +33,10 @@ public class User {
 
     @Column(nullable = false)
     private String job;
+
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
+//    @JsonIgnoreProperties("User")
+//    private List<WorkspaceUser> workspaceUsers;
 
     public User(UserRequestDto.Register registerDto, String password) {
         this.image = registerDto.getUserImage();
