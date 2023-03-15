@@ -126,7 +126,7 @@ public class ManagingService {
     private WorkspaceUser checkRole(User user, Long id) {
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.PERMISSION_DINED));
 
-        if (!(workspaceUser.getRole() == WorkspaceUserRole.MANAGER || workspaceUser.getRole() == WorkspaceUserRole.ADMIN)) {
+        if (workspaceUser.getRole() == WorkspaceUserRole.MEMBER) {
             throw new CustomException(ErrorCode.PERMISSION_DINED);
         }
 
