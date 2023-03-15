@@ -42,22 +42,31 @@ public class User {
 
     public User(UserRequestDto.Register registerDto, String password) {
         this.image = registerDto.getUserImage();
+
         this.email = registerDto.getEmail();
+
         this.username = registerDto.getUserName();
+
         this.description = registerDto.getUserDesc();
+
         this.password = password;
+
         this.job = registerDto.getUserJob();
     }
+
     public void updateName(ChangeMypageDto.NameRequest nameRequest) {
         this.username = nameRequest.getUserName();
     }
+
     public void updateJob(ChangeMypageDto.JobRequest jobRequest) {
-        this.username = jobRequest.getUserJob();
+        this.job = jobRequest.getUserJob();
     }
+
     public void updateDesc(ChangeMypageDto.DescRequest descRequest) {
-        this.username = descRequest.getUserDesc();
+        this.description = descRequest.getUserDesc();
     }
+
     public void updateImage(ChangeMypageDto.ImageRequest imageRequest) {
-        this.username = imageRequest.getUserImage();
+        this.image = imageRequest.getUserImage();
     }
 }

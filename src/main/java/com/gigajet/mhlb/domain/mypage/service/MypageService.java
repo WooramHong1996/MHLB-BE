@@ -47,14 +47,14 @@ public class MypageService {
         return allLists;
     }
 
-    public ResponseEntity<SendMessageDto> UpdateImage(User user, MultipartFile image) {
+    public ResponseEntity<SendMessageDto> updateImage(User user, MultipartFile image) {
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL));
         //나중에 만들기
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.LOGIN_SUCCESS));
     }
 
-    public ResponseEntity<SendMessageDto> UpdateName(User user, ChangeMypageDto.NameRequest nameRequest) {
+    public ResponseEntity<SendMessageDto> updateName(User user, ChangeMypageDto.NameRequest nameRequest) {
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
         );
@@ -62,7 +62,7 @@ public class MypageService {
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.LOGIN_SUCCESS));
     }
 
-    public ResponseEntity<SendMessageDto> UpdateDesc(User user, ChangeMypageDto.DescRequest descRequest) {
+    public ResponseEntity<SendMessageDto> updateDesc(User user, ChangeMypageDto.DescRequest descRequest) {
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
         );
@@ -70,7 +70,7 @@ public class MypageService {
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.LOGIN_SUCCESS));
     }
 
-    public ResponseEntity<SendMessageDto> UpdateJob(User user, ChangeMypageDto.JobRequest jobRequest) {
+    public ResponseEntity<SendMessageDto> updateJob(User user, ChangeMypageDto.JobRequest jobRequest) {
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
         );

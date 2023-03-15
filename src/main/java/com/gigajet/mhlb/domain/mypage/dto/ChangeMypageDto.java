@@ -7,14 +7,17 @@ public class ChangeMypageDto {
     public static class NameRequest{
         private String userName;
     }
+
     @Getter
     public static class DescRequest{
         private String userDesc;
     }
+
     @Getter
     public static class JobRequest{
         private String userJob;
     }
+
     @Getter
     public static class ImageRequest{
         private String userImage;
