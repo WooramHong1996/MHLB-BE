@@ -26,9 +26,9 @@ public class WorkspaceController {
     }
 
     @PostMapping
-    public ResponseEntity<SendMessageDto> workspaceCreate(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                          @RequestPart("image") MultipartFile image,
-                                                          @RequestPart("data") WorkspaceDto.Create workspaceDto) throws IOException {
+    public WorkspaceDto.CreateResponse workspaceCreate(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                       @RequestPart("image") MultipartFile image,
+                                                       @RequestPart("data") WorkspaceDto.Create workspaceDto) throws IOException {
         return workspaceService.workspaceCreate(userDetails.getUser(), image, workspaceDto);
     }
 
@@ -37,5 +37,11 @@ public class WorkspaceController {
                          @PathVariable Long id,
                          @RequestParam(defaultValue = "3") Integer size) {
         return workspaceService.inboxGet(userDetails.getUser(), id, size);
+    }
+
+    @GetMapping("/")
+    public WorkspaceDto.InfoAndRoll infoAndRoll(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                @RequestParam Long id) {
+        return workspaceService.infoAndRoll(userDetails.getUser(), id);
     }
 }
