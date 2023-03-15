@@ -74,10 +74,10 @@ public class ManagingService {
 
         List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_Id(id);
 
-        List<ManagingResponseDto.PeopleResponse> responses = new ArrayList<>();
+        List<ManagingResponseDto.People> responses = new ArrayList<>();
 
         for (WorkspaceUser workspaceUser : workspaceUsers) {
-            responses.add(new ManagingResponseDto.PeopleResponse(workspaceUser.getUser(), workspaceUser.getRole()));
+            responses.add(new ManagingResponseDto.People(workspaceUser.getUser(), workspaceUser.getRole()));
         }
 
         return responses;
