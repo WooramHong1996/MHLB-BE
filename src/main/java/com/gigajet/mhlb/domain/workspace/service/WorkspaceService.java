@@ -7,6 +7,8 @@ import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
+import com.gigajet.mhlb.exception.CustomException;
+import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.ADMIN;
+import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.*;
 
 @Service
 @RequiredArgsConstructor
@@ -71,4 +73,20 @@ public class WorkspaceService {
 
         return new WorkspaceDto.InfoAndRoll(workspaceUser.get().getWorkspace(), workspaceUser.get().getRole());
     }
+
+    //임시코드
+    @Transactional
+    public String testInvite(User user, Long id) {
+        Optional<WorkspaceUser> workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user,id);
+        if(workspaceUser.isPresent()){
+            throw new CustomException(ErrorCode.PERMISSION_DINED);
+        }
+
+        Workspace workspace = workspaceRepository.findById(id).orElseThrow(()->new CustomException(ErrorCode.PERMISSION_DINED));
+
+        workspaceUserRepository.save(new WorkspaceUser(user,workspace,MANAGER));
+
+        return "댓서!";
+    }
+    //임시코드
 }

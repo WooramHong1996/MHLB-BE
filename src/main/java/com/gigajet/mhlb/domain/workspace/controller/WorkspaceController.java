@@ -44,4 +44,9 @@ public class WorkspaceController {
                                                 @RequestParam Long id) {
         return workspaceService.infoAndRoll(userDetails.getUser(), id);
     }
+
+    @PostMapping("/{id}/invite")//테스트용 코드
+    public String testInvite(@AuthenticationPrincipal UserDetailsImpl userDetails,@PathVariable Long id){
+        return workspaceService.testInvite(userDetails.getUser(),id);
+    }
 }
