@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 
+@Getter
 public class SendMessageDto {
     private String message;
     private int statusCode;
