@@ -20,8 +20,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/duplicate-email")
-    public ResponseEntity<SendMessageDto> duplicateEmail(@RequestBody String email) {
-        return userService.duplicateEmail(email);
+    public ResponseEntity<SendMessageDto> duplicateEmail(@RequestBody UserRequestDto.CheckEmailDto emailDto) {
+        return userService.duplicateEmail(emailDto);
     }
 
     @PostMapping("/register")
