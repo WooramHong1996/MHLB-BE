@@ -86,7 +86,9 @@ public class ManagingService {
     @Transactional
     public ResponseEntity<SendMessageDto> deletePeople(User user, Long id, Long userid) {
         checkRole(user, id);
+
         workspaceUserRepository.deleteByUser_IdAndAndWorkspace_Id(userid, id);
+
         return ResponseEntity.ok(SendMessageDto.builder().message("ok").build());
     }
 
