@@ -47,7 +47,7 @@ public class MypageController {
                                                      @RequestBody ChangeMypageDto.DescRequest descRequest) {
         return mypageService.updateDesc(userDetails.getUser(), descRequest);
     }
-    @PatchMapping("/desc")
+    @PatchMapping("/job")
     public ResponseEntity<SendMessageDto> updateJob(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                      @RequestBody ChangeMypageDto.JobRequest jobRequest) {
         return mypageService.updateJob(userDetails.getUser(), jobRequest);
