@@ -2,7 +2,8 @@ package com.gigajet.mhlb.domain.workspace.service;
 
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
-import com.gigajet.mhlb.domain.workspace.dto.WorkspaceDto;
+import com.gigajet.mhlb.domain.workspace.dto.WorkspaceRequestDto;
+import com.gigajet.mhlb.domain.workspace.dto.WorkspaceResponseDto;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
@@ -10,7 +11,6 @@ import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
-import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,21 +35,21 @@ public class WorkspaceService {
     private final JwtUtil jwtUtil;
 
     @Transactional(readOnly = true)
-    public List<WorkspaceDto.AllList> workspaceAllList(User user) {
+    public List<WorkspaceResponseDto.AllList> workspaceAllList(User user) {
 
-        List<WorkspaceDto.AllList> allLists = new ArrayList<>();
+        List<WorkspaceResponseDto.AllList> allLists = new ArrayList<>();
 
         List<WorkspaceUser> workspaceUsers =workspaceUserRepository.findByUser(user);
 
         for (WorkspaceUser workspaceUser : workspaceUsers) {
-            allLists.add(new WorkspaceDto.AllList(workspaceUser.getWorkspace()));
+            allLists.add(new WorkspaceResponseDto.AllList(workspaceUser.getWorkspace()));
         }
 
         return allLists;
     }
 
     @Transactional
-    public WorkspaceDto.CreateResponse workspaceCreate(User user, MultipartFile image, WorkspaceDto.Create workspaceDto) {
+    public WorkspaceResponseDto.CreateResponse workspaceCreate(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) {
         //임시코드 시작 > 구현시 제거
         String imageurl = "더미데이터";
         //임시코드 끝
@@ -60,7 +60,7 @@ public class WorkspaceService {
 
         workspaceUserRepository.save(new WorkspaceUser(user, workspace, ADMIN));
 
-        return new WorkspaceDto.CreateResponse(workspace);
+        return new WorkspaceResponseDto.CreateResponse(workspace);
     }
 
     public List inboxGet(User user, Long id, Integer size) {
@@ -68,10 +68,10 @@ public class WorkspaceService {
     }
 
     @Transactional(readOnly = true)
-    public WorkspaceDto.InfoAndRoll infoAndRoll(User user, Long id) {
+    public WorkspaceResponseDto.InfoAndRoll infoAndRoll(User user, Long id) {
         Optional<WorkspaceUser> workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, id);
 
-        return new WorkspaceDto.InfoAndRoll(workspaceUser.get().getWorkspace(), workspaceUser.get().getRole());
+        return new WorkspaceResponseDto.InfoAndRoll(workspaceUser.get().getWorkspace(), workspaceUser.get().getRole());
     }
 
     //임시코드

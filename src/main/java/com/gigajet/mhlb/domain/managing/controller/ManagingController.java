@@ -1,7 +1,8 @@
 package com.gigajet.mhlb.domain.managing.controller;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.domain.managing.dto.ManagingDto;
+import com.gigajet.mhlb.domain.managing.dto.ManagingRequestDto;
+import com.gigajet.mhlb.domain.managing.dto.ManagingResponseDto;
 import com.gigajet.mhlb.domain.managing.service.ManagingService;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
@@ -21,7 +22,7 @@ public class ManagingController {
     private final ManagingService managingService;
 
     @GetMapping
-    public ManagingDto.ManagementResponse management(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Long id) {
+    public ManagingResponseDto.ManagementResponse management(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Long id) {
         return managingService.management(userDetails.getUser(), id);
     }
 
@@ -31,12 +32,12 @@ public class ManagingController {
     }
 
     @PatchMapping("/{id}/title")
-    public String titlePatch(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestBody ManagingDto.Title workspaceTitle) {
+    public String titlePatch(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestBody ManagingRequestDto.Title workspaceTitle) {
         return managingService.titlePatch(userDetails.getUser(), id, workspaceTitle.getWorkspaceTitle());
     }
 
     @PatchMapping("/{id}/description")
-    public String descPatch(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestBody ManagingDto.Desc workspaceDesc) {
+    public String descPatch(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestBody ManagingRequestDto.Desc workspaceDesc) {
         return managingService.descPatch(userDetails.getUser(), id, workspaceDesc.getWorkspaceDesc());
     }
 
