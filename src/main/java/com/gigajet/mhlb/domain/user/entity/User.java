@@ -1,7 +1,9 @@
 package com.gigajet.mhlb.domain.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gigajet.mhlb.domain.mypage.dto.ChangeMypageDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
+import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -45,5 +47,17 @@ public class User {
         this.description = registerDto.getUserDesc();
         this.password = password;
         this.job = registerDto.getUserJob();
+    }
+    public void updateName(ChangeMypageDto.NameRequest nameRequest) {
+        this.username = nameRequest.getUserName();
+    }
+    public void updateJob(ChangeMypageDto.JobRequest jobRequest) {
+        this.username = jobRequest.getUserJob();
+    }
+    public void updateDesc(ChangeMypageDto.DescRequest descRequest) {
+        this.username = descRequest.getUserDesc();
+    }
+    public void updateImage(ChangeMypageDto.ImageRequest imageRequest) {
+        this.username = imageRequest.getUserImage();
     }
 }
