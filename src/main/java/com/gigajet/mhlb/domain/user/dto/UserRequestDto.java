@@ -5,6 +5,13 @@ import lombok.Getter;
 public class UserRequestDto {
 
     @Getter
+    public static class CheckEmailDto {
+
+        private String email;
+
+    }
+
+    @Getter
     public static class Register {
 
         private String email;

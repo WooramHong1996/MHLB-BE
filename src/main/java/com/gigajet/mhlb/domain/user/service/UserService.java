@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
@@ -24,8 +25,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public ResponseEntity<SendMessageDto> duplicateEmail(String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
+    @Transactional(readOnly = true)
+    public ResponseEntity<SendMessageDto> duplicateEmail(UserRequestDto.CheckEmailDto emailDto) {
+        Optional<User> optionalUser = userRepository.findByEmail(emailDto.getEmail());
         if (optionalUser.isPresent()) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
@@ -33,6 +35,7 @@ public class UserService {
         return SendMessageDto.toResponseEntity(SuccessCode.CHECKUP_SUCCESS);
     }
 
+    @Transactional
     public ResponseEntity<SendMessageDto> register(UserRequestDto.Register registerDto) {
         Optional<User> optionalUser = userRepository.findByEmail(registerDto.getEmail());
         if (optionalUser.isPresent()) {
@@ -46,6 +49,7 @@ public class UserService {
         return SendMessageDto.toResponseEntity(SuccessCode.SIGNUP_SUCCESS);
     }
 
+    @Transactional(readOnly = true)
     public ResponseEntity<SendMessageDto> login(UserRequestDto.Login loginDto, HttpServletResponse response) {
         User user = userRepository.findByEmail(loginDto.getEmail()).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
 
