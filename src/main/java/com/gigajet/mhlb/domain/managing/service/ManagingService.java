@@ -1,7 +1,7 @@
 package com.gigajet.mhlb.domain.managing.service;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.domain.managing.dto.ManagingDto;
+import com.gigajet.mhlb.domain.managing.dto.ManagingResponseDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
@@ -31,8 +31,8 @@ public class ManagingService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public ManagingDto.ManagementResponse management(User user, Long id) {
-        return new ManagingDto.ManagementResponse(checkManager(user, id).getWorkspace());
+    public ManagingResponseDto.ManagementResponse management(User user, Long id) {
+        return new ManagingResponseDto.ManagementResponse(checkRole(user, id).getWorkspace());
     }
 
     @Transactional
@@ -41,9 +41,9 @@ public class ManagingService {
         String newimage = image.getName();
         //임시코드
 
-        checkManager(user, id);
+        checkRole(user, id);
 
-        Workspace workspace = workspaceRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("id wrong"));
+        Workspace workspace = workspaceRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
         workspace.imageChange(newimage);
 
@@ -52,7 +52,8 @@ public class ManagingService {
 
     @Transactional
     public String titlePatch(User user, Long id, String workspaceTitle) {
-        Workspace workspace = checkManager(user, id).getWorkspace();
+        Workspace workspace = checkRole(user, id).getWorkspace();
+
         workspace.titleChange(workspaceTitle);
 
         return workspace.getTitle();
@@ -60,7 +61,8 @@ public class ManagingService {
 
     @Transactional
     public String descPatch(User user, Long id, String workspaceDesc) {
-        Workspace workspace = checkManager(user, id).getWorkspace();
+        Workspace workspace = checkRole(user, id).getWorkspace();
+
         workspace.descChange(workspaceDesc);
 
         return workspace.getDescription();
@@ -68,14 +70,14 @@ public class ManagingService {
 
     @Transactional
     public List getPeople(User user, Long id) {
-        checkManager(user, id);
+        checkRole(user, id);
 
         List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_Id(id);
 
-        List<ManagingDto.PeopleResponse> responses = new ArrayList<>();
+        List<ManagingResponseDto.PeopleResponse> responses = new ArrayList<>();
 
         for (WorkspaceUser workspaceUser : workspaceUsers) {
-            responses.add(new ManagingDto.PeopleResponse(workspaceUser.getUser(), workspaceUser.getRole()));
+            responses.add(new ManagingResponseDto.PeopleResponse(workspaceUser.getUser(), workspaceUser.getRole()));
         }
 
         return responses;
@@ -83,7 +85,7 @@ public class ManagingService {
 
     @Transactional
     public ResponseEntity<SendMessageDto> deletePeople(User user, Long id, Long userid) {
-        checkManager(user, id);
+        checkRole(user, id);
         workspaceUserRepository.deleteByUser_IdAndAndWorkspace_Id(userid, id);
         return ResponseEntity.ok(SendMessageDto.builder().message("ok").build());
     }
@@ -94,20 +96,24 @@ public class ManagingService {
             throw new CustomException(ErrorCode.PERMISSION_DINED);
         }
 
-        checkManager(user, id);
+        checkRole(user, id);
 
-        User changeUser = userRepository.findById(userid).orElseThrow(() -> new IllegalArgumentException());
+        User changeUser = userRepository.findById(userid).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
-        Optional<WorkspaceUser> changeWorkspace = workspaceUserRepository.findByUserAndWorkspaceId(changeUser, id);
+        WorkspaceUser changeUserWorkspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(changeUser, id).orElseThrow(()->new CustomException(ErrorCode.WRONG_USER));
 
-        changeWorkspace.get().updateRole(userRole);
+        if(userRole==changeUserWorkspaceUser.getRole()){
+            throw new CustomException(ErrorCode.SAME_PERMISSION);
+        }
+
+        changeUserWorkspaceUser.updateRole(userRole);
 
         return userRole;
     }
 
     @Transactional
     public ResponseEntity<SendMessageDto> deleteWorkspace(User user, Long id) {
-        WorkspaceUser manager = checkManager(user, id);
+        WorkspaceUser manager = checkRole(user, id);
 
         if (manager.getRole() != WorkspaceUserRole.ADMIN) {
             throw new CustomException(ErrorCode.PERMISSION_DINED);
@@ -117,7 +123,7 @@ public class ManagingService {
         return ResponseEntity.ok(SendMessageDto.builder().message("ok").build());
     }
 
-    private WorkspaceUser checkManager(User user, Long id) {
+    private WorkspaceUser checkRole(User user, Long id) {
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.PERMISSION_DINED));
 
         if (!(workspaceUser.getRole() == WorkspaceUserRole.MANAGER || workspaceUser.getRole() == WorkspaceUserRole.ADMIN)) {

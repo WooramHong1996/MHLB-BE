@@ -17,6 +17,9 @@ public enum ErrorCode {
     WRONG_ADMIN_TOKEN(BAD_REQUEST, "wrong admin token"),
     DUPLICATE_TITLE(BAD_REQUEST, "duplicate title"),
     WRONG_CHANNEL(BAD_REQUEST, "wrong channel"),
+    WRONG_WORKSPACE_ID(BAD_REQUEST,"wrong id"),
+    WRONG_USER(BAD_REQUEST,"wrong user"),
+    SAME_PERMISSION(BAD_REQUEST,"same role"),
 
 
     /* 401 UNAUTHORIZED : 인증 실패 */

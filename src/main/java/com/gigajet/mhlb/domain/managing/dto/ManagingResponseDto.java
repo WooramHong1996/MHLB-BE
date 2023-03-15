@@ -5,7 +5,7 @@ import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
 import lombok.Getter;
 
-public class ManagingDto {
+public class ManagingResponseDto {
     @Getter
     public static class ManagementResponse {
         private Long workspaceId;
@@ -27,16 +27,6 @@ public class ManagingDto {
         }
 
 
-    }
-
-    @Getter
-    public static class Title{
-        private String workspaceTitle;
-    }
-
-    @Getter
-    public static class Desc{
-        private String workspaceDesc;
     }
 
     @Getter

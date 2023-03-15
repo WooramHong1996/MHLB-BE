@@ -26,13 +26,13 @@ public class WorkspaceUser {
     @Column(nullable = false)
     private WorkspaceUserRole role;
 
-    public WorkspaceUser(User user,Workspace workspace,WorkspaceUserRole role){
-        this.user=user;
-        this.workspace=workspace;
-        this.role=role;
+    public WorkspaceUser(User user, Workspace workspace, WorkspaceUserRole role) {
+        this.user = user;
+        this.workspace = workspace;
+        this.role = role;
     }
 
-    public void updateRole(WorkspaceUserRole role){
-        this.role=role;
+    public void updateRole(WorkspaceUserRole role) {
+        this.role = role;
     }
 }
