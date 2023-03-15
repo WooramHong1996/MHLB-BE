@@ -31,25 +31,25 @@ public class MypageController {
     }
 
     @PatchMapping("/image")
-    public ResponseEntity<SendMessageDto> UpdateImage(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<SendMessageDto> updateImage(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                       @RequestPart("image") MultipartFile image) {
-        return mypageService.UpdateImage(userDetails.getUser(), image);
+        return mypageService.updateImage(userDetails.getUser(), image);
     }
 
     @PatchMapping("/name")
-    public ResponseEntity<SendMessageDto> UpdateName(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<SendMessageDto> updateName(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                      @RequestBody ChangeMypageDto.NameRequest nameRequest) {
-        return mypageService.UpdateName(userDetails.getUser(), nameRequest);
+        return mypageService.updateName(userDetails.getUser(), nameRequest);
     }
 
     @PatchMapping("/desc")
-    public ResponseEntity<SendMessageDto> UpdateDesc(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<SendMessageDto> updateDesc(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                      @RequestBody ChangeMypageDto.DescRequest descRequest) {
-        return mypageService.UpdateDesc(userDetails.getUser(), descRequest);
+        return mypageService.updateDesc(userDetails.getUser(), descRequest);
     }
     @PatchMapping("/desc")
-    public ResponseEntity<SendMessageDto> UpdateJob(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<SendMessageDto> updateJob(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                      @RequestBody ChangeMypageDto.JobRequest jobRequest) {
-        return mypageService.UpdateJob(userDetails.getUser(), jobRequest);
+        return mypageService.updateJob(userDetails.getUser(), jobRequest);
     }
 }
