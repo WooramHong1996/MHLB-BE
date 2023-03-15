@@ -22,7 +22,7 @@ public class ManagingController {
     private final ManagingService managingService;
 
     @GetMapping
-    public ManagingResponseDto.ManagementResponse management(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Long id) {
+    public ManagingResponseDto.Management management(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Long id) {
         return managingService.management(userDetails.getUser(), id);
     }
 

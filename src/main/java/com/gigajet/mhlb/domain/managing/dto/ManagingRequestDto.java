@@ -8,12 +8,12 @@ import lombok.Getter;
 public class ManagingRequestDto {
 
     @Getter
-    public static class Title{
+    public static class Title {
         private String workspaceTitle;
     }
 
     @Getter
-    public static class Desc{
+    public static class Desc {
         private String workspaceDesc;
     }
 }
