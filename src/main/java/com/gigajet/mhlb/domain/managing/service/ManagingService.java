@@ -31,8 +31,8 @@ public class ManagingService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public ManagingResponseDto.ManagementResponse management(User user, Long id) {
-        return new ManagingResponseDto.ManagementResponse(checkRole(user, id).getWorkspace());
+    public ManagingResponseDto.Management management(User user, Long id) {
+        return new ManagingResponseDto.Management(checkRole(user, id).getWorkspace());
     }
 
     @Transactional
@@ -100,9 +100,9 @@ public class ManagingService {
 
         User changeUser = userRepository.findById(userid).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
-        WorkspaceUser changeUserWorkspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(changeUser, id).orElseThrow(()->new CustomException(ErrorCode.WRONG_USER));
+        WorkspaceUser changeUserWorkspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(changeUser, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
-        if(userRole==changeUserWorkspaceUser.getRole()){
+        if (userRole == changeUserWorkspaceUser.getRole()) {
             throw new CustomException(ErrorCode.SAME_PERMISSION);
         }
 

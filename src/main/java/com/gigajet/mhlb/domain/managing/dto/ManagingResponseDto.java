@@ -7,7 +7,7 @@ import lombok.Getter;
 
 public class ManagingResponseDto {
     @Getter
-    public static class ManagementResponse {
+    public static class Management {
         private Long workspaceId;
 
         private String workspaceImage;
@@ -16,7 +16,7 @@ public class ManagingResponseDto {
 
         private String workspaceDesc;
 
-        public ManagementResponse(Workspace workspace) {
+        public Management(Workspace workspace) {
             this.workspaceId = workspace.getId();
 
             this.workspaceImage = workspace.getImage();
@@ -25,8 +25,6 @@ public class ManagingResponseDto {
 
             this.workspaceDesc = workspace.getDescription();
         }
-
-
     }
 
     @Getter
