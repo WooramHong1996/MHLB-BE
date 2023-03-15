@@ -19,16 +19,20 @@ public class WorkspaceUser {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workspace_id", nullable = false)
     private Workspace workspace;
 
     @Column(nullable = false)
     private WorkspaceUserRole role;
 
-    public WorkspaceUser(User user,Workspace workspace,WorkspaceUserRole role){
-        this.user=user;
-        this.workspace=workspace;
-        this.role=role;
+    public WorkspaceUser(User user, Workspace workspace, WorkspaceUserRole role) {
+        this.user = user;
+        this.workspace = workspace;
+        this.role = role;
+    }
+
+    public void updateRole(WorkspaceUserRole role) {
+        this.role = role;
     }
 }

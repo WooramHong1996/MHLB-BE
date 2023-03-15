@@ -1,11 +1,10 @@
 package com.gigajet.mhlb.domain.workspace.controller;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.domain.workspace.dto.WorkspaceDto;
+import com.gigajet.mhlb.domain.workspace.dto.WorkspaceRequestDto;
+import com.gigajet.mhlb.domain.workspace.dto.WorkspaceResponseDto;
 import com.gigajet.mhlb.domain.workspace.service.WorkspaceService;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,9 +25,9 @@ public class WorkspaceController {
     }
 
     @PostMapping
-    public WorkspaceDto.CreateResponse workspaceCreate(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                       @RequestPart("image") MultipartFile image,
-                                                       @RequestPart("data") WorkspaceDto.Create workspaceDto) throws IOException {
+    public WorkspaceResponseDto.CreateResponse workspaceCreate(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                               @RequestPart("image") MultipartFile image,
+                                                               @RequestPart("data") WorkspaceRequestDto.Create workspaceDto) throws IOException {
         return workspaceService.workspaceCreate(userDetails.getUser(), image, workspaceDto);
     }
 
@@ -40,8 +39,13 @@ public class WorkspaceController {
     }
 
     @GetMapping("/")
-    public WorkspaceDto.InfoAndRoll infoAndRoll(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                @RequestParam Long id) {
+    public WorkspaceResponseDto.InfoAndRoll infoAndRoll(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                       @RequestParam Long id) {
         return workspaceService.infoAndRoll(userDetails.getUser(), id);
+    }
+
+    @PostMapping("/{id}/invite")//테스트용 코드
+    public String testInvite(@AuthenticationPrincipal UserDetailsImpl userDetails,@PathVariable Long id){
+        return workspaceService.testInvite(userDetails.getUser(),id);
     }
 }
