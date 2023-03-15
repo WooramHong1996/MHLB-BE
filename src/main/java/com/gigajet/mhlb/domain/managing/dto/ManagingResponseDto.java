@@ -28,7 +28,7 @@ public class ManagingResponseDto {
     }
 
     @Getter
-    public static class PeopleResponse {
+    public static class People {
         private Long id;
 
         private String userName;
@@ -41,7 +41,7 @@ public class ManagingResponseDto {
 
         private WorkspaceUserRole userRole;
 
-        public PeopleResponse(User user, WorkspaceUserRole role) {
+        public People(User user, WorkspaceUserRole role) {
             this.id = user.getId();
 
             this.userName = user.getUsername();
