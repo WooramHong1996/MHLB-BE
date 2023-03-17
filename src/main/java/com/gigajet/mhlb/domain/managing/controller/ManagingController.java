@@ -26,7 +26,7 @@ public class ManagingController {
         return managingService.management(userDetails.getUser(), id);
     }
 
-    @PatchMapping("/{id}/image")
+    @PostMapping("/{id}/image")
     public String imagePatch(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestPart MultipartFile image) throws IOException {
         return managingService.imagePatch(userDetails.getUser(), id, image);
     }

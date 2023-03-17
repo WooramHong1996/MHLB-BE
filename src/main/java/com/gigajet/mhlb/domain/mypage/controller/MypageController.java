@@ -1,17 +1,15 @@
 package com.gigajet.mhlb.domain.mypage.controller;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.domain.mypage.dto.ChangeMypageDto;
-import com.gigajet.mhlb.domain.mypage.dto.MypageDto;
+import com.gigajet.mhlb.domain.mypage.dto.MypageRequestDto;
+import com.gigajet.mhlb.domain.mypage.dto.MypageResponseDto;
 import com.gigajet.mhlb.domain.mypage.service.MypageService;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -21,36 +19,36 @@ public class MypageController {
     private final MypageService mypageService;
 
     @GetMapping
-    public MypageDto.UserResponse userInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public MypageResponseDto.Info userInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return mypageService.userInfo(userDetails.getUser());
     }
 
     @GetMapping("/workspace")
-    public List<MypageDto.AllList> workspaceInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public List<MypageResponseDto.AllList> workspaceInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return mypageService.workspaceInfo(userDetails.getUser());
     }
 
-    @PatchMapping("/image")
-    public MypageDto.ImageResponse updateImage(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                      @RequestPart("image") MultipartFile image) {
+    @PostMapping("/image")
+    public MypageResponseDto.Image updateImage(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                               @RequestPart("image") MultipartFile image) throws IOException {
         return mypageService.updateImage(userDetails.getUser(), image);
     }
 
     @PatchMapping("/name")
-    public MypageDto.NameResponse updateName(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                     @RequestBody ChangeMypageDto.NameRequest nameRequest) {
+    public MypageResponseDto.Name updateName(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                             @RequestBody MypageRequestDto.Name nameRequest) {
         return mypageService.updateName(userDetails.getUser(), nameRequest);
     }
 
-    @PatchMapping("/desc")
-    public MypageDto.DescResponse updateDesc(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                     @RequestBody ChangeMypageDto.DescRequest descRequest) {
+    @PatchMapping("/status-message")
+    public MypageResponseDto.Description updateDesc(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                    @RequestBody MypageRequestDto.Description descRequest) {
         return mypageService.updateDesc(userDetails.getUser(), descRequest);
     }
 
     @PatchMapping("/job")
-    public MypageDto.JobResponse updateJob(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                     @RequestBody ChangeMypageDto.JobRequest jobRequest) {
+    public MypageResponseDto.Job updateJob(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                           @RequestBody MypageRequestDto.Job jobRequest) {
         return mypageService.updateJob(userDetails.getUser(), jobRequest);
     }
 }
