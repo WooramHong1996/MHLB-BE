@@ -47,6 +47,7 @@ public class MypageService {
         return allLists;
     }
 
+    @Transactional
     public MypageDto.ImageResponse updateImage(User user, MultipartFile image) {
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL));
@@ -54,6 +55,7 @@ public class MypageService {
         return new MypageDto.ImageResponse(users);
     }
 
+    @Transactional
     public MypageDto.NameResponse updateName(User user, ChangeMypageDto.NameRequest nameRequest) {
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
@@ -62,6 +64,7 @@ public class MypageService {
         return new MypageDto.NameResponse(users);
     }
 
+    @Transactional
     public MypageDto.DescResponse updateDesc(User user, ChangeMypageDto.DescRequest descRequest) {
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
@@ -70,6 +73,7 @@ public class MypageService {
         return new MypageDto.DescResponse(users);
     }
 
+    @Transactional
     public MypageDto.JobResponse updateJob(User user, ChangeMypageDto.JobRequest jobRequest) {
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
