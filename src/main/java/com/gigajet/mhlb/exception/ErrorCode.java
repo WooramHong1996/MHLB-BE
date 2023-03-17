@@ -27,7 +27,10 @@ public enum ErrorCode {
     NULL_TOKEN(UNAUTHORIZED, "null token"),
 
     /* 403 FORBIDDEN : 인가 실패 */
-    PERMISSION_DINED(FORBIDDEN, "forbidden");
+    PERMISSION_DINED(FORBIDDEN, "forbidden"),
+
+    /* 500 */
+    FAIL_CONVERT(INTERNAL_SERVER_ERROR, "convert failed");
 
 
     private final HttpStatus httpStatus;

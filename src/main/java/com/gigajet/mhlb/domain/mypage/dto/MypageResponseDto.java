@@ -5,9 +5,9 @@ import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import lombok.Builder;
 import lombok.Getter;
 
-public class MypageDto {
+public class MypageResponseDto {
     @Getter
-    public static class UserResponse {
+    public static class Info {
         private final String userName;
 
         private final long id;
@@ -19,7 +19,7 @@ public class MypageDto {
         private final String userJob;
 
         @Builder
-        public UserResponse(User user) {
+        public Info(User user) {
             this.userName = user.getUsername();
 
             this.id = user.getId();
@@ -53,37 +53,38 @@ public class MypageDto {
             this.workspaceDesc = workspace.getDescription();
         }
     }
+
     @Getter
-    public static class NameResponse{
+    public static class Name {
         private String userName;
 
-        public NameResponse(User user) {
+        public Name(User user) {
             this.userName = user.getUsername();
         }
     }
 
     @Getter
-    public static class DescResponse{
+    public static class Description {
         private String userDesc;
-        public DescResponse(User user) {
+        public Description(User user) {
             this.userDesc = user.getDescription();
         }
     }
 
     @Getter
-    public static class JobResponse{
+    public static class Job {
         private String userJob;
 
-        public JobResponse(User user) {
+        public Job(User user) {
             this.userJob = user.getJob();
         }
     }
 
     @Getter
-    public static class ImageResponse{
+    public static class Image {
         private String userImage;
 
-        public ImageResponse(User user) {
+        public Image(User user) {
             this.userImage = user.getImage();
         }
     }

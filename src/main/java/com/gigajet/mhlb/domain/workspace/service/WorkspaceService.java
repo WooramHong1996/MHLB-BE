@@ -1,5 +1,6 @@
 package com.gigajet.mhlb.domain.workspace.service;
 
+import com.gigajet.mhlb.common.util.S3Handler;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceRequestDto;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +36,8 @@ public class WorkspaceService {
 
     private final JwtUtil jwtUtil;
 
+    private final S3Handler s3Handler;
+
     @Transactional(readOnly = true)
     public List<WorkspaceResponseDto.AllList> workspaceAllList(User user) {
 
@@ -49,12 +53,9 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public WorkspaceResponseDto.CreateResponse workspaceCreate(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) {
-        //임시코드 시작 > 구현시 제거
-        String imageurl = "더미데이터";
-        //임시코드 끝
-
-        Workspace workspace = new Workspace(workspaceDto, imageurl);
+    public WorkspaceResponseDto.CreateResponse workspaceCreate(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
+        String imageUrl = s3Handler.upload(image);
+        Workspace workspace = new Workspace(workspaceDto, imageUrl);
 
         workspaceRepository.save(workspace);
 

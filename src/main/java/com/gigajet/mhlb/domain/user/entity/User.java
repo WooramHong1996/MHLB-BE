@@ -1,14 +1,11 @@
 package com.gigajet.mhlb.domain.user.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.gigajet.mhlb.domain.mypage.dto.ChangeMypageDto;
+import com.gigajet.mhlb.domain.mypage.dto.MypageRequestDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity(name = "users")
 @Getter
@@ -54,19 +51,19 @@ public class User {
         this.job = registerDto.getUserJob();
     }
 
-    public void updateName(ChangeMypageDto.NameRequest nameRequest) {
+    public void updateName(MypageRequestDto.Name nameRequest) {
         this.username = nameRequest.getUserName();
     }
 
-    public void updateJob(ChangeMypageDto.JobRequest jobRequest) {
+    public void updateJob(MypageRequestDto.Job jobRequest) {
         this.job = jobRequest.getUserJob();
     }
 
-    public void updateDesc(ChangeMypageDto.DescRequest descRequest) {
+    public void updateDesc(MypageRequestDto.Description descRequest) {
         this.description = descRequest.getUserDesc();
     }
 
-    public void updateImage(ChangeMypageDto.ImageRequest imageRequest) {
-        this.image = imageRequest.getUserImage();
+    public void updateImage(String imageUrl) {
+        this.image = imageUrl;
     }
 }
