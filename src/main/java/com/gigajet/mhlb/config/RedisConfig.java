@@ -1,8 +1,5 @@
 package com.gigajet.mhlb.config;
 
-import io.lettuce.core.RedisChannelHandler;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisConnectionStateListener;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,10 +17,6 @@ public class RedisConfig {
 
     @Value("${spring.redis.port}")
     private int port;
-
-    @Value("${redis.endpoint}")
-    private String endpoint;
-
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
