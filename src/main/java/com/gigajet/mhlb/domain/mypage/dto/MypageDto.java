@@ -10,7 +10,7 @@ public class MypageDto {
     public static class UserResponse {
         private final String userName;
 
-        private final String userEmail;
+        private final long id;
 
         private final String userDesc;
 
@@ -22,7 +22,7 @@ public class MypageDto {
         public UserResponse(User user) {
             this.userName = user.getUsername();
 
-            this.userEmail = user.getEmail();
+            this.id = user.getId();
 
             this.userDesc = user.getDescription();
 
@@ -51,6 +51,40 @@ public class MypageDto {
             this.workspaceTitle = workspace.getTitle();
 
             this.workspaceDesc = workspace.getDescription();
+        }
+    }
+    @Getter
+    public static class NameResponse{
+        private String userName;
+
+        public NameResponse(User user) {
+            this.userName = user.getUsername();
+        }
+    }
+
+    @Getter
+    public static class DescResponse{
+        private String userDesc;
+        public DescResponse(User user) {
+            this.userDesc = user.getDescription();
+        }
+    }
+
+    @Getter
+    public static class JobResponse{
+        private String userJob;
+
+        public JobResponse(User user) {
+            this.userJob = user.getJob();
+        }
+    }
+
+    @Getter
+    public static class ImageResponse{
+        private String userImage;
+
+        public ImageResponse(User user) {
+            this.userImage = user.getImage();
         }
     }
 }
