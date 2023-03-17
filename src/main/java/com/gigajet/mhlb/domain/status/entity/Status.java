@@ -22,12 +22,15 @@ public class Status {
 
     public Status(String email) {
         this.email = email;
+
         this.status = "기본값";
+
         this.updatedAt = LocalDateTime.now();
     }
 
     public void update(StatusRequestDto statusRequestDto) {
         this.status = statusRequestDto.getStatus();
+
         this.updatedAt = LocalDateTime.now();
     }
 }

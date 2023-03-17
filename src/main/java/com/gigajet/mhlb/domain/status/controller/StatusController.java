@@ -22,7 +22,7 @@ public class StatusController {
     }
 
     @GetMapping
-    public StatusResponseDto getMyStatus(@AuthenticationPrincipal UserDetailsImpl userDetails){
+    public StatusResponseDto getMyStatus(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return statusService.myStatus(userDetails.getUser());
     }
 
