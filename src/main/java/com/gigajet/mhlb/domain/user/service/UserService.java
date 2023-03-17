@@ -26,8 +26,8 @@ public class UserService {
     private final JwtUtil jwtUtil;
 
     @Transactional(readOnly = true)
-    public ResponseEntity<SendMessageDto> duplicateEmail(UserRequestDto.CheckEmailDto emailDto) {
-        Optional<User> optionalUser = userRepository.findByEmail(emailDto.getEmail());
+    public ResponseEntity<SendMessageDto> duplicateEmail(String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
