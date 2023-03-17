@@ -32,7 +32,8 @@ public class ManagingService {
 
     @Transactional(readOnly = true)
     public ManagingResponseDto.Management management(User user, Long id) {
-        return new ManagingResponseDto.Management(checkRole(user, id).getWorkspace());
+        WorkspaceUser manager = checkRole(user, id);
+        return new ManagingResponseDto.Management(manager.getWorkspace(),manager.getRole());
     }
 
     @Transactional
