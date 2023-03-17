@@ -36,7 +36,7 @@ public class UserService {
     }
 
     @Transactional
-    public ResponseEntity<SendMessageDto> register(UserRequestDto.Register registerDto) {
+    public void register(UserRequestDto.Register registerDto) {
         Optional<User> optionalUser = userRepository.findByEmail(registerDto.getEmail());
         if (optionalUser.isPresent()) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
@@ -45,8 +45,6 @@ public class UserService {
         String password = passwordEncoder.encode(registerDto.getPassword());
 
         userRepository.save(new User(registerDto, password));
-
-        return SendMessageDto.toResponseEntity(SuccessCode.SIGNUP_SUCCESS);
     }
 
     @Transactional(readOnly = true)
