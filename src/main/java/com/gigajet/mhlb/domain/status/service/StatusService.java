@@ -27,33 +27,42 @@ public class StatusService {
 
     public String statusUpdate(User user, StatusRequestDto statusRequestDto) {
         Status status = statusRepository.findByEmail(user.getEmail());
+
         status.update(statusRequestDto);
+
         statusRepository.save(status);
+
         return status.getStatus();
     }
 
     public List getWorkspacePeople(User user, Long id) {
         List<StatusResponseDto> responseDto = new ArrayList<>();
 
-        workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(()->new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+
         List<WorkspaceUser> byWorkspaceId = workspaceUserRepository.findByWorkspace_Id(id);
+
         for (WorkspaceUser workspaceUser : byWorkspaceId) {
-//            Status status = statusRepository.findById(workspaceUser.getUser().getStatusId()).orElseThrow(()->new IllegalArgumentException());
             Status status = statusRepository.findByEmail(workspaceUser.getUser().getEmail());
             responseDto.add(new StatusResponseDto(status));
         }
+
         return responseDto;
     }
 
     public ResponseEntity<SendMessageDto> register(UserRequestDto.Register registerDto) {
         Status status = new Status(registerDto.getEmail());
+
         statusRepository.save(status);
+
         return SendMessageDto.toResponseEntity(SuccessCode.SIGNUP_SUCCESS);
     }
 
     public StatusResponseDto myStatus(User user) {
         Status status = statusRepository.findByEmail(user.getEmail());
+
         StatusResponseDto response = new StatusResponseDto(status);
+
         return response;
     }
 }
