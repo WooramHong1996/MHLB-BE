@@ -16,7 +16,9 @@ public class ManagingResponseDto {
 
         private String workspaceDesc;
 
-        public Management(Workspace workspace) {
+        private WorkspaceUserRole userRole;
+
+        public Management(Workspace workspace, WorkspaceUserRole role) {
             this.workspaceId = workspace.getId();
 
             this.workspaceImage = workspace.getImage();
@@ -24,6 +26,8 @@ public class ManagingResponseDto {
             this.workspaceTitle = workspace.getTitle();
 
             this.workspaceDesc = workspace.getDescription();
+
+            this.userRole = role;
         }
     }
 
