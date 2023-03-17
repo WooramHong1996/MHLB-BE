@@ -31,24 +31,25 @@ public class MypageController {
     }
 
     @PatchMapping("/image")
-    public ResponseEntity<SendMessageDto> updateImage(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public MypageDto.ImageResponse updateImage(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                       @RequestPart("image") MultipartFile image) {
         return mypageService.updateImage(userDetails.getUser(), image);
     }
 
     @PatchMapping("/name")
-    public ResponseEntity<SendMessageDto> updateName(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public MypageDto.NameResponse updateName(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                      @RequestBody ChangeMypageDto.NameRequest nameRequest) {
         return mypageService.updateName(userDetails.getUser(), nameRequest);
     }
 
     @PatchMapping("/desc")
-    public ResponseEntity<SendMessageDto> updateDesc(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public MypageDto.DescResponse updateDesc(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                      @RequestBody ChangeMypageDto.DescRequest descRequest) {
         return mypageService.updateDesc(userDetails.getUser(), descRequest);
     }
+
     @PatchMapping("/job")
-    public ResponseEntity<SendMessageDto> updateJob(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public MypageDto.JobResponse updateJob(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                      @RequestBody ChangeMypageDto.JobRequest jobRequest) {
         return mypageService.updateJob(userDetails.getUser(), jobRequest);
     }

@@ -47,34 +47,34 @@ public class MypageService {
         return allLists;
     }
 
-    public ResponseEntity<SendMessageDto> updateImage(User user, MultipartFile image) {
+    public MypageDto.ImageResponse updateImage(User user, MultipartFile image) {
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL));
         //나중에 만들기
-        return ResponseEntity.ok(SendMessageDto.of(SuccessCode.LOGIN_SUCCESS));
+        return new MypageDto.ImageResponse(users);
     }
 
-    public ResponseEntity<SendMessageDto> updateName(User user, ChangeMypageDto.NameRequest nameRequest) {
+    public MypageDto.NameResponse updateName(User user, ChangeMypageDto.NameRequest nameRequest) {
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
         );
         users.updateName(nameRequest);
-        return ResponseEntity.ok(SendMessageDto.of(SuccessCode.LOGIN_SUCCESS));
+        return new MypageDto.NameResponse(users);
     }
 
-    public ResponseEntity<SendMessageDto> updateDesc(User user, ChangeMypageDto.DescRequest descRequest) {
+    public MypageDto.DescResponse updateDesc(User user, ChangeMypageDto.DescRequest descRequest) {
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
         );
         users.updateDesc(descRequest);
-        return ResponseEntity.ok(SendMessageDto.of(SuccessCode.LOGIN_SUCCESS));
+        return new MypageDto.DescResponse(users);
     }
 
-    public ResponseEntity<SendMessageDto> updateJob(User user, ChangeMypageDto.JobRequest jobRequest) {
+    public MypageDto.JobResponse updateJob(User user, ChangeMypageDto.JobRequest jobRequest) {
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
         );
         users.updateJob(jobRequest);
-        return ResponseEntity.ok(SendMessageDto.of(SuccessCode.LOGIN_SUCCESS));
+        return new MypageDto.JobResponse(users);
     }
 }
