@@ -49,12 +49,12 @@ public class MypageService {
     }
 
     @Transactional
-    public MypageResponseDto.Image updateImage(User user, MultipartFile image) throws IOException {
+    public MypageResponseDto.Image updateImage(User user, MultipartFile userImage) throws IOException {
         user = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL));
 
         s3Handler.delete(user.getImage());
-        String imageUrl = s3Handler.upload(image);
+        String imageUrl = s3Handler.upload(userImage);
         user.updateImage(imageUrl);
 
         return new MypageResponseDto.Image(user);
