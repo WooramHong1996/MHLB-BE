@@ -73,8 +73,7 @@ public class WebSecurityConfig {
 
         config.addAllowedMethod("*");
 
-        config.addAllowedHeader("Content-Type");
-        config.addAllowedHeader(JwtUtil.AUTHORIZATION_HEADER);
+        config.addAllowedHeader("*");
 
         config.setAllowCredentials(true);
 

@@ -27,8 +27,8 @@ public class ManagingController {
     }
 
     @PostMapping("/{id}/image")
-    public String imagePatch(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestPart MultipartFile image) throws IOException {
-        return managingService.imagePatch(userDetails.getUser(), id, image);
+    public ManagingResponseDto.Image imagePost(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestPart MultipartFile workspaceImage) throws IOException {
+        return managingService.imagePost(userDetails.getUser(), id, workspaceImage);
     }
 
     @PatchMapping("/{id}/title")

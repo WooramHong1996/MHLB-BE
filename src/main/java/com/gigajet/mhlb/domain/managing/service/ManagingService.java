@@ -40,17 +40,17 @@ public class ManagingService {
     }
 
     @Transactional
-    public String imagePatch(User user, Long id, MultipartFile image) throws IOException {
+    public ManagingResponseDto.Image imagePost(User user, Long id, MultipartFile workspaceImage) throws IOException {
         checkRole(user, id);
 
         Workspace workspace = workspaceRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
         s3Handler.delete(workspace.getImage());
-        String newImage = s3Handler.upload(image);
+        String newImage = s3Handler.upload(workspaceImage);
 
         workspace.imageChange(newImage);
 
-        return workspace.getImage();
+        return new ManagingResponseDto.Image(newImage);
     }
 
     @Transactional

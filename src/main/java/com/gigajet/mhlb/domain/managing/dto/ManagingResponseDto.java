@@ -4,6 +4,7 @@ import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 public class ManagingResponseDto {
     @Getter
@@ -58,5 +59,13 @@ public class ManagingResponseDto {
 
             this.userRole = role;
         }
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public static class Image {
+
+        private final String workspaceImage;
+
     }
 }
