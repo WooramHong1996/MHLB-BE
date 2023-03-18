@@ -30,8 +30,8 @@ public class MypageController {
 
     @PostMapping("/image")
     public MypageResponseDto.Image updateImage(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                               @RequestPart("image") MultipartFile image) throws IOException {
-        return mypageService.updateImage(userDetails.getUser(), image);
+                                               @RequestPart MultipartFile userImage) throws IOException {
+        return mypageService.updateImage(userDetails.getUser(), userImage);
     }
 
     @PatchMapping("/name")
