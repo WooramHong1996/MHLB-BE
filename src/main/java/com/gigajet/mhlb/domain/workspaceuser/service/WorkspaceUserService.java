@@ -30,7 +30,7 @@ public class WorkspaceUserService {
 
         workspaceUserRepository.save(new WorkspaceUser(user, workspace, WorkspaceUserRole.MANAGER));
 
-        return SendMessageDto.toResponseEntity(SuccessCode.CHECKUP_SUCCESS);
+        return SendMessageDto.toResponseEntity(SuccessCode.CHECKUP_EMAIL);
     }
 
 }
