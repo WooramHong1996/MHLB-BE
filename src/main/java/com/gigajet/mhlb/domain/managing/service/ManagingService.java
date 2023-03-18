@@ -1,6 +1,7 @@
 package com.gigajet.mhlb.domain.managing.service;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
+import com.gigajet.mhlb.common.util.S3Handler;
 import com.gigajet.mhlb.domain.managing.dto.ManagingResponseDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
@@ -17,9 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,8 @@ public class ManagingService {
 
     private final UserRepository userRepository;
 
+    private final S3Handler s3Handler;
+
     @Transactional(readOnly = true)
     public ManagingResponseDto.Management management(User user, Long id) {
         WorkspaceUser manager = checkRole(user, id);
@@ -37,18 +40,17 @@ public class ManagingService {
     }
 
     @Transactional
-    public String imagePatch(User user, Long id, MultipartFile image) {
-        //임시코드
-        String newimage = image.getName();
-        //임시코드
-
+    public ManagingResponseDto.Image imagePost(User user, Long id, MultipartFile workspaceImage) throws IOException {
         checkRole(user, id);
 
         Workspace workspace = workspaceRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
-        workspace.imageChange(newimage);
+        s3Handler.delete(workspace.getImage());
+        String newImage = s3Handler.upload(workspaceImage);
 
-        return workspace.getImage();
+        workspace.imageChange(newImage);
+
+        return new ManagingResponseDto.Image(newImage);
     }
 
     @Transactional
