@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 public enum SuccessCode {
     SIGNUP_SUCCESS(HttpStatus.OK, "registration success"),
     LOGIN_SUCCESS(HttpStatus.OK, "login success"),
-    CHECKUP_SUCCESS(HttpStatus.OK, "email available"),
+    CHECKUP_EMAIL(HttpStatus.OK, "email available"),
+    VALID_EMAIL(HttpStatus.OK, "valid email"),
     LOGOUT_SUCCESS(HttpStatus.OK, "bye bye");
 
     private final HttpStatus httpStatus;
