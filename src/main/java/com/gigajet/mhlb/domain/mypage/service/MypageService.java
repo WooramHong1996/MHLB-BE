@@ -1,6 +1,8 @@
 package com.gigajet.mhlb.domain.mypage.service;
 
+import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.common.util.S3Handler;
+import com.gigajet.mhlb.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.mypage.dto.MypageRequestDto;
 import com.gigajet.mhlb.domain.mypage.dto.MypageResponseDto;
 import com.gigajet.mhlb.domain.user.entity.User;
@@ -10,13 +12,16 @@ import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -85,5 +90,15 @@ public class MypageService {
         );
         users.updateJob(jobRequest);
         return new MypageResponseDto.Job(users);
+    }
+
+    @Transactional
+    public ResponseEntity<SendMessageDto> deleteWorkspace(User user, long workspaceId){
+        Optional<WorkspaceUser> workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user,workspaceId);
+        if(workspaceUser.isEmpty()){
+            throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
+        }
+        workspaceUserRepository.deleteByUser_IdAndAndWorkspace_Id(user.getId(), workspaceId);
+        return ResponseEntity.ok(SendMessageDto.of(SuccessCode.DELETE_SUCCESS));
     }
 }

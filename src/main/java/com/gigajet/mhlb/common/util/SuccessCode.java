@@ -11,7 +11,9 @@ public enum SuccessCode {
     LOGIN_SUCCESS(HttpStatus.OK, "login success"),
     CHECKUP_EMAIL(HttpStatus.OK, "email available"),
     VALID_EMAIL(HttpStatus.OK, "valid email"),
-    LOGOUT_SUCCESS(HttpStatus.OK, "bye bye");
+    LOGOUT_SUCCESS(HttpStatus.OK, "bye bye"),
+    STATUS_CHANGED(HttpStatus.OK,"status change success");
+
 
     private final HttpStatus httpStatus;
     private final String message;

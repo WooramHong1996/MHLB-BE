@@ -1,26 +1,27 @@
 package com.gigajet.mhlb.domain.status.entity;
 
-
 import com.gigajet.mhlb.domain.status.dto.StatusRequestDto;
 import lombok.Getter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
+import lombok.NoArgsConstructor;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.time.LocalDateTime;
 
 @Getter
-@RedisHash(value = "status")
-public class Status {
-
+@Entity
+@NoArgsConstructor
+public class SqlStatus {
     @Id
-    private String id;
-    @Indexed
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String email;
     private String status;
     private LocalDateTime updatedAt;
 
-    public Status(String email) {
+    public SqlStatus(String email) {
         this.email = email;
 
         this.status = "기본값";
