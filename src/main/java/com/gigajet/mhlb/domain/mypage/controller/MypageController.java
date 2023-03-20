@@ -1,10 +1,12 @@
 package com.gigajet.mhlb.domain.mypage.controller;
 
+import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.domain.mypage.dto.MypageRequestDto;
 import com.gigajet.mhlb.domain.mypage.dto.MypageResponseDto;
 import com.gigajet.mhlb.domain.mypage.service.MypageService;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,5 +52,11 @@ public class MypageController {
     public MypageResponseDto.Job updateJob(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                            @RequestBody MypageRequestDto.Job jobRequest) {
         return mypageService.updateJob(userDetails.getUser(), jobRequest);
+    }
+
+    @DeleteMapping("/{workspaceId}")
+    public ResponseEntity<SendMessageDto> deleteWorkspace(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                          @PathVariable Long workspaceId) {
+        return mypageService.deleteWorkspace(userDetails.getUser(), workspaceId);
     }
 }
