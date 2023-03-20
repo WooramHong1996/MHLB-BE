@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @RedisHash(value = "status")
-public class Status {
+public class RedisStatus {
 
     @Id
     private String id;
@@ -20,7 +20,7 @@ public class Status {
     private String status;
     private LocalDateTime updatedAt;
 
-    public Status(String email) {
+    public RedisStatus(String email) {
         this.email = email;
 
         this.status = "기본값";
