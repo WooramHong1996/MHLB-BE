@@ -32,7 +32,13 @@ public class UserService {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
 
-        return SendMessageDto.toResponseEntity(SuccessCode.CHECKUP_SUCCESS);
+        return SendMessageDto.toResponseEntity(SuccessCode.CHECKUP_EMAIL);
+    }
+
+    public ResponseEntity<SendMessageDto> validateEmail(String email) {
+        userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
+
+        return SendMessageDto.toResponseEntity(SuccessCode.VALID_EMAIL);
     }
 
     @Transactional
@@ -59,4 +65,5 @@ public class UserService {
 
         return SendMessageDto.toResponseEntity(SuccessCode.LOGIN_SUCCESS);
     }
+
 }

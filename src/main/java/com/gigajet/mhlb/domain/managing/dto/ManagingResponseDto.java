@@ -34,7 +34,7 @@ public class ManagingResponseDto {
 
     @Getter
     public static class People {
-        private Long id;
+        private Long userId;
 
         private String userName;
 
@@ -47,7 +47,7 @@ public class ManagingResponseDto {
         private WorkspaceUserRole userRole;
 
         public People(User user, WorkspaceUserRole role) {
-            this.id = user.getId();
+            this.userId = user.getId();
 
             this.userName = user.getUsername();
 
@@ -68,4 +68,29 @@ public class ManagingResponseDto {
         private final String workspaceImage;
 
     }
+
+    @Getter
+    @RequiredArgsConstructor
+    public static class Title {
+
+        private final String workspaceTitle;
+
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public static class Description {
+
+        private final String workspaceDesc;
+
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public static class Role {
+
+        private final WorkspaceUserRole userRole;
+
+    }
+
 }

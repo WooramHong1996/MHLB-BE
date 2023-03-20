@@ -1,7 +1,9 @@
 package com.gigajet.mhlb.domain.user.entity;
 
 import com.gigajet.mhlb.domain.mypage.dto.MypageRequestDto;
+import com.gigajet.mhlb.domain.user.dto.GoogleOAuthRequestDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
+import com.gigajet.mhlb.domain.user.social.SocialType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,14 +26,20 @@ public class User {
     @Column(nullable = false)
     private String username;
 
-    @Column(nullable = false)
+    @Column
     private String description;
 
-    @Column(nullable = false)
+    @Column
     private String password;
 
-    @Column(nullable = false)
+    @Column
     private String job;
+
+    @Column
+    private SocialType type;
+
+    @Column(nullable = false)
+    private Integer isShow;
 
 //    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
 //    @JsonIgnoreProperties("User")
@@ -39,16 +47,20 @@ public class User {
 
     public User(UserRequestDto.Register registerDto, String password) {
         this.image = registerDto.getUserImage();
-
         this.email = registerDto.getEmail();
-
         this.username = registerDto.getUserName();
-
         this.description = registerDto.getUserDesc();
-
         this.password = password;
-
         this.job = registerDto.getUserJob();
+        this.isShow = 1;
+    }
+
+    public User(GoogleOAuthRequestDto.GoogleUser googleUserDto) {
+        this.image = googleUserDto.getPicture();
+        this.email = googleUserDto.getEmail();
+        this.username = googleUserDto.getName();
+        this.type = SocialType.GOOGLE;
+        this.isShow = 1;
     }
 
     public void updateName(MypageRequestDto.Name nameRequest) {

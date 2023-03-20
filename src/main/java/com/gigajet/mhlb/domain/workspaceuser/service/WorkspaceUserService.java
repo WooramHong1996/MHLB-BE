@@ -28,9 +28,9 @@ public class WorkspaceUserService {
 
         Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_PASSWORD));
 
-        workspaceUserRepository.save(new WorkspaceUser(user, workspace, WorkspaceUserRole.MANAGER));
+        workspaceUserRepository.save(new WorkspaceUser(user, workspace, WorkspaceUserRole.MEMBER));
 
-        return SendMessageDto.toResponseEntity(SuccessCode.CHECKUP_SUCCESS);
+        return SendMessageDto.toResponseEntity(SuccessCode.CHECKUP_EMAIL);
     }
 
 }

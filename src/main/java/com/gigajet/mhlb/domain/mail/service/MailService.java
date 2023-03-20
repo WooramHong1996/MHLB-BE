@@ -5,7 +5,6 @@ import com.gigajet.mhlb.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
-import io.lettuce.core.RedisClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,7 +54,7 @@ public class MailService {
             log.error(e.getMessage());
         }
 
-        return SendMessageDto.toResponseEntity(SuccessCode.CHECKUP_SUCCESS);
+        return SendMessageDto.toResponseEntity(SuccessCode.VALID_EMAIL);
     }
 
     private void saveEmailAndRandomNumber(String email, String randomNumber) {
