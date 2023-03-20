@@ -4,8 +4,8 @@ import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.status.dto.StatusRequestDto;
 import com.gigajet.mhlb.domain.status.dto.StatusResponseDto;
-import com.gigajet.mhlb.domain.status.entity.Status;
-import com.gigajet.mhlb.domain.status.repository.StatusRepository;
+import com.gigajet.mhlb.domain.status.entity.SqlStatus;
+import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
@@ -22,20 +22,20 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class StatusService {
-    private final StatusRepository statusRepository;
+    private final SqlStatusRepository statusRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
 
-    public String statusUpdate(User user, StatusRequestDto statusRequestDto) {
-        Status status = statusRepository.findByEmail(user.getEmail());
+    public StatusResponseDto statusUpdate(User user, StatusRequestDto statusRequestDto) {
+        SqlStatus status = statusRepository.findByEmail(user.getEmail());
 
         status.update(statusRequestDto);
 
         statusRepository.save(status);
 
-        return status.getStatus();
+        return new StatusResponseDto(status);
     }
 
-    public List getWorkspacePeople(User user, Long id) {
+    public List<StatusResponseDto> getWorkspacePeople(User user, Long id) {
         List<StatusResponseDto> responseDto = new ArrayList<>();
 
         workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
@@ -43,7 +43,7 @@ public class StatusService {
         List<WorkspaceUser> byWorkspaceId = workspaceUserRepository.findByWorkspace_Id(id);
 
         for (WorkspaceUser workspaceUser : byWorkspaceId) {
-            Status status = statusRepository.findByEmail(workspaceUser.getUser().getEmail());
+            SqlStatus status = statusRepository.findByEmail(workspaceUser.getUser().getEmail());
             responseDto.add(new StatusResponseDto(status));
         }
 
@@ -51,7 +51,7 @@ public class StatusService {
     }
 
     public ResponseEntity<SendMessageDto> register(UserRequestDto.Register registerDto) {
-        Status status = new Status(registerDto.getEmail());
+        SqlStatus status = new SqlStatus(registerDto.getEmail());
 
         statusRepository.save(status);
 
@@ -59,10 +59,17 @@ public class StatusService {
     }
 
     public StatusResponseDto myStatus(User user) {
-        Status status = statusRepository.findByEmail(user.getEmail());
+        SqlStatus status = statusRepository.findByEmail(user.getEmail());
 
-        StatusResponseDto response = new StatusResponseDto(status);
+        return  new StatusResponseDto(status);
+    }
 
-        return response;
+    public List<Long> getWorkspaceList(User user) {
+        List<WorkspaceUser> list = workspaceUserRepository.findByUser(user);
+        List<Long> longList = new ArrayList<>();
+        for (WorkspaceUser workspaceUser : list) {
+            longList.add(workspaceUser.getWorkspace().getId());
+        }
+        return longList;
     }
 }
