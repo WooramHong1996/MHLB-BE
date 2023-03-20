@@ -20,7 +20,8 @@ public class SqlStatus {
     private String email;
     private String status;
     private LocalDateTime updatedAt;
-    public SqlStatus (String email) {
+
+    public SqlStatus(String email) {
         this.email = email;
 
         this.status = "기본값";

@@ -29,7 +29,7 @@ public class StatusController {
         StatusResponseDto dto = statusService.statusUpdate(userDetails.getUser(), statusRequestDto);
         List<Long> workspaceList = statusService.getWorkspaceList(userDetails.getUser());
         for (Long id : workspaceList) {
-            sseHandler.statusChanged(id,dto);
+            sseHandler.statusChanged(id, dto);
         }
         return SendMessageDto.toResponseEntity(SuccessCode.STATUS_CHANGED);
     }
@@ -45,7 +45,7 @@ public class StatusController {
     }
 
     @GetMapping(value = "/{id}/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)//sse 시작 요청
-    public ResponseEntity<SseEmitter> connect(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id){
+    public ResponseEntity<SseEmitter> connect(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
         SseEmitter emitter = new SseEmitter();
         sseHandler.add(id);
         return ResponseEntity.ok(emitter);
