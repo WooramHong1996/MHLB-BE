@@ -4,7 +4,6 @@ import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.domain.managing.dto.ManagingRequestDto;
 import com.gigajet.mhlb.domain.managing.dto.ManagingResponseDto;
 import com.gigajet.mhlb.domain.managing.service.ManagingService;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,17 +31,17 @@ public class ManagingController {
     }
 
     @PatchMapping("/{id}/title")
-    public String titlePatch(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestBody ManagingRequestDto.Title workspaceTitle) {
+    public ManagingResponseDto.Title titlePatch(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestBody ManagingRequestDto.Title workspaceTitle) {
         return managingService.titlePatch(userDetails.getUser(), id, workspaceTitle.getWorkspaceTitle());
     }
 
     @PatchMapping("/{id}/description")
-    public String descPatch(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestBody ManagingRequestDto.Desc workspaceDesc) {
+    public ManagingResponseDto.Description descPatch(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestBody ManagingRequestDto.Desc workspaceDesc) {
         return managingService.descPatch(userDetails.getUser(), id, workspaceDesc.getWorkspaceDesc());
     }
 
     @GetMapping("/{id}/people")
-    public List getPeople(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
+    public List<ManagingResponseDto.People> getPeople(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
         return managingService.getPeople(userDetails.getUser(), id);
     }
 
@@ -51,13 +50,13 @@ public class ManagingController {
         return managingService.deletePeople(userDetails.getUser(), id, userid);
     }
 
-    @PostMapping("/{id}/people/{userid}")
-    public WorkspaceUserRole changeRole(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @PathVariable Long userid, @RequestBody WorkspaceUserRole userRole) {
-        return managingService.changeRole(userDetails.getUser(), id, userid, userRole);
+    @PatchMapping("/{id}/people/{userid}")
+    public ManagingResponseDto.Role changeRole(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @PathVariable Long userid, @RequestBody ManagingRequestDto.Role roleRequestDto) {
+        return managingService.changeRole(userDetails.getUser(), id, userid, roleRequestDto);
     }
 
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<SendMessageDto> deleteWorkspace(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
-        return managingService.deleteWorkspace(userDetails.getUser(),id);
+        return managingService.deleteWorkspace(userDetails.getUser(), id);
     }
 }

@@ -2,6 +2,7 @@ package com.gigajet.mhlb.domain.managing.service;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.common.util.S3Handler;
+import com.gigajet.mhlb.domain.managing.dto.ManagingRequestDto;
 import com.gigajet.mhlb.domain.managing.dto.ManagingResponseDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
@@ -54,25 +55,25 @@ public class ManagingService {
     }
 
     @Transactional
-    public String titlePatch(User user, Long id, String workspaceTitle) {
+    public ManagingResponseDto.Title titlePatch(User user, Long id, String workspaceTitle) {
         Workspace workspace = checkRole(user, id).getWorkspace();
 
         workspace.titleChange(workspaceTitle);
 
-        return workspace.getTitle();
+        return new ManagingResponseDto.Title(workspaceTitle);
     }
 
     @Transactional
-    public String descPatch(User user, Long id, String workspaceDesc) {
+    public ManagingResponseDto.Description descPatch(User user, Long id, String workspaceDesc) {
         Workspace workspace = checkRole(user, id).getWorkspace();
 
         workspace.descChange(workspaceDesc);
 
-        return workspace.getDescription();
+        return new ManagingResponseDto.Description(workspaceDesc);
     }
 
     @Transactional
-    public List getPeople(User user, Long id) {
+    public List<ManagingResponseDto.People> getPeople(User user, Long id) {
         checkRole(user, id);
 
         List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_Id(id);
@@ -96,8 +97,8 @@ public class ManagingService {
     }
 
     @Transactional
-    public WorkspaceUserRole changeRole(User user, Long id, Long userid, WorkspaceUserRole userRole) {
-        if (userRole == WorkspaceUserRole.ADMIN) {
+    public ManagingResponseDto.Role changeRole(User user, Long id, Long userid, ManagingRequestDto.Role role) {
+        if (role.getUserRole() == WorkspaceUserRole.ADMIN) {
             throw new CustomException(ErrorCode.PERMISSION_DINED);
         }
 
@@ -107,13 +108,13 @@ public class ManagingService {
 
         WorkspaceUser changeUserWorkspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(changeUser, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
-        if (userRole == changeUserWorkspaceUser.getRole()) {
+        if (role.getUserRole() == changeUserWorkspaceUser.getRole()) {
             throw new CustomException(ErrorCode.SAME_PERMISSION);
         }
 
-        changeUserWorkspaceUser.updateRole(userRole);
+        changeUserWorkspaceUser.updateRole(role.getUserRole());
 
-        return userRole;
+        return new ManagingResponseDto.Role(role.getUserRole());
     }
 
     @Transactional
