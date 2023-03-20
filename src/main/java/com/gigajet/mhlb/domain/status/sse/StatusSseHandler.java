@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class StatusSseHandler {
     //워크스페이스 id별로 구분해야함
-    private final ConcurrentHashMap<Long, List<SseEmitter>> emitters = new ConcurrentHashMap();
+    private final ConcurrentHashMap<Long, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
     public SseEmitter add(Long workspaceId) {
         List<SseEmitter> emitterList = emitters.get(workspaceId);

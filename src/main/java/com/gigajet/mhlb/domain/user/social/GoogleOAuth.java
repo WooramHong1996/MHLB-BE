@@ -1,8 +1,6 @@
 package com.gigajet.mhlb.domain.user.social;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gigajet.mhlb.domain.user.dto.GoogleOAuthTokenRequestDto;
-import com.gigajet.mhlb.domain.user.dto.GoogleUserDto;
+import com.gigajet.mhlb.domain.user.dto.GoogleOAuthRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +11,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -53,7 +50,7 @@ public class GoogleOAuth implements SocialOAuth {
         return redirectURL;
     }
 
-    public GoogleOAuthTokenRequestDto getAccessToken(String code) {
+    public GoogleOAuthRequestDto.Token getAccessToken(String code) {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("code", code);
         paramMap.put("client_id", googleClientId);
@@ -61,7 +58,7 @@ public class GoogleOAuth implements SocialOAuth {
         paramMap.put("redirect_uri", googleCallbackUrl);
         paramMap.put("grant_type", "authorization_code");
 
-        ResponseEntity<GoogleOAuthTokenRequestDto> responseEntity = restTemplate.postForEntity("https://oauth2.googleapis.com/token", paramMap, GoogleOAuthTokenRequestDto.class);
+        ResponseEntity<GoogleOAuthRequestDto.Token> responseEntity = restTemplate.postForEntity("https://oauth2.googleapis.com/token", paramMap, GoogleOAuthRequestDto.Token.class);
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             return responseEntity.getBody();
@@ -70,12 +67,12 @@ public class GoogleOAuth implements SocialOAuth {
         return null;
     }
 
-    public GoogleUserDto getUserInfo(GoogleOAuthTokenRequestDto googleOAuthTokenRequestDto) {
+    public GoogleOAuthRequestDto.GoogleUser getUserInfo(GoogleOAuthRequestDto.Token googleOAuthTokenRequestDto) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Authorization", googleOAuthTokenRequestDto.getToken_type() + " " + googleOAuthTokenRequestDto.getAccess_token());
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(httpHeaders);
-        ResponseEntity<GoogleUserDto> responseEntity = restTemplate.exchange("https://www.googleapis.com/oauth2/v1/userinfo", HttpMethod.GET, request, GoogleUserDto.class);
+        ResponseEntity<GoogleOAuthRequestDto.GoogleUser> responseEntity = restTemplate.exchange("https://www.googleapis.com/oauth2/v1/userinfo", HttpMethod.GET, request, GoogleOAuthRequestDto.GoogleUser.class);
 
         return responseEntity.getBody();
     }

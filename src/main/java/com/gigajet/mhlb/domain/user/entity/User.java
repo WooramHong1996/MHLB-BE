@@ -1,7 +1,7 @@
 package com.gigajet.mhlb.domain.user.entity;
 
 import com.gigajet.mhlb.domain.mypage.dto.MypageRequestDto;
-import com.gigajet.mhlb.domain.user.dto.GoogleUserDto;
+import com.gigajet.mhlb.domain.user.dto.GoogleOAuthRequestDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.social.SocialType;
 import lombok.Getter;
@@ -55,7 +55,7 @@ public class User {
         this.isShow = 1;
     }
 
-    public User(GoogleUserDto googleUserDto) {
+    public User(GoogleOAuthRequestDto.GoogleUser googleUserDto) {
         this.image = googleUserDto.getPicture();
         this.email = googleUserDto.getEmail();
         this.username = googleUserDto.getName();

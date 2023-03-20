@@ -2,8 +2,7 @@ package com.gigajet.mhlb.domain.user.service;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.common.util.SuccessCode;
-import com.gigajet.mhlb.domain.user.dto.GoogleOAuthTokenRequestDto;
-import com.gigajet.mhlb.domain.user.dto.GoogleUserDto;
+import com.gigajet.mhlb.domain.user.dto.GoogleOAuthRequestDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.user.social.GoogleOAuth;
@@ -36,8 +35,8 @@ public class OAuthService {
     }
 
     public ResponseEntity<SendMessageDto> oAuthLogin(String code) {
-        GoogleOAuthTokenRequestDto googleOAuthTokenRequestDto = googleOAuth.getAccessToken(code);
-        GoogleUserDto googleUserDto = googleOAuth.getUserInfo(googleOAuthTokenRequestDto);
+        GoogleOAuthRequestDto.Token tokenRequestDto = googleOAuth.getAccessToken(code);
+        GoogleOAuthRequestDto.GoogleUser googleUserDto = googleOAuth.getUserInfo(tokenRequestDto);
 
         createOAuthUser(googleUserDto);
 
@@ -47,7 +46,7 @@ public class OAuthService {
     }
 
     @Transactional
-    void createOAuthUser(GoogleUserDto googleUserDto) {
+    void createOAuthUser(GoogleOAuthRequestDto.GoogleUser googleUserDto) {
         Optional<User> userOptional = userRepository.findByEmail(googleUserDto.getEmail());
         if (userOptional.isEmpty()) {
             userRepository.save(new User(googleUserDto));
