@@ -70,7 +70,6 @@ public class WorkspaceService {
 
         workspaceUserRepository.save(workspaceUser);
 
-
         workspaceOrderRepository.save(workspaceOrder);
 
         return new WorkspaceResponseDto.CreateResponse(workspace);
