@@ -1,6 +1,7 @@
 package com.gigajet.mhlb.domain.workspace.dto;
 
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
+import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
 import lombok.Getter;
 
@@ -65,6 +66,19 @@ public class WorkspaceResponseDto {
             this.workspaceDesc = workspace.getDescription();
 
             this.userRole = role;
+        }
+    }
+
+    @Getter
+    public static class Invite {
+        private Long inviteId;
+
+        private String email;
+
+        public Invite(WorkspaceInvite invite) {
+            this.inviteId = invite.getId();
+
+            this.email = invite.getEmail();
         }
     }
 }

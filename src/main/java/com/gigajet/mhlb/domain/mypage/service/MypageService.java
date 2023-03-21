@@ -45,7 +45,7 @@ public class MypageService {
 
         List<MypageResponseDto.AllList> allLists = new ArrayList<>();
 
-        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUser(user);
+        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShow(user, 1);
 
         for (WorkspaceUser workspaceUser : workspaceUsers) {
             allLists.add(new MypageResponseDto.AllList(workspaceUser.getWorkspace()));
@@ -93,9 +93,9 @@ public class MypageService {
     }
 
     @Transactional
-    public ResponseEntity<SendMessageDto> deleteWorkspace(User user, long workspaceId){
-        Optional<WorkspaceUser> workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user,workspaceId);
-        if(workspaceUser.isEmpty()){
+    public ResponseEntity<SendMessageDto> deleteWorkspace(User user, long workspaceId) {
+        Optional<WorkspaceUser> workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, workspaceId);
+        if (workspaceUser.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
         workspaceUserRepository.deleteByUser_IdAndAndWorkspace_Id(user.getId(), workspaceId);

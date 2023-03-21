@@ -23,14 +23,14 @@ public class WorkspaceUserService {
     private final WorkspaceUserRepository workspaceUserRepository;
 
     // 임시적인 완전 잠깐 쓸 진짜진짜 가짜인 테스트용용
-    @Transactional
-    public ResponseEntity<SendMessageDto> testJoinUser(Long workspaceId, User user) {
-
-        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_PASSWORD));
-
-        workspaceUserRepository.save(new WorkspaceUser(user, workspace, WorkspaceUserRole.MEMBER));
-
-        return SendMessageDto.toResponseEntity(SuccessCode.CHECKUP_EMAIL);
-    }
+//    @Transactional
+//    public ResponseEntity<SendMessageDto> testJoinUser(Long workspaceId, User user) {
+//
+//        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_PASSWORD));
+//
+//        workspaceUserRepository.save(new WorkspaceUser(user, workspace, WorkspaceUserRole.MEMBER));
+//
+//        return SendMessageDto.toResponseEntity(SuccessCode.CHECKUP_EMAIL);
+//    }
 
 }

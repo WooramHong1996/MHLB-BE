@@ -61,4 +61,22 @@ public class MailService {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         valueOperations.set(email, randomNumber, Duration.ofMinutes(5));
     }
+
+    public void inviteMail(String email) {
+        //유저 없는거 확인 하고 왓서오
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            mimeMessageHelper.setTo(email);
+            mimeMessageHelper.setFrom(myAddress);
+            mimeMessageHelper.setSubject("핀미에 초대댓서오");
+            mimeMessageHelper.setText("<h1>초대 바들래용?</h1>", true);
+
+            mailSender.send(mimeMessage);
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
 }
