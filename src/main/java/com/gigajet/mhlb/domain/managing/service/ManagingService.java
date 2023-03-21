@@ -37,7 +37,7 @@ public class ManagingService {
     @Transactional(readOnly = true)
     public ManagingResponseDto.Management management(User user, Long id) {
         WorkspaceUser manager = checkRole(user, id);
-        return new ManagingResponseDto.Management(manager.getWorkspace(),manager.getRole());
+        return new ManagingResponseDto.Management(manager.getWorkspace(), manager.getRole());
     }
 
     @Transactional
@@ -76,7 +76,7 @@ public class ManagingService {
     public List<ManagingResponseDto.People> getPeople(User user, Long id) {
         checkRole(user, id);
 
-        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_Id(id);
+        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
 
         List<ManagingResponseDto.People> responses = new ArrayList<>();
 

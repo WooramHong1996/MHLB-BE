@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -25,7 +26,8 @@ public class StatusController {
     private final StatusSseHandler sseHandler;
 
     @PostMapping
-    public ResponseEntity<SendMessageDto> stausUpdate(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody StatusRequestDto statusRequestDto) {
+    public ResponseEntity<SendMessageDto> stausUpdate(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                      @RequestBody StatusRequestDto statusRequestDto) throws IOException {
         StatusResponseDto dto = statusService.statusUpdate(userDetails.getUser(), statusRequestDto);
         List<Long> workspaceList = statusService.getWorkspaceList(userDetails.getUser());
         for (Long id : workspaceList) {
@@ -45,9 +47,21 @@ public class StatusController {
     }
 
     @GetMapping(value = "/{id}/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)//sse 시작 요청
-    public ResponseEntity<SseEmitter> connect(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
+    public ResponseEntity<SseEmitter> connect(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) throws IOException {
+        statusService.checkUser(userDetails.getUser(), id);
+
         SseEmitter emitter = new SseEmitter();
+
         sseHandler.add(id);
+
+        try {
+            emitter.send(SseEmitter.event()
+                    .name("connect")
+                    .data("connect success"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         return ResponseEntity.ok(emitter);
     }
 }

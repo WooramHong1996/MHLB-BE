@@ -45,16 +45,24 @@ public class StatusSseHandler {
 
     public void statusChanged(Long workspaceId, StatusResponseDto dto) {
         List<SseEmitter> emitterList = emitters.get(workspaceId);
+
         if (emitterList == null) {
             throw new CustomException(ErrorCode.PERMISSION_DINED);
         }
+
         for (SseEmitter emitter : emitterList) {
             try {
                 emitter.send(SseEmitter.event()
                         .name("statusChanged")
                         .data(dto));
             } catch (IOException e) {
-                emitterList.remove(emitter);
+                List<SseEmitter> list = emitters.get(workspaceId);
+
+                list.remove(emitter);
+
+                if (list.isEmpty()) {
+                    emitters.remove(workspaceId);
+                }
             }
         }
     }

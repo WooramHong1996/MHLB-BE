@@ -1,9 +1,9 @@
 package com.gigajet.mhlb.domain.workspace.dto;
 
-import com.gigajet.mhlb.domain.workspace.entity.Workspace;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
 import com.sun.istack.NotNull;
 import lombok.Getter;
+
+import java.util.List;
 
 public class WorkspaceRequestDto {
 
@@ -14,5 +14,23 @@ public class WorkspaceRequestDto {
 
         @NotNull
         private String workspaceDesc;
+    }
+
+    @Getter
+    public static class Invite {
+        @NotNull
+        private String email;
+    }
+
+    @Getter
+    public static class Orders {
+        @NotNull
+        private List<Order> orders;
+    }
+
+    @Getter
+    public static class Order {
+        private Long workspaceId;
+        private Long order;
     }
 }
