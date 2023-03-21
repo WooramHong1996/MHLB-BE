@@ -2,6 +2,8 @@ package com.gigajet.mhlb.domain.mail.service;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
+import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
@@ -13,7 +15,9 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.internet.MimeMessage;
 import java.time.Duration;
@@ -27,6 +31,7 @@ public class MailService {
     private final UserRepository userRepository;
     private final JavaMailSender mailSender;
     private final RedisTemplate<String, String> redisTemplate;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${spring.mail.username}")
     private String myAddress;
@@ -36,7 +41,7 @@ public class MailService {
         userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
 
         String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-        saveEmailAndRandomNumber(email, uuid);
+        saveRandomNumberAndEmail(uuid, email);
 
         MimeMessage mimeMessage = mailSender.createMimeMessage();
 
@@ -45,8 +50,8 @@ public class MailService {
 
             mimeMessageHelper.setTo(email);
             mimeMessageHelper.setFrom(myAddress);
-            mimeMessageHelper.setSubject("뭐한라봉 :: 이메일 인증");
-            mimeMessageHelper.setText("<h1>안뇽안뇽</h1>", true);
+            mimeMessageHelper.setSubject("PIN ME :: 이메일 인증");
+            mimeMessageHelper.setText("<a href='http://localhost:3000/reset-password/" + uuid + "'>비밀번호 변경</a>", true);
 
             mailSender.send(mimeMessage);
 
@@ -57,10 +62,38 @@ public class MailService {
         return SendMessageDto.toResponseEntity(SuccessCode.VALID_EMAIL);
     }
 
-    private void saveEmailAndRandomNumber(String email, String randomNumber) {
+    // 캐시 저장
+    private void saveRandomNumberAndEmail(String randomNumber, String email) {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        valueOperations.set(email, randomNumber, Duration.ofMinutes(5));
+        valueOperations.set(randomNumber, email, Duration.ofMinutes(3));
     }
+
+    // 비밀번호 찾기 인증 코드 유효 검사
+    public ResponseEntity<SendMessageDto> checkCode(String uuid) {
+        String email = redisTemplate.opsForValue().get(uuid);
+
+        if (email == null) {
+            throw new CustomException(ErrorCode.INVALID_CODE);
+        }
+
+        return SendMessageDto.toResponseEntity(SuccessCode.VALID_CODE);
+    }
+
+    // 비밀번호 변경
+    @Transactional
+    public ResponseEntity<SendMessageDto> resetPassword(String uuid, UserRequestDto.Password passwordDto) {
+        String email = redisTemplate.opsForValue().get(uuid);
+
+        if (email == null) {
+            throw new CustomException(ErrorCode.INVALID_CODE);
+        }
+
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
+        user.resetPassword(passwordEncoder.encode(passwordDto.getPassword()));
+
+        return SendMessageDto.toResponseEntity(SuccessCode.RESET_PASSWORD_SUCCESS);
+    }
+
 
     public void inviteMail(String email) {
         //유저 없는거 확인 하고 왓서오

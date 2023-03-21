@@ -8,16 +8,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class MailController {
 
     private final MailService mailService;
 
     // 비밀번호 찾기 이메일 발송
-    @PostMapping("/users/check/email")
-    public ResponseEntity<SendMessageDto> sendMail(@RequestBody UserRequestDto.CheckEmailDto emailDto) {
+    @PostMapping("/check/email")
+    public ResponseEntity<SendMessageDto> sendMail(@RequestBody UserRequestDto.CheckEmail emailDto) {
         return mailService.sendMail(emailDto.getEmail());
+    }
+
+    // 비밀번호 찾기 인증 코드 유효 검사
+    @PostMapping("/check/code/{uuid}")
+    public ResponseEntity<SendMessageDto> checkCode(@PathVariable String uuid) {
+        return mailService.checkCode(uuid);
+    }
+
+    // 비밀번호 변경
+    @PostMapping("/reset/password/{uuid}")
+    public ResponseEntity<SendMessageDto> resetPassword(@PathVariable String uuid, @RequestBody UserRequestDto.Password passwordDto) {
+        return mailService.resetPassword(uuid, passwordDto);
     }
 
 }

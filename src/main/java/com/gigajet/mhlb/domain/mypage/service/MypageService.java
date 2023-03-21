@@ -98,7 +98,7 @@ public class MypageService {
         if (workspaceUser.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
-        workspaceUserRepository.deleteByUser_IdAndAndWorkspace_Id(user.getId(), workspaceId);
+        workspaceUserRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.DELETE_SUCCESS));
     }
 }

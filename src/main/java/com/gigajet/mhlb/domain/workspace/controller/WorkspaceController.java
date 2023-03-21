@@ -33,7 +33,7 @@ public class WorkspaceController {
 
     @PostMapping
     public WorkspaceResponseDto.CreateResponse workspaceCreate(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                               @RequestPart("image") MultipartFile image,
+                                                               @RequestPart(name = "image", required = false) MultipartFile image,
                                                                @RequestPart("data") WorkspaceRequestDto.Create workspaceDto) throws IOException {
         return workspaceService.workspaceCreate(userDetails.getUser(), image, workspaceDto);
     }
