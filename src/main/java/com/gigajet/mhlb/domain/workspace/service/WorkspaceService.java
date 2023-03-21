@@ -65,7 +65,6 @@ public class WorkspaceService {
         WorkspaceOrder workspaceOrder = new WorkspaceOrder(count);
         WorkspaceUser workspaceUser = new WorkspaceUser(user, workspace, ADMIN, workspaceOrder);
 
-
         workspaceRepository.save(workspace);
 
         workspaceUserRepository.save(workspaceUser);
