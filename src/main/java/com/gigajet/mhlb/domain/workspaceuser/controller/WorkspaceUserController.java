@@ -17,9 +17,9 @@ public class WorkspaceUserController {
     private final WorkspaceUserService workspaceUserService;
 
     // 임시적인 완전 잠깐 쓸 진짜진짜 가짜인 테스트용용
-    @PostMapping("/api/workspace/{workspaceId}/test/join")
-    public ResponseEntity<SendMessageDto> testJoinUser(@PathVariable Long workspaceId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return workspaceUserService.testJoinUser(workspaceId, userDetails.getUser());
-    }
+//    @PostMapping("/api/workspace/{workspaceId}/test/join")
+//    public ResponseEntity<SendMessageDto> testJoinUser(@PathVariable Long workspaceId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+//        return workspaceUserService.testJoinUser(workspaceId, userDetails.getUser());
+//    }
 
 }

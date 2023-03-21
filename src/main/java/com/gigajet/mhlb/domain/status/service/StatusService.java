@@ -40,7 +40,7 @@ public class StatusService {
 
         workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
-        List<WorkspaceUser> byWorkspaceId = workspaceUserRepository.findByWorkspace_Id(id);
+        List<WorkspaceUser> byWorkspaceId = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
 
         for (WorkspaceUser workspaceUser : byWorkspaceId) {
             SqlStatus status = statusRepository.findByEmail(workspaceUser.getUser().getEmail());
@@ -61,15 +61,19 @@ public class StatusService {
     public StatusResponseDto myStatus(User user) {
         SqlStatus status = statusRepository.findByEmail(user.getEmail());
 
-        return  new StatusResponseDto(status);
+        return new StatusResponseDto(status);
     }
 
     public List<Long> getWorkspaceList(User user) {
-        List<WorkspaceUser> list = workspaceUserRepository.findByUser(user);
+        List<WorkspaceUser> list = workspaceUserRepository.findByUserAndIsShow(user, 1);
         List<Long> longList = new ArrayList<>();
         for (WorkspaceUser workspaceUser : list) {
             longList.add(workspaceUser.getWorkspace().getId());
         }
         return longList;
+    }
+
+    public void checkUser(User user, Long id) {
+        workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
     }
 }
