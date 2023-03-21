@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WorkspaceInviteRepository extends JpaRepository<WorkspaceInvite, Long> {
-    List<WorkspaceInvite> findByWorkspace(Workspace workspace);
+    List<WorkspaceInvite> findByWorkspaceOrderByIdDesc(Workspace workspace);
 
-    Optional<WorkspaceInvite> findByWorkspace_IdAndId(Workspace workspace, Long id);
+    Optional<WorkspaceInvite> findByWorkspace_IdAndId(Long workspaceId, Long inviteId);
 
     Optional<WorkspaceInvite> findByWorkspaceAndEmail(Workspace workspace, String email);
 }

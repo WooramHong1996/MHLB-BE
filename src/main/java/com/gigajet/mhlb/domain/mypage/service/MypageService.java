@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -98,7 +97,7 @@ public class MypageService {
         if (workspaceUser.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
-        workspaceUserRepository.deleteByUser_IdAndAndWorkspace_Id(user.getId(), workspaceId);
+        workspaceUserRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.DELETE_SUCCESS));
     }
 }
