@@ -29,15 +29,13 @@ public class WorkspaceUser {
     @Column(nullable = false)
     private Integer isShow;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "workspaceorder_id")
+    @OneToOne(mappedBy = "workspaceUser")
     private WorkspaceOrder workspaceorder;
 
-    public WorkspaceUser(User user, Workspace workspace, WorkspaceUserRole role, WorkspaceOrder order) {
+    public WorkspaceUser(User user, Workspace workspace, WorkspaceUserRole role) {
         this.user = user;
         this.workspace = workspace;
         this.role = role;
-        this.workspaceorder = order;
         this.isShow = 1;
     }
 

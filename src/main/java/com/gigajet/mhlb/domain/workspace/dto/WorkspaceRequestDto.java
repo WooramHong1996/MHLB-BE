@@ -31,6 +31,6 @@ public class WorkspaceRequestDto {
     @Getter
     public static class Order {
         private Long workspaceId;
-        private Long order;
+        private Long ordernum;
     }
 }

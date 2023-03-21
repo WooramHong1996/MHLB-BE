@@ -57,6 +57,11 @@ public class WorkspaceController {
         return workspaceService.changeOrder(userDetails.getUser(), orders);
     }
 
+    @GetMapping("/order")
+    public List<WorkspaceResponseDto.OrderList> getOrder(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return workspaceService.getOrder(userDetails.getUser());
+    }
+
     @PostMapping("/{id}/invite")
     public ResponseEntity<SendMessageDto> invite(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestBody WorkspaceRequestDto.Invite email) {
         Optional<User> invited = workspaceService.invite(userDetails.getUser(), id, email.getEmail());
