@@ -18,9 +18,7 @@ public interface WorkspaceUserRepository extends JpaRepository<WorkspaceUser, Lo
 
     List<WorkspaceUser> findByWorkspace_IdAndIsShow(Long id, Integer isShow);
 
-    void deleteByUser_IdAndAndWorkspace_Id(Long userId, Long workspaceId);
+    void deleteByUser_IdAndWorkspace_Id(Long userId, Long workspaceId);
 
-    Integer countByWorkspace(Workspace workspace);
-
-    Integer countByUserAndIsShow(User user, Integer isShow);
+    Long countByUserAndIsShow(User user, Integer isShow);
 }

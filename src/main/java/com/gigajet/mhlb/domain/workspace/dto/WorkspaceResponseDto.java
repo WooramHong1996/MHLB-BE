@@ -81,4 +81,25 @@ public class WorkspaceResponseDto {
             this.email = invite.getEmail();
         }
     }
+
+    @Getter
+    public static class OrderList {
+        private Long workspaceId;
+
+        private String workspaceImage;
+
+        private String workspaceTitle;
+
+        private String workspaceDesc;
+
+        public OrderList(Workspace workspace) {
+            this.workspaceId = workspace.getId();
+
+            this.workspaceImage = workspace.getImage();
+
+            this.workspaceTitle = workspace.getTitle();
+
+            this.workspaceDesc = workspace.getDescription();
+        }
+    }
 }

@@ -13,12 +13,21 @@ public class WorkspaceOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne(fetch = FetchType.LAZY)
-    private WorkspaceUser user;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "workspaceUser_id")
+    private WorkspaceUser workspaceUser;
     @Column
-    private Integer orders;
+    private Long orders;
+    @Column
+    private Integer isShow;
 
-    public WorkspaceOrder(Integer orders) {
+    public WorkspaceOrder(Long orders, WorkspaceUser workspaceUser) {
+        this.orders = orders;
+        this.workspaceUser = workspaceUser;
+        isShow = 1;
+    }
+
+    public void updateOrder(Long orders) {
         this.orders = orders;
     }
 }
