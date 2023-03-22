@@ -26,14 +26,17 @@ public class Workspace {
     @Column(nullable = false)
     private String image;
 
-    @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    @JsonIgnoreProperties("Workspace")
+    @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE,fetch = FetchType.LAZY)
     private List<WorkspaceUser> workspaceUsers;
+
+    @Column(nullable = false)
+    private Integer isShow;
 
     public Workspace(WorkspaceRequestDto.Create workspaceDto, String image) {
         this.title = workspaceDto.getWorkspaceTitle();
         this.description = workspaceDto.getWorkspaceDesc();
         this.image = image;
+        this.isShow = 1;
     }
 
     public void imageChange(String image) {
@@ -47,4 +50,6 @@ public class Workspace {
     public void descChange(String workspaceDesc) {
         this.description = workspaceDesc;
     }
+
+    public void updateIsShow(){this.isShow = 0;}
 }
