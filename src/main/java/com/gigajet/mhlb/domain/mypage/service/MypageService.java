@@ -52,43 +52,31 @@ public class MypageService {
         return allLists;
     }
 
-    @Transactional
     public MypageResponseDto.Image updateImage(User user, MultipartFile userImage) throws IOException {
-        user = userRepository.findByEmail(user.getEmail()).orElseThrow(
-                () -> new CustomException(ErrorCode.DUPLICATE_EMAIL));
-
+        // 디폴트 이미지면 삭제 불가하게
         s3Handler.delete(user.getImage());
         String imageUrl = s3Handler.upload(userImage);
-        user.updateImage(imageUrl);
+        userRepository.updateImage(imageUrl, user.getId());
 
-        return new MypageResponseDto.Image(user);
+        return new MypageResponseDto.Image(imageUrl);
     }
 
-    @Transactional
     public MypageResponseDto.Name updateName(User user, MypageRequestDto.Name nameRequest) {
-        User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
-                () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
-        );
-        users.updateName(nameRequest);
-        return new MypageResponseDto.Name(users);
+        userRepository.updateUserName(nameRequest.getUserName(), user.getId());
+
+        return new MypageResponseDto.Name(nameRequest.getUserName());
     }
 
-    @Transactional
     public MypageResponseDto.Description updateDesc(User user, MypageRequestDto.Description descRequest) {
-        User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
-                () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
-        );
-        users.updateDesc(descRequest);
-        return new MypageResponseDto.Description(users);
+        userRepository.updateDescription(descRequest.getUserDesc(), user.getId());
+
+        return new MypageResponseDto.Description(descRequest.getUserDesc());
     }
 
-    @Transactional
     public MypageResponseDto.Job updateJob(User user, MypageRequestDto.Job jobRequest) {
-        User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
-                () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
-        );
-        users.updateJob(jobRequest);
-        return new MypageResponseDto.Job(users);
+        userRepository.updateJob(jobRequest.getUserJob(), user.getId());
+
+        return new MypageResponseDto.Job(jobRequest.getUserJob());
     }
 
     @Transactional

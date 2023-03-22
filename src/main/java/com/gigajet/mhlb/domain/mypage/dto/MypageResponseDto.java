@@ -58,16 +58,16 @@ public class MypageResponseDto {
     public static class Name {
         private String userName;
 
-        public Name(User user) {
-            this.userName = user.getUsername();
+        public Name(String userName) {
+            this.userName = userName;
         }
     }
 
     @Getter
     public static class Description {
         private String userDesc;
-        public Description(User user) {
-            this.userDesc = user.getDescription();
+        public Description(String userDesc) {
+            this.userDesc = userDesc;
         }
     }
 
@@ -75,8 +75,8 @@ public class MypageResponseDto {
     public static class Job {
         private String userJob;
 
-        public Job(User user) {
-            this.userJob = user.getJob();
+        public Job(String userJob) {
+            this.userJob = userJob;
         }
     }
 
@@ -84,8 +84,8 @@ public class MypageResponseDto {
     public static class Image {
         private String userImage;
 
-        public Image(User user) {
-            this.userImage = user.getImage();
+        public Image(String userImage) {
+            this.userImage = userImage;
         }
     }
 }
