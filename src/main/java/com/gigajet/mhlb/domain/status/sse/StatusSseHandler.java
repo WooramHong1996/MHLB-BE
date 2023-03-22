@@ -44,7 +44,7 @@ public class StatusSseHandler {
 
         emitter.send(SseEmitter.event()
                 .name("connect")
-                .data(emitter.toString()));
+                .data("connect success"));
         return emitter;
     }
 
