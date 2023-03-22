@@ -7,7 +7,11 @@ import com.gigajet.mhlb.domain.mypage.dto.MypageRequestDto;
 import com.gigajet.mhlb.domain.mypage.dto.MypageResponseDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
+import com.gigajet.mhlb.domain.workspace.entity.Workspace;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
+import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
+import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceInviteRepository;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
@@ -28,6 +32,8 @@ public class MypageService {
 
     private final UserRepository userRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
+    private final WorkspaceInviteRepository workspaceInviteRepository;
+    private final WorkspaceRepository workspaceRepository;
 
     private final S3Handler s3Handler;
 
@@ -44,11 +50,21 @@ public class MypageService {
 
         List<MypageResponseDto.AllList> allLists = new ArrayList<>();
 
+        List<MypageResponseDto.InviteList> inviteLists = new ArrayList<>();
+        List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByUser(user);
+
+        List<MypageResponseDto.WorkspaceList> workspaceLists = new ArrayList<>();
         List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShow(user, 1);
 
-        for (WorkspaceUser workspaceUser : workspaceUsers) {
-            allLists.add(new MypageResponseDto.AllList(workspaceUser.getWorkspace()));
+        for (WorkspaceInvite workspaceInvite: workspaceInviteList) {
+            inviteLists.add(new MypageResponseDto.InviteList(workspaceInvite.getWorkspace()));
         }
+
+        for (WorkspaceUser workspaceUser : workspaceUsers) {
+            workspaceLists.add(new MypageResponseDto.WorkspaceList(workspaceUser.getWorkspace()));
+        }
+        allLists.add(new MypageResponseDto.AllList(inviteLists, workspaceLists));
+
         return allLists;
     }
 
@@ -84,20 +100,55 @@ public class MypageService {
 
     @Transactional
     public MypageResponseDto.Job updateJob(User user, MypageRequestDto.Job jobRequest) {
+
         User users = userRepository.findByEmail(user.getEmail()).orElseThrow(
                 () -> new CustomException(ErrorCode.DUPLICATE_EMAIL)
         );
+
         users.updateJob(jobRequest);
+
         return new MypageResponseDto.Job(users);
     }
 
     @Transactional
     public ResponseEntity<SendMessageDto> deleteWorkspace(User user, long workspaceId) {
-        Optional<WorkspaceUser> workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, workspaceId);
-        if (workspaceUser.isEmpty()) {
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, workspaceId).orElseThrow( ()-> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+
+        workspaceUser.updateIsShow();
+//        workspaceUserRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
+
+        return ResponseEntity.ok(SendMessageDto.of(SuccessCode.DELETE_SUCCESS));
+    }
+
+    @Transactional
+    public ResponseEntity<SendMessageDto> inviteWorkspace(User user, long workspaceId) {
+        Optional<WorkspaceInvite> workspaceUserOptional = workspaceInviteRepository.findByWorkspace_IdAndUserId(workspaceId, user.getId());
+
+        if (workspaceUserOptional.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
-        workspaceUserRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
+        Optional<Workspace> workspace= workspaceRepository.findById(workspaceId);
+
+        Optional<WorkspaceUser> workspaceUser= Optional.of(new WorkspaceUser(user, workspace.get()));
+
+        workspaceUserRepository.save(workspaceUser.get());
+
+        workspaceInviteRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
+
+        return ResponseEntity.ok(SendMessageDto.of(SuccessCode.INVITE_SUCCESS));
+    }
+
+    @Transactional
+    public ResponseEntity<SendMessageDto> rejectWorkspace(User user, long workspaceId) {
+
+        Optional<WorkspaceInvite> workspaceUserOptional = workspaceInviteRepository.findByWorkspace_IdAndUserId(workspaceId, user.getId());
+
+        if (workspaceUserOptional.isEmpty()) {
+            throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
+        }
+
+        workspaceInviteRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
+
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.DELETE_SUCCESS));
     }
 }

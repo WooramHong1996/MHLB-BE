@@ -5,6 +5,8 @@ import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 public class MypageResponseDto {
     @Getter
     public static class Info {
@@ -34,6 +36,18 @@ public class MypageResponseDto {
 
     @Getter
     public static class AllList {
+        private List<WorkspaceList> workspaceList;
+        private List<InviteList> inviteList;
+
+        @Builder
+        public AllList(List<InviteList> inviteLists, List<WorkspaceList> workspaceList) {
+            this.inviteList = inviteLists;
+            this.workspaceList = workspaceList;
+        }
+    }
+
+    @Getter
+    public static class WorkspaceList {
         private Long workspaceId;
 
         private String workspaceImage;
@@ -43,7 +57,29 @@ public class MypageResponseDto {
         private String workspaceDesc;
 
         @Builder
-        public AllList(Workspace workspace) {
+        public WorkspaceList(Workspace workspace) {
+            this.workspaceId = workspace.getId();
+
+            this.workspaceImage = workspace.getImage();
+
+            this.workspaceTitle = workspace.getTitle();
+
+            this.workspaceDesc = workspace.getDescription();
+        }
+    }
+
+    @Getter
+    public static class InviteList {
+        private Long workspaceId;
+
+        private String workspaceImage;
+
+        private String workspaceTitle;
+
+        private String workspaceDesc;
+
+        @Builder
+        public InviteList(Workspace workspace) {
             this.workspaceId = workspace.getId();
 
             this.workspaceImage = workspace.getImage();
