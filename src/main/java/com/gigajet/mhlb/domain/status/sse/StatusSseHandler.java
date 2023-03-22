@@ -48,7 +48,7 @@ public class StatusSseHandler {
         return emitter;
     }
 
-    public void statusChanged(Long workspaceId, StatusResponseDto dto) throws JsonProcessingException {
+    public void statusChanged(Long workspaceId, StatusResponseDto dto) {
         List<SseEmitter> emitterList = emitters.get(workspaceId);
 
         if (emitterList == null) {
