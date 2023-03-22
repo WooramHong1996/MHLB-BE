@@ -135,7 +135,7 @@ public class MypageService {
 
         workspaceInviteRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
 
-        return ResponseEntity.ok(SendMessageDto.of(SuccessCode.DELETE_SUCCESS));
+        return ResponseEntity.ok(SendMessageDto.of(SuccessCode.INVITE_SUCCESS));
     }
 
     @Transactional
