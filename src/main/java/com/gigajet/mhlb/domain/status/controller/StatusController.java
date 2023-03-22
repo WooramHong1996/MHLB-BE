@@ -50,18 +50,18 @@ public class StatusController {
     public ResponseEntity<SseEmitter> connect(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) throws IOException {
         statusService.checkUser(userDetails.getUser(), id);
 
-        SseEmitter emitter = new SseEmitter();
+//        SseEmitter emitter = new SseEmitter();
 
-        sseHandler.add(id);
 
-        try {
-            emitter.send(SseEmitter.event()
-                    .name("connect")
-                    .data("connect success"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
-        return ResponseEntity.ok(emitter);
+//        try {
+//            emitter.send(SseEmitter.event()
+//                    .name("connect")
+//                    .data(emitter.toString()));
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+
+        return ResponseEntity.ok(sseHandler.add(id));
     }
 }

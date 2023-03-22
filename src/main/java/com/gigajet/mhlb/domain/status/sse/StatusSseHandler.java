@@ -1,5 +1,7 @@
 package com.gigajet.mhlb.domain.status.sse;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gigajet.mhlb.domain.status.dto.StatusResponseDto;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
@@ -18,7 +20,7 @@ public class StatusSseHandler {
     //워크스페이스 id별로 구분해야함
     private final ConcurrentHashMap<Long, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
-    public SseEmitter add(Long workspaceId) {
+    public SseEmitter add(Long workspaceId) throws IOException {
         List<SseEmitter> emitterList = emitters.get(workspaceId);
 
         if (emitterList == null) {
@@ -40,10 +42,13 @@ public class StatusSseHandler {
 
         emitter.onTimeout(() -> new IllegalAccessError("타임아웃 시간 안정해놔서 안터짐...아마"));
 
+        emitter.send(SseEmitter.event()
+                .name("connect")
+                .data(emitter.toString()));
         return emitter;
     }
 
-    public void statusChanged(Long workspaceId, StatusResponseDto dto) {
+    public void statusChanged(Long workspaceId, StatusResponseDto dto) throws JsonProcessingException {
         List<SseEmitter> emitterList = emitters.get(workspaceId);
 
         if (emitterList == null) {
@@ -53,7 +58,7 @@ public class StatusSseHandler {
         for (SseEmitter emitter : emitterList) {
             try {
                 emitter.send(SseEmitter.event()
-                        .name("statusChanged")
+                        .name("status changed")
                         .data(dto));
             } catch (IOException e) {
                 List<SseEmitter> list = emitters.get(workspaceId);
