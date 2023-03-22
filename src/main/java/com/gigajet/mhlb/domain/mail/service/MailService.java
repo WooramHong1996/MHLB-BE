@@ -25,6 +25,7 @@ import java.util.UUID;
 public class MailService {
 
     private final UserRepository userRepository;
+
     private final JavaMailSender mailSender;
     private final RedisTemplate<String, String> redisTemplate;
 
