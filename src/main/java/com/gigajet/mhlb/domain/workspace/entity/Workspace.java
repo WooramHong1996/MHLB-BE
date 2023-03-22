@@ -26,7 +26,7 @@ public class Workspace {
     @Column(nullable = false)
     private String image;
 
-    @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<WorkspaceUser> workspaceUsers;
 
     @Column(nullable = false)
@@ -51,5 +51,7 @@ public class Workspace {
         this.description = workspaceDesc;
     }
 
-    public void updateIsShow(){this.isShow = 0;}
+    public void updateIsShow() {
+        this.isShow = 0;
+    }
 }
