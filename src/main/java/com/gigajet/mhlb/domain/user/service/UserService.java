@@ -42,7 +42,7 @@ public class UserService {
     }
 
     @Transactional
-    public void register(UserRequestDto.Register registerDto) {
+    public User register(UserRequestDto.Register registerDto) {
         Optional<User> optionalUser = userRepository.findByEmail(registerDto.getEmail());
         if (optionalUser.isPresent()) {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
@@ -50,7 +50,11 @@ public class UserService {
 
         String password = passwordEncoder.encode(registerDto.getPassword());
 
-        userRepository.save(new User(registerDto, password));
+        User user = new User(registerDto, password);
+
+        userRepository.save(user);
+
+        return user;
     }
 
     @Transactional(readOnly = true)

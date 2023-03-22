@@ -30,4 +30,6 @@ public class WorkspaceOrder {
     public void updateOrder(Long orders) {
         this.orders = orders;
     }
+
+    public void updateIsShow(){this.isShow = 0;}
 }

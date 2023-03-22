@@ -1,5 +1,7 @@
 package com.gigajet.mhlb.domain.workspace.dto;
 
+import com.gigajet.mhlb.domain.status.entity.SqlStatus;
+import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
@@ -100,6 +102,27 @@ public class WorkspaceResponseDto {
             this.workspaceTitle = workspace.getTitle();
 
             this.workspaceDesc = workspace.getDescription();
+        }
+    }
+
+    @Getter
+    public static class People {
+        private Long userId;
+        private String userImage;
+        private String userName;
+        private String userJob;
+        private String userEmail;
+        private String description;
+        private String status;
+
+        public People(SqlStatus status) {
+            this.userId = status.getUser().getId();
+            this.userImage = status.getUser().getImage();
+            this.userName = status.getUser().getUsername();
+            this.userJob = status.getUser().getJob();
+            this.userEmail = status.getUser().getEmail();
+            this.description = status.getUser().getDescription();
+            this.status = status.getStatus();
         }
     }
 }

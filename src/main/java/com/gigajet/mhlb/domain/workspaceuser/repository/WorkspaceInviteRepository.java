@@ -18,4 +18,5 @@ public interface WorkspaceInviteRepository extends JpaRepository<WorkspaceInvite
     Optional<WorkspaceInvite> findByWorkspaceAndEmail(Workspace workspace, String email);
     List<WorkspaceInvite>findByUser(User user);
     void deleteByUser_IdAndWorkspace_Id(Long userId, Long workspaceId);
+    void deleteByWorkspace(Workspace workspace);
 }
