@@ -78,4 +78,8 @@ public class User {
     public void updateImage(String imageUrl) {
         this.image = imageUrl;
     }
+
+    public void resetPassword(String password) {
+        this.password = password;
+    }
 }

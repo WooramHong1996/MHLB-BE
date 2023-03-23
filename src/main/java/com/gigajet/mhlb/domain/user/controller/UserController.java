@@ -26,13 +26,13 @@ public class UserController {
 
     // 중복 체크
     @PostMapping("/duplicate-email")
-    public ResponseEntity<SendMessageDto> duplicateEmail(@RequestBody UserRequestDto.CheckEmailDto emailDto) {
+    public ResponseEntity<SendMessageDto> duplicateEmail(@RequestBody UserRequestDto.CheckEmail emailDto) {
         return userService.duplicateEmail(emailDto.getEmail());
     }
 
     // 유효 체크
     @PostMapping("/validate-email")
-    public ResponseEntity<SendMessageDto> validateEmail(@RequestBody UserRequestDto.CheckEmailDto emailDto) {
+    public ResponseEntity<SendMessageDto> validateEmail(@RequestBody UserRequestDto.CheckEmail emailDto) {
         return userService.validateEmail(emailDto.getEmail());
     }
 
