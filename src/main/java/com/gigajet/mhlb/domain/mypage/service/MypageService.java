@@ -61,7 +61,7 @@ public class MypageService {
         }
 
         for (WorkspaceUser workspaceUser : workspaceUsers) {
-            allLists.add(new MypageResponseDto.AllList(workspaceUser.getWorkspace()));
+            workspaceLists.add(new MypageResponseDto.WorkspaceList(workspaceUser.getWorkspace()));
         }
         allLists.add(new MypageResponseDto.AllList(inviteLists, workspaceLists));
 
