@@ -5,7 +5,7 @@ import lombok.Getter;
 public class UserRequestDto {
 
     @Getter
-    public static class CheckEmailDto {
+    public static class CheckEmail {
 
         private String email;
 
@@ -32,6 +32,13 @@ public class UserRequestDto {
     public static class Login {
 
         private String email;
+
+        private String password;
+
+    }
+
+    @Getter
+    public static class Password {
 
         private String password;
 

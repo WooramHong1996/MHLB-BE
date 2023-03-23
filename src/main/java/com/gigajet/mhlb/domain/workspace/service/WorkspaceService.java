@@ -61,7 +61,14 @@ public class WorkspaceService {
 
     @Transactional
     public WorkspaceResponseDto.CreateResponse workspaceCreate(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
-        String imageUrl = s3Handler.upload(image);
+        String imageUrl = "";
+
+        if (image == null) {
+            imageUrl = "https://mhlbbucket.s3.ap-northeast-2.amazonaws.com/ea1f0590-771d-4b25-9f9f-968bae140a7f-trys-ketch-%EB%85%BC%EB%A6%AC%EC%A0%81%EC%9D%B8+%EC%BF%A0%ED%82%A4.png";
+        } else {
+            imageUrl = s3Handler.upload(image);
+        }
+
         Workspace workspace = new Workspace(workspaceDto, imageUrl);
 
         Long count = workspaceUserRepository.countByUserAndIsShow(user, 1);

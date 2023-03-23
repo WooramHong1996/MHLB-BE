@@ -21,6 +21,7 @@ public enum ErrorCode {
     SAME_PERMISSION(BAD_REQUEST, "same role"),
     NOT_SOCIAL_EMAIL(BAD_REQUEST, "not social email"),
     ALREADY_INVITED(BAD_REQUEST, "already invited"),
+    INVALID_CODE(BAD_REQUEST, "invalid code"),
 
 
     /* 401 UNAUTHORIZED : 인증 실패 */
