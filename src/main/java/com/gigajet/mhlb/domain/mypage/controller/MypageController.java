@@ -26,7 +26,7 @@ public class MypageController {
     }
 
     @GetMapping("/workspaces")
-    public List<MypageResponseDto.AllList> workspaceInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public MypageResponseDto.AllList workspaceInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return mypageService.workspaceInfo(userDetails.getUser());
     }
 

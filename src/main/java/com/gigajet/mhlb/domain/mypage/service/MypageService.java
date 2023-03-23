@@ -46,10 +46,7 @@ public class MypageService {
     }
 
     @Transactional(readOnly = true)
-    public List<MypageResponseDto.AllList> workspaceInfo(User user) {
-
-        List<MypageResponseDto.AllList> allLists = new ArrayList<>();
-
+    public MypageResponseDto.AllList workspaceInfo(User user) {
         List<MypageResponseDto.InviteList> inviteLists = new ArrayList<>();
         List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByUser(user);
 
@@ -63,9 +60,7 @@ public class MypageService {
         for (WorkspaceUser workspaceUser : workspaceUsers) {
             workspaceLists.add(new MypageResponseDto.WorkspaceList(workspaceUser.getWorkspace()));
         }
-        allLists.add(new MypageResponseDto.AllList(inviteLists, workspaceLists));
-
-        return allLists;
+        return new MypageResponseDto.AllList(inviteLists, workspaceLists);
     }
 
     public MypageResponseDto.Image updateImage(User user, MultipartFile userImage) throws IOException {
