@@ -6,7 +6,6 @@ import com.gigajet.mhlb.domain.status.dto.StatusRequestDto;
 import com.gigajet.mhlb.domain.status.dto.StatusResponseDto;
 import com.gigajet.mhlb.domain.status.entity.SqlStatus;
 import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
-import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
@@ -28,6 +27,10 @@ public class StatusService {
 
     @Transactional
     public StatusResponseDto statusUpdate(User user, StatusRequestDto statusRequestDto) {
+        if(statusRepository.findTopByUserOrderByUpdatedAtDesc(user).getStatus()==statusRequestDto.getStatus()){
+            throw new CustomException(ErrorCode.STATUS_NOT_CHANGED);
+        }
+
         SqlStatus status = new SqlStatus(user,statusRequestDto);
 
         statusRepository.save(status);
