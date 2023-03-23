@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.internet.MimeMessage;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -71,11 +72,7 @@ public class MailService {
 
     // 비밀번호 찾기 인증 코드 유효 검사
     public ResponseEntity<SendMessageDto> checkCode(String uuid) {
-        String email = redisTemplate.opsForValue().get(uuid);
-
-        if (email == null) {
-            throw new CustomException(ErrorCode.INVALID_CODE);
-        }
+        Objects.requireNonNull(redisTemplate.opsForValue().get(uuid)).describeConstable().orElseThrow(() -> new CustomException(ErrorCode.INVALID_CODE));
 
         return SendMessageDto.toResponseEntity(SuccessCode.VALID_CODE);
     }
@@ -83,11 +80,7 @@ public class MailService {
     // 비밀번호 변경
     @Transactional
     public ResponseEntity<SendMessageDto> resetPassword(String uuid, UserRequestDto.Password passwordDto) {
-        String email = redisTemplate.opsForValue().get(uuid);
-
-        if (email == null) {
-            throw new CustomException(ErrorCode.INVALID_CODE);
-        }
+        String email = Objects.requireNonNull(redisTemplate.opsForValue().get(uuid)).describeConstable().orElseThrow(() -> new CustomException(ErrorCode.INVALID_CODE));
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
         user.resetPassword(passwordEncoder.encode(passwordDto.getPassword()));
