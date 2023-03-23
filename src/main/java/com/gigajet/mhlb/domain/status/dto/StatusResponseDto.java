@@ -1,6 +1,5 @@
 package com.gigajet.mhlb.domain.status.dto;
 
-import com.gigajet.mhlb.domain.status.entity.RedisStatus;
 import com.gigajet.mhlb.domain.status.entity.SqlStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,14 +9,11 @@ import lombok.NoArgsConstructor;
 public class StatusResponseDto {
     private Long userId;
     private String status;
-
-    public StatusResponseDto(RedisStatus status) {
-//        this.userId = status.getEmail();
-        this.status = status.getStatus();
-    }
+    private Integer color;
 
     public StatusResponseDto(SqlStatus status) {
         this.userId = status.getUser().getId();
-        this.status = status.getStatus();
+        this.status = status.getStatus().getStatus();
+        this.color = status.getStatus().getColor();
     }
 }
