@@ -28,9 +28,9 @@ public class RedisStatus {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void update(StatusRequestDto statusRequestDto) {
-        this.status = statusRequestDto.getStatus();
-
-        this.updatedAt = LocalDateTime.now();
-    }
+//    public void update(StatusRequestDto statusRequestDto) {
+//        this.status = statusRequestDto.getStatus();
+//
+//        this.updatedAt = LocalDateTime.now();
+//    }
 }

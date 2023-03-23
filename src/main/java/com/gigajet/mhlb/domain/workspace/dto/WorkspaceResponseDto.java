@@ -1,7 +1,6 @@
 package com.gigajet.mhlb.domain.workspace.dto;
 
 import com.gigajet.mhlb.domain.status.entity.SqlStatus;
-import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
@@ -114,6 +113,7 @@ public class WorkspaceResponseDto {
         private String userEmail;
         private String description;
         private String status;
+        private Integer color;
 
         public People(SqlStatus status) {
             this.userId = status.getUser().getId();
@@ -122,7 +122,8 @@ public class WorkspaceResponseDto {
             this.userJob = status.getUser().getJob();
             this.userEmail = status.getUser().getEmail();
             this.description = status.getUser().getDescription();
-            this.status = status.getStatus();
+            this.status = status.getStatus().getStatus();
+            this.color = status.getStatus().getColor();
         }
     }
 }
