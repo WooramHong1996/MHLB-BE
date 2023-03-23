@@ -82,4 +82,9 @@ public class WorkspaceController {
     public ResponseEntity<SendMessageDto> deleteInvite(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @PathVariable Long inviteid) {
         return workspaceService.deleteInvite(userDetails.getUser(), id, inviteid);
     }
+
+    @GetMapping("/{id}/people")
+    public List<WorkspaceResponseDto.People> getPeople(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id){
+        return workspaceService.getPeople(userDetails.getUser(),id);
+    }
 }

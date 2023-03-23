@@ -15,6 +15,7 @@ import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,16 +26,16 @@ public class StatusService {
     private final SqlStatusRepository statusRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
 
+    @Transactional
     public StatusResponseDto statusUpdate(User user, StatusRequestDto statusRequestDto) {
-        SqlStatus status = statusRepository.findByEmail(user.getEmail());
-
-        status.update(statusRequestDto);
+        SqlStatus status = new SqlStatus(user,statusRequestDto);
 
         statusRepository.save(status);
 
         return new StatusResponseDto(status);
     }
 
+    @Transactional(readOnly = true)
     public List<StatusResponseDto> getWorkspacePeople(User user, Long id) {
         List<StatusResponseDto> responseDto = new ArrayList<>();
 
@@ -43,27 +44,27 @@ public class StatusService {
         List<WorkspaceUser> byWorkspaceId = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
 
         for (WorkspaceUser workspaceUser : byWorkspaceId) {
-            SqlStatus status = statusRepository.findByEmail(workspaceUser.getUser().getEmail());
-            responseDto.add(new StatusResponseDto(status));
+            responseDto.add(new StatusResponseDto(statusRepository.findTopByUserOrderByUpdatedAtDesc(workspaceUser.getUser())));
         }
 
         return responseDto;
     }
 
-    public ResponseEntity<SendMessageDto> register(UserRequestDto.Register registerDto) {
-        SqlStatus status = new SqlStatus(registerDto.getEmail());
+    @Transactional
+    public ResponseEntity<SendMessageDto> register(User user) {
+        SqlStatus status = new SqlStatus(user);
 
         statusRepository.save(status);
 
         return SendMessageDto.toResponseEntity(SuccessCode.SIGNUP_SUCCESS);
     }
 
+    @Transactional(readOnly = true)
     public StatusResponseDto myStatus(User user) {
-        SqlStatus status = statusRepository.findByEmail(user.getEmail());
-
-        return new StatusResponseDto(status);
+        return new StatusResponseDto(statusRepository.findTopByUserOrderByUpdatedAtDesc(user));
     }
 
+    @Transactional(readOnly = true)
     public List<Long> getWorkspaceList(User user) {
         List<WorkspaceUser> list = workspaceUserRepository.findByUserAndIsShow(user, 1);
         List<Long> longList = new ArrayList<>();

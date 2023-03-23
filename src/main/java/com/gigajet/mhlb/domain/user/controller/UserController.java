@@ -3,6 +3,7 @@ package com.gigajet.mhlb.domain.user.controller;
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.domain.status.service.StatusService;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
+import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.service.OAuthService;
 import com.gigajet.mhlb.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +38,8 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<SendMessageDto> register(@RequestBody UserRequestDto.Register registerDto) {
-        userService.register(registerDto);
-        return statusService.register(registerDto);
+        User user = userService.register(registerDto);
+        return statusService.register(user);
     }
 
     @PostMapping("/login")

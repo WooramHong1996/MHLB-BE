@@ -59,4 +59,16 @@ public class MypageController {
                                                           @PathVariable Long workspaceId) {
         return mypageService.deleteWorkspace(userDetails.getUser(), workspaceId);
     }
+
+    @PostMapping("/{workspaceId}/invite")
+    public ResponseEntity<SendMessageDto> inviteWorkspace(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                          @PathVariable Long workspaceId) {
+        return mypageService.inviteWorkspace(userDetails.getUser(), workspaceId);
+    }
+
+    @DeleteMapping("/{workspaceId}/reject")
+    public ResponseEntity<SendMessageDto> rejectWorkspace(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                          @PathVariable Long workspaceId) {
+        return mypageService.rejectWorkspace(userDetails.getUser(), workspaceId);
+    }
 }

@@ -3,6 +3,8 @@ package com.gigajet.mhlb.domain.workspace.service;
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.common.util.S3Handler;
 import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.domain.status.entity.SqlStatus;
+import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceRequestDto;
@@ -41,6 +43,7 @@ public class WorkspaceService {
     private final S3Handler s3Handler;
     private final WorkspaceInviteRepository workspaceInviteRepository;
     private final WorkspaceOrderRepository workspaceOrderRepository;
+    private final SqlStatusRepository statusRepository;
 
     @Transactional(readOnly = true)
     public List<WorkspaceResponseDto.AllList> workspaceAllList(User user) {
@@ -184,6 +187,7 @@ public class WorkspaceService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<WorkspaceResponseDto.OrderList> getOrder(User user) {
         List<WorkspaceResponseDto.OrderList> orderLists = new ArrayList<>();
         List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);
@@ -193,5 +197,25 @@ public class WorkspaceService {
         }
 
         return orderLists;
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkspaceResponseDto.People> getPeople(User user, Long id) {
+        getWorkspaceuser(user, id);
+
+        List<WorkspaceResponseDto.People> peopleList = new ArrayList<>();
+        List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
+
+        peopleList.add(new WorkspaceResponseDto.People(statusRepository.findTopByUserOrderByUpdatedAtDesc(user)));//본인이 가장 먼저 나오게 해야함
+
+        for (WorkspaceUser workspaceUser : workspaceUserList) {
+            if(workspaceUser.getUser().equals(user)){
+                continue;
+            }
+            SqlStatus status = statusRepository.findTopByUserOrderByUpdatedAtDesc(workspaceUser.getUser());
+            peopleList.add(new WorkspaceResponseDto.People(status));
+        }
+
+        return peopleList;
     }
 }

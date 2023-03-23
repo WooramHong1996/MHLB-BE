@@ -8,8 +8,11 @@ import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
+import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceOrder;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
+import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceInviteRepository;
+import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceOrderRepository;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
@@ -22,17 +25,19 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ManagingService {
     private final WorkspaceUserRepository workspaceUserRepository;
-
     private final WorkspaceRepository workspaceRepository;
-
     private final UserRepository userRepository;
-
     private final S3Handler s3Handler;
+
+    private final WorkspaceInviteRepository workspaceInviteRepository;
+
+    private final WorkspaceOrderRepository workspaceOrderRepository;
 
     @Transactional(readOnly = true)
     public ManagingResponseDto.Management management(User user, Long id) {
@@ -91,7 +96,14 @@ public class ManagingService {
     public ResponseEntity<SendMessageDto> deletePeople(User user, Long id, Long userid) {
         checkRole(user, id);
 
-        workspaceUserRepository.deleteByUser_IdAndWorkspace_Id(userid, id);
+        Optional<WorkspaceUser> delete = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(userid, id, 1);
+        if(Optional.empty().isEmpty()){
+            throw new CustomException(ErrorCode.WRONG_USER);
+        }
+        delete.get().updateIsShow();
+
+        Optional<WorkspaceOrder> order = workspaceOrderRepository.findByWorkspaceUserAndIsShow(delete.get(),1);
+        order.get().updateIsShow();
 
         return ResponseEntity.ok(SendMessageDto.builder().message("ok").build());
     }
@@ -125,7 +137,18 @@ public class ManagingService {
             throw new CustomException(ErrorCode.PERMISSION_DINED);
         }
 
-        workspaceRepository.deleteById(id);
+        Optional<Workspace> workspace = workspaceRepository.findByIdAndIsShow(id, 1);
+        workspace.get().updateIsShow();
+
+        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_IdAndIsShow(id,1);
+        for (WorkspaceUser workspaceUser : workspaceUsers) {
+            workspaceUser.updateIsShow();
+
+            workspaceOrderRepository.findByWorkspaceUserAndIsShow(workspaceUser, 1).get().updateIsShow();
+        }
+
+        workspaceInviteRepository.deleteByWorkspace(manager.getWorkspace());
+
         return ResponseEntity.ok(SendMessageDto.builder().message("ok").build());
     }
 

@@ -8,16 +8,16 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class StatusResponseDto {
-    private String email;
+    private Long userId;
     private String status;
 
     public StatusResponseDto(RedisStatus status) {
-        this.email = status.getEmail();
+//        this.userId = status.getEmail();
         this.status = status.getStatus();
     }
 
     public StatusResponseDto(SqlStatus status) {
-        this.email = status.getEmail();
+        this.userId = status.getUser().getId();
         this.status = status.getStatus();
     }
 }

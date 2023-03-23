@@ -49,19 +49,6 @@ public class StatusController {
     @GetMapping(value = "/{id}/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)//sse 시작 요청
     public ResponseEntity<SseEmitter> connect(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) throws IOException {
         statusService.checkUser(userDetails.getUser(), id);
-
-        SseEmitter emitter = new SseEmitter();
-
-        sseHandler.add(id);
-
-        try {
-            emitter.send(SseEmitter.event()
-                    .name("connect")
-                    .data("connect success"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return ResponseEntity.ok(emitter);
+        return ResponseEntity.ok(sseHandler.add(id));
     }
 }
