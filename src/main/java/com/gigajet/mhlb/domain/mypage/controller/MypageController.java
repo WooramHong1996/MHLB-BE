@@ -30,6 +30,11 @@ public class MypageController {
         return mypageService.workspaceInfo(userDetails.getUser());
     }
 
+    @GetMapping("/image")
+    public MypageResponseDto.Image getImage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return mypageService.showImage(userDetails.getUser());
+    }
+
     @PostMapping("/image")
     public MypageResponseDto.Image updateImage(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                @RequestPart MultipartFile userImage) throws IOException {
