@@ -1,5 +1,6 @@
-package com.gigajet.mhlb.config;
+package com.gigajet.mhlb.common.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -7,6 +8,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 @Aspect
+@Slf4j
 @Component
 public class TimeCheckAop {
     /**Around : 실행 전후로 사용할 로직이 있는경우 사용
@@ -39,13 +41,13 @@ public class TimeCheckAop {
 //    @Around("execution(* com.gigajet.mhlb.domain..*(..))")
     public Object timeChecker(ProceedingJoinPoint joinPoint) throws Throwable {
         Long start = System.currentTimeMillis();
-        System.out.println("Start : " + joinPoint.toString());
+        log.info("Start : " + joinPoint.toString());
         try {
             return joinPoint.proceed();
         } finally {
             long end = System.currentTimeMillis();
             long time = end - start;
-            System.out.println("End : " + joinPoint.toString() + " -> " + time + "ms");
+            log.info("End : " + joinPoint.toString() + " -> " + time + "ms");
         }
     }
 }
