@@ -63,6 +63,11 @@ public class MypageService {
         return new MypageResponseDto.AllList(inviteLists, workspaceLists);
     }
 
+    @Transactional(readOnly = true)
+    public MypageResponseDto.Image showImage(User user) {
+        return new MypageResponseDto.Image(user.getImage());
+    }
+
     public MypageResponseDto.Image updateImage(User user, MultipartFile userImage) throws IOException {
         // 디폴트 이미지면 삭제 불가하게
         s3Handler.delete(user.getImage());
