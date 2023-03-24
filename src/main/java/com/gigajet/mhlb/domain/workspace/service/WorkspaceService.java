@@ -206,13 +206,13 @@ public class WorkspaceService {
         List<WorkspaceResponseDto.People> peopleList = new ArrayList<>();
         List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
 
-        peopleList.add(new WorkspaceResponseDto.People(statusRepository.findTopByUserOrderByUpdatedAtDesc(user)));//본인이 가장 먼저 나오게 해야함
+        peopleList.add(new WorkspaceResponseDto.People(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user)));//본인이 가장 먼저 나오게 해야함
 
         for (WorkspaceUser workspaceUser : workspaceUserList) {
             if(workspaceUser.getUser().getId() == user.getId()){
                 continue;
             }
-            SqlStatus status = statusRepository.findTopByUserOrderByUpdatedAtDesc(workspaceUser.getUser());
+            SqlStatus status = statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(workspaceUser.getUser());
             peopleList.add(new WorkspaceResponseDto.People(status));
         }
 

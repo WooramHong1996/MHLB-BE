@@ -21,14 +21,12 @@ public class SqlStatus {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
     private StatusEnum status;
-    private LocalDateTime updatedAt;
     private LocalDate updateDay;
     private LocalTime updateTime;
 
     public SqlStatus(User user) {
         this.user = user;
         this.status = StatusEnum.COB;
-        this.updatedAt = LocalDateTime.now();
         this.updateDay = LocalDate.now();
         this.updateTime = LocalTime.now();
     }
@@ -36,7 +34,6 @@ public class SqlStatus {
     public SqlStatus(User user, StatusRequestDto statusRequestDto) {
         this.user = user;
         this.status = statusRequestDto.getStatus();
-        this.updatedAt = LocalDateTime.now();
         this.updateDay = LocalDate.now();
         this.updateTime = LocalTime.now();
     }
