@@ -5,5 +5,5 @@ import com.gigajet.mhlb.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SqlStatusRepository extends JpaRepository<SqlStatus, Long> {
-    SqlStatus findTopByUserOrderByUpdatedAtDesc(User user);
+    SqlStatus findTopByUserOrderByUpdateDayDescUpdateTimeDesc(User user);
 }
