@@ -1,4 +1,4 @@
-name: Deploy to Docker Registry
+name: Deploy to ECR
 
 on:
   push:
@@ -25,14 +25,22 @@ jobs:
       - name: Build Spring Boot application
         run: ./gradlew bootJar
 
-      - name: Build Docker image and push to registry
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push Docker image to Amazon ECR
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
           tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           build-args: JAR_FILE=./build/libs/*.jar
-          registry: docker.pkg.github.com
-          repository: my-github-username/my-repo-name/my-image-name
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ steps.login-ecr.outputs.registry }}
