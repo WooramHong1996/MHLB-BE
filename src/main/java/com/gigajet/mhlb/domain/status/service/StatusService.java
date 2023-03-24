@@ -27,7 +27,7 @@ public class StatusService {
 
     @Transactional
     public StatusResponseDto statusUpdate(User user, StatusRequestDto statusRequestDto) {
-        if(statusRepository.findTopByUserOrderByUpdatedAtDesc(user).getStatus()==statusRequestDto.getStatus()){
+        if(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user).getStatus()==statusRequestDto.getStatus()){
             throw new CustomException(ErrorCode.STATUS_NOT_CHANGED);
         }
 
@@ -47,7 +47,7 @@ public class StatusService {
         List<WorkspaceUser> byWorkspaceId = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
 
         for (WorkspaceUser workspaceUser : byWorkspaceId) {
-            responseDto.add(new StatusResponseDto(statusRepository.findTopByUserOrderByUpdatedAtDesc(workspaceUser.getUser())));
+            responseDto.add(new StatusResponseDto(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(workspaceUser.getUser())));
         }
 
         return responseDto;
@@ -64,7 +64,7 @@ public class StatusService {
 
     @Transactional(readOnly = true)
     public StatusResponseDto myStatus(User user) {
-        return new StatusResponseDto(statusRepository.findTopByUserOrderByUpdatedAtDesc(user));
+        return new StatusResponseDto(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user));
     }
 
     @Transactional(readOnly = true)
