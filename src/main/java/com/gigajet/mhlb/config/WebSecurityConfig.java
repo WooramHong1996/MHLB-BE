@@ -49,7 +49,9 @@ public class WebSecurityConfig {
 
         http.authorizeRequests()
                 .antMatchers("/api/users/**").permitAll()
-//                .antMatchers("/stomp/chat/**").permitAll()
+                .antMatchers("/inbox/**").permitAll()
+                .antMatchers("/pub/**").permitAll()
+                .antMatchers("/sub/**").permitAll()
                 .anyRequest().authenticated();
 
         http.cors();
