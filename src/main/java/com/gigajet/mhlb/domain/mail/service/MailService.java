@@ -2,6 +2,7 @@ package com.gigajet.mhlb.domain.mail.service;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.domain.mail.dto.MailResponseDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
@@ -11,6 +12,7 @@ import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
@@ -23,6 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.internet.MimeMessage;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -39,7 +44,7 @@ public class MailService {
     @Value("${spring.mail.username}")
     private String myAddress;
 
-    // 비밀번호 찾기 이메일 발송
+    // 비밀번호 찾기 메일 발송
     public ResponseEntity<SendMessageDto> sendMail(String email) {
         userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
 
@@ -65,21 +70,28 @@ public class MailService {
         return SendMessageDto.toResponseEntity(SuccessCode.VALID_EMAIL);
     }
 
-    // 캐시 저장
+    // 캐시 저장 1
     private void saveRandomNumberAndEmail(String randomNumber, String email) {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         valueOperations.set(randomNumber, email, Duration.ofMinutes(10));
     }
 
+    // 캐시 저장 2
     private void saveRandomNumberAndEmail(String randomNumber, WorkspaceInvite workspaceInvite) {
-        SetOperations<String, String> setOperations = redisTemplate.opsForSet();
+        HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
+
+        Map<String, String> map = new HashMap<>(3);
+        map.put("email", workspaceInvite.getEmail());
+        map.put("inviteId", workspaceInvite.getId().toString());
 
         if (workspaceInvite.getUser() == null) {
-            setOperations.add(randomNumber, workspaceInvite.getEmail(), "N");
-            setOperations.getOperations().expire(randomNumber, Duration.ofMinutes(3));
+            map.put("isUser", "N");
+            hashOperations.putAll(randomNumber, map);
+            hashOperations.getOperations().expire(randomNumber, Duration.ofMinutes(3));
         } else {
-            setOperations.add(randomNumber, workspaceInvite.getEmail(), "Y");
-            setOperations.getOperations().expire(randomNumber, Duration.ofMinutes(3));
+            map.put("isUser", "Y");
+            hashOperations.putAll(randomNumber, map);
+            hashOperations.getOperations().expire(randomNumber, Duration.ofMinutes(3));
         }
     }
 
@@ -107,7 +119,7 @@ public class MailService {
         return SendMessageDto.toResponseEntity(SuccessCode.RESET_PASSWORD_SUCCESS);
     }
 
-    // 초대 메일
+    // 워크스페이스 초대 메일 발송
     public void inviteMail(WorkspaceInvite workspaceInvite) {
         String uuid = UUID.randomUUID().toString().replaceAll("-", "");
         saveRandomNumberAndEmail(uuid, workspaceInvite);
@@ -118,13 +130,23 @@ public class MailService {
 
             mimeMessageHelper.setTo(workspaceInvite.getEmail());
             mimeMessageHelper.setFrom(myAddress);
-            mimeMessageHelper.setSubject("핀미에 초대댓서오");
-            mimeMessageHelper.setText("<h1>초대 바들래용?</h1>", true);
+            mimeMessageHelper.setSubject("PIN ME :: 이메일 인증");
+            mimeMessageHelper.setText("<a href='http://localhost:8080/invite-workspace/" + uuid + "'>Workspace 참여</a>", true);
 
             mailSender.send(mimeMessage);
 
         } catch (Exception e) {
             log.error(e.getMessage());
         }
+    }
+
+    // 워크스페이스 초대 인증 코드 유효 검사 및 회원가입 유무 검사
+    public ResponseEntity<MailResponseDto.CheckInviteCode> checkInviteCode(String uuid) {
+        if (Boolean.FALSE.equals(redisTemplate.hasKey(uuid))) {
+            throw new CustomException(ErrorCode.INVALID_CODE);
+        }
+
+        Map<Object, Object> entries = redisTemplate.opsForHash().entries(uuid);
+        return ResponseEntity.ok(new MailResponseDto.CheckInviteCode((String) entries.get("isUser")));
     }
 }
