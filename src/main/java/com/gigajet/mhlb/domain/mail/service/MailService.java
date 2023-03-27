@@ -5,12 +5,14 @@ import com.gigajet.mhlb.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
+import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -21,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.internet.MimeMessage;
 import java.time.Duration;
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -67,7 +68,19 @@ public class MailService {
     // 캐시 저장
     private void saveRandomNumberAndEmail(String randomNumber, String email) {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        valueOperations.set(randomNumber, email, Duration.ofMinutes(3));
+        valueOperations.set(randomNumber, email, Duration.ofMinutes(10));
+    }
+
+    private void saveRandomNumberAndEmail(String randomNumber, WorkspaceInvite workspaceInvite) {
+        SetOperations<String, String> setOperations = redisTemplate.opsForSet();
+
+        if (workspaceInvite.getUser() == null) {
+            setOperations.add(randomNumber, workspaceInvite.getEmail(), "N");
+            setOperations.getOperations().expire(randomNumber, Duration.ofMinutes(3));
+        } else {
+            setOperations.add(randomNumber, workspaceInvite.getEmail(), "Y");
+            setOperations.getOperations().expire(randomNumber, Duration.ofMinutes(3));
+        }
     }
 
     // 비밀번호 찾기 인증 코드 유효 검사
@@ -94,14 +107,16 @@ public class MailService {
         return SendMessageDto.toResponseEntity(SuccessCode.RESET_PASSWORD_SUCCESS);
     }
 
+    // 초대 메일
+    public void inviteMail(WorkspaceInvite workspaceInvite) {
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+        saveRandomNumberAndEmail(uuid, workspaceInvite);
 
-    public void inviteMail(String email) {
-        //유저 없는거 확인 하고 왓서오
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         try {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
-            mimeMessageHelper.setTo(email);
+            mimeMessageHelper.setTo(workspaceInvite.getEmail());
             mimeMessageHelper.setFrom(myAddress);
             mimeMessageHelper.setSubject("핀미에 초대댓서오");
             mimeMessageHelper.setText("<h1>초대 바들래용?</h1>", true);
