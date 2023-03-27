@@ -2,11 +2,17 @@ package com.gigajet.mhlb.domain.user.dto;
 
 import lombok.Getter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+
 public class UserRequestDto {
+//    패스워드 - 8글자 이상 20글자 미만, 알파벳 대문자, 소문자, 숫자 필수 포함 - regex : /[0-9]/g , /[a-z]/g , /[A-Z]/g
 
     @Getter
     public static class CheckEmail {
 
+        @NotBlank(message = "값이 입력되지 않음")
+        @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "잘못된 형식의 이메일")
         private String email;
 
     }
@@ -14,8 +20,11 @@ public class UserRequestDto {
     @Getter
     public static class Register {
 
+        @NotBlank(message = "값이 입력되지 않음")
+        @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "잘못된 형식의 이메일")
         private String email;
 
+        @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$", message = "잘못된 형식의 비밀번호")
         private String password;
 
         private String userName;
@@ -31,6 +40,8 @@ public class UserRequestDto {
     @Getter
     public static class Login {
 
+        @NotBlank(message = "값이 입력되지 않음")
+        @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "잘못된 형식의 이메일")
         private String email;
 
         private String password;
@@ -40,6 +51,8 @@ public class UserRequestDto {
     @Getter
     public static class Password {
 
+        @NotBlank(message = "값이 입력되지 않음")
+        @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\\\d)[a-zA-Z\\\\d]{8,20}$", message = "잘못된 형식의 비밀번호")
         private String password;
 
     }
