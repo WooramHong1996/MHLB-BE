@@ -109,8 +109,7 @@ public class WorkspaceService {
         }
 
         for (WorkspaceOrder workspaceOrder : orderList) {
-            workspaceOrder.updateOrder(orderMap.get(workspaceOrder.getWorkspaceUser().getWorkspace().getId()));
-            workspaceOrderRepository.save(workspaceOrder);
+            workspaceOrderRepository.orderUpdate(orderMap.get(workspaceOrder.getWorkspaceUser().getWorkspace().getId()),workspaceOrder.getWorkspaceUser().getId());
         }
 
         return SendMessageDto.toResponseEntity(SuccessCode.ORDER_CHANGE_SUCCESS);
@@ -193,7 +192,7 @@ public class WorkspaceService {
         List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);
 
         for (WorkspaceOrder workspaceOrder : workspaceOrderList) {
-            orderLists.add(new WorkspaceResponseDto.OrderList(workspaceOrder.getWorkspaceUser().getWorkspace()));
+            orderLists.add(new WorkspaceResponseDto.OrderList(workspaceOrder.getWorkspaceUser().getWorkspace(), workspaceOrder.getOrders()));
         }
 
         return orderLists;
@@ -209,7 +208,7 @@ public class WorkspaceService {
         peopleList.add(new WorkspaceResponseDto.People(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user)));//본인이 가장 먼저 나오게 해야함
 
         for (WorkspaceUser workspaceUser : workspaceUserList) {
-            if(workspaceUser.getUser().getId() == user.getId()){
+            if (workspaceUser.getUser().getId() == user.getId()) {
                 continue;
             }
             SqlStatus status = statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(workspaceUser.getUser());

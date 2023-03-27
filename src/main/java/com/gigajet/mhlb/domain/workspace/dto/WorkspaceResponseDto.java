@@ -92,8 +92,9 @@ public class WorkspaceResponseDto {
         private String workspaceTitle;
 
         private String workspaceDesc;
+        private Long orders;
 
-        public OrderList(Workspace workspace) {
+        public OrderList(Workspace workspace, Long orders) {
             this.workspaceId = workspace.getId();
 
             this.workspaceImage = workspace.getImage();
@@ -101,6 +102,7 @@ public class WorkspaceResponseDto {
             this.workspaceTitle = workspace.getTitle();
 
             this.workspaceDesc = workspace.getDescription();
+            this.orders = orders;
         }
     }
 

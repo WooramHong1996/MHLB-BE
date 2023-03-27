@@ -10,8 +10,10 @@ import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
+import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceOrder;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceInviteRepository;
+import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceOrderRepository;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
@@ -34,6 +36,7 @@ public class MypageService {
     private final WorkspaceUserRepository workspaceUserRepository;
     private final WorkspaceInviteRepository workspaceInviteRepository;
     private final WorkspaceRepository workspaceRepository;
+    private final WorkspaceOrderRepository workspaceOrderRepository;
 
     private final S3Handler s3Handler;
 
@@ -114,9 +117,15 @@ public class MypageService {
         }
         Optional<Workspace> workspace= workspaceRepository.findById(workspaceId);
 
-        Optional<WorkspaceUser> workspaceUser= Optional.of(new WorkspaceUser(user, workspace.get()));
+        WorkspaceUser workspaceUser = new WorkspaceUser(user, workspace.get());
 
-        workspaceUserRepository.save(workspaceUser.get());
+        Long count = workspaceUserRepository.countByUserAndIsShow(user, 1);
+
+        WorkspaceOrder workspaceOrder = new WorkspaceOrder(count, workspaceUser);
+
+        workspaceUserRepository.save(workspaceUser);
+
+        workspaceOrderRepository.save(workspaceOrder);
 
         workspaceInviteRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
 
