@@ -20,6 +20,7 @@ import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +46,9 @@ public class WorkspaceService {
     private final WorkspaceOrderRepository workspaceOrderRepository;
     private final SqlStatusRepository statusRepository;
 
+    @Value("{workspace.default.image}")
+    private String defaultImage;
+
     @Transactional(readOnly = true)
     public List<WorkspaceResponseDto.AllList> workspaceAllList(User user) {
 
@@ -64,7 +68,7 @@ public class WorkspaceService {
         String imageUrl = "";
 
         if (image == null) {
-            imageUrl = "https://mhlbbucket.s3.ap-northeast-2.amazonaws.com/ea1f0590-771d-4b25-9f9f-968bae140a7f-trys-ketch-%EB%85%BC%EB%A6%AC%EC%A0%81%EC%9D%B8+%EC%BF%A0%ED%82%A4.png";
+            imageUrl = defaultImage;
         } else {
             imageUrl = s3Handler.upload(image);
         }
