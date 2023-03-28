@@ -19,7 +19,8 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
                 .addEndpoint("/inbox")
-                .setAllowedOrigins("*");
+                .setAllowedOrigins("http://localhost:8080")
+                .setAllowedOrigins("chrome-extension://ggnhohnkfcpcanfekomdkjffnfcjnjam")
+                .withSockJS();
     }
 }
-

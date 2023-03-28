@@ -9,6 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChatMessage {
     private Long id;
-    private Long senderId;
     private String message;
 }
