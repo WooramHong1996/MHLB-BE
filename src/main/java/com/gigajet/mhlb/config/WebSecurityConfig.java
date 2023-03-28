@@ -50,6 +50,7 @@ public class WebSecurityConfig {
         http.authorizeRequests()
                 .antMatchers("/api/users/**").permitAll()
                 .antMatchers("/inbox/**").authenticated()//로그인된사람만 접근가능
+//                .antMatchers("/inbox/**").permitAll()//로그인된사람만 접근가능
 //                .antMatchers("/pub/**").permitAll()
 //                .antMatchers("/sub/**").permitAll()
                 .anyRequest().authenticated();
