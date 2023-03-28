@@ -91,6 +91,7 @@ public class UserService {
         userRepository.save(user);
 
         workspaceUserRepository.save(new WorkspaceUser(user, workspace));
+        workspaceInviteRepository.delete(workspaceInvite);
 
         return user;
     }
