@@ -7,6 +7,7 @@ import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceRequestDto;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceResponseDto;
 import com.gigajet.mhlb.domain.workspace.service.WorkspaceService;
+import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -64,11 +65,8 @@ public class WorkspaceController {
 
     @PostMapping("/{id}/invite")
     public ResponseEntity<SendMessageDto> invite(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @RequestBody WorkspaceRequestDto.Invite email) {
-        Optional<User> invited = workspaceService.invite(userDetails.getUser(), id, email.getEmail());
-
-        if (invited.isEmpty()) {
-            mailService.inviteMail(email.getEmail());
-        }
+        WorkspaceInvite workspaceInvite = workspaceService.invite(userDetails.getUser(), id, email.getEmail());
+        mailService.inviteMail(workspaceInvite);
 
         return SendMessageDto.toResponseEntity(SuccessCode.INVITE_SUCCESS);
     }

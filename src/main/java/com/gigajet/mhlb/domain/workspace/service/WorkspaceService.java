@@ -116,39 +116,36 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public Optional<User> invite(User user, Long id, String email) {
-        Optional<WorkspaceUser> workspace = getWorkspaceuser(user, id);
+    public WorkspaceInvite invite(User user, Long id, String invitedUserEmail) {
+        WorkspaceUser managerUser = getWorkspaceuser(user, id);
 
-        Optional<WorkspaceInvite> checkInvite = workspaceInviteRepository.findByWorkspaceAndEmail(workspace.get().getWorkspace(), email);
+        Optional<WorkspaceInvite> checkInvite = workspaceInviteRepository.findByWorkspaceAndEmail(managerUser.getWorkspace(), invitedUserEmail);
+        // 기존에 초대 한 사람인지 확인
         if (checkInvite.isPresent()) {
-            throw new CustomException(ErrorCode.ALREADY_INVITED);//기존에 초대 한 사람인지 확인
+            return checkInvite.get();
+        } else {
+            // 해당 유저가 회원가입 되어있는지 먼저 확인
+            Optional<User> invitedUser = userRepository.findByEmail(invitedUserEmail);
+
+            if (invitedUser.isEmpty()) {
+                return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, managerUser.getWorkspace()));
+            } else {
+                if (workspaceUserRepository.findByUserAndWorkspace(invitedUser.get(), managerUser.getWorkspace()).isPresent()) {
+                    throw new CustomException(ErrorCode.ALREADY_INVITED);
+                }
+
+                return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, invitedUser.get(), managerUser.getWorkspace()));
+            }
         }
-
-        Optional<User> invited = userRepository.findByEmail(email);//해당 유저가 회원가입 되어있는지 먼저 확인
-
-        if (invited.isEmpty()) {//회원가입 되어있지 않으면 그대로 반환 후 메일서비스로 넘김
-            WorkspaceInvite workspaceInvite = new WorkspaceInvite(email, workspace.get().getWorkspace());
-            workspaceInviteRepository.save(workspaceInvite);
-            return invited;
-        }
-
-        Optional<WorkspaceUser> workspaceUser = workspaceUserRepository.findByUserAndWorkspace(invited.get(), workspace.get().getWorkspace());
-        if (workspaceUser.isPresent()) {//워크스페이스에 가입된 유저인지 확인
-            throw new CustomException(ErrorCode.WRONG_USER);
-        }
-
-        WorkspaceInvite workspaceInvite = new WorkspaceInvite(email, invited.get(), workspace.get().getWorkspace());
-        workspaceInviteRepository.save(workspaceInvite);
-        return invited;
     }
 
     @Transactional(readOnly = true)
     public List<WorkspaceResponseDto.Invite> getInvite(User user, Long id) {
-        Optional<WorkspaceUser> workspaceUser = getWorkspaceuser(user, id);
-        checkrole(workspaceUser);
+        WorkspaceUser workspaceUser = getWorkspaceuser(user, id);
+        checkRole(workspaceUser);
 
         List<WorkspaceResponseDto.Invite> inviteList = new ArrayList<>();
-        List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByWorkspaceOrderByIdDesc(workspaceUser.get().getWorkspace());
+        List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByWorkspaceOrderByIdDesc(workspaceUser.getWorkspace());
 
         for (WorkspaceInvite workspaceInvite : workspaceInviteList) {
             inviteList.add(new WorkspaceResponseDto.Invite(workspaceInvite));
@@ -159,8 +156,8 @@ public class WorkspaceService {
 
     @Transactional
     public ResponseEntity<SendMessageDto> deleteInvite(User user, Long id, Long inviteid) {
-        Optional<WorkspaceUser> workspaceUser = getWorkspaceuser(user, id);
-        checkrole(workspaceUser);
+        WorkspaceUser workspaceUser = getWorkspaceuser(user, id);
+        checkRole(workspaceUser);
 
         Optional<WorkspaceInvite> workspaceInvite = workspaceInviteRepository.findByWorkspace_IdAndId(id, inviteid);
         if (workspaceInvite.isEmpty()) {
@@ -172,16 +169,16 @@ public class WorkspaceService {
         return SendMessageDto.toResponseEntity(SuccessCode.CANCLE_INVITE);
     }
 
-    private Optional<WorkspaceUser> getWorkspaceuser(User user, Long id) {
+    private WorkspaceUser getWorkspaceuser(User user, Long id) {
         Optional<WorkspaceUser> workspace = workspaceUserRepository.findByUserAndWorkspaceId(user, id);//유저가 워크스페이스에 가입 되어있는지 확인
         if (workspace.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
-        return workspace;
+        return workspace.get();
     }
 
-    private void checkrole(Optional<WorkspaceUser> workspaceUser) {
-        if (workspaceUser.get().getRole() == MEMBER) {
+    private void checkRole(WorkspaceUser workspaceUser) {
+        if (workspaceUser.getRole() == MEMBER) {
             throw new CustomException(ErrorCode.WRONG_USER);
         }
     }
