@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -27,7 +26,6 @@ import javax.mail.internet.MimeMessage;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -148,5 +146,14 @@ public class MailService {
 
         Map<Object, Object> entries = redisTemplate.opsForHash().entries(uuid);
         return ResponseEntity.ok(new MailResponseDto.CheckInviteCode((String) entries.get("isUser")));
+    }
+
+    // 워크스페이스 초대 인증 코드로 유저 정보 반환
+    public Map<Object, Object> getUserInfo(String uuid) {
+        if (Boolean.FALSE.equals(redisTemplate.hasKey(uuid))) {
+            throw new CustomException(ErrorCode.INVALID_CODE);
+        }
+
+        return redisTemplate.opsForHash().entries(uuid);
     }
 }
