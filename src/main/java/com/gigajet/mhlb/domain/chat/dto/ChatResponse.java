@@ -36,4 +36,15 @@ public class ChatResponse {
             this.message = chatRoom.getLastMessage();
         }
     }
+
+    @Getter
+    public static class Chat {
+        private Long senderId;
+        private String message;
+
+        public Chat(Long senderId, String message) {
+            this.message = message;
+            this.senderId = senderId;
+        }
+    }
 }

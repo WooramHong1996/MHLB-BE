@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -68,7 +65,8 @@ public class ChatService {
 
             ChatRoom inbox = ChatRoom.builder()
                     .inBoxId(inboxId)
-                    .userList(userIdList)
+                    .userAndMessages(userIdList)
+                    .userSet(userIdSet)
                     .workspaceId(workspaceId)
                     .build();
             chatRoomRepository.save(inbox);
@@ -78,6 +76,8 @@ public class ChatService {
     }
 
     public List<ChatResponse.Inbox> getInbox(User user, Long workspaceId) {
+        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+
         List<ChatResponse.Inbox> response = new ArrayList<>();
         List<ChatRoom> list = chatRoomRepository.findByWorkspaceIdAndUserSetInOrderByLastChat(workspaceId, user.getId());
 
@@ -90,7 +90,26 @@ public class ChatService {
                 response.add(new ChatResponse.Inbox(chatRoom, opponents.get(), 0));
             }
         }
-
         return response;
+    }
+
+    public List<ChatResponse.Chat> getChat(User user, Long workspaceId, Long opponentsId) {
+        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+
+        userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        List<ChatResponse.Chat> chatList = new ArrayList<>();
+
+        HashSet<Long> userIdSet = new HashSet<>();
+        userIdSet.add(user.getId());
+        userIdSet.add(opponentsId);
+
+        ChatRoom chatRoom = chatRoomRepository.findByUserSetAndWorkspaceId(userIdSet, workspaceId);
+
+        List<Chat> messageList = chatRepository.findByInBoxId(chatRoom.getInBoxId());
+        for (Chat chat : messageList) {
+            chatList.add(new ChatResponse.Chat(chat.getSenderId(), chat.getMessage()));
+        }
+        return chatList;
     }
 }

@@ -35,4 +35,9 @@ public class ChatController {
     public List<ChatResponse.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId) {
         return chatService.getInbox(userDetails.getUser(), workspaceId);
     }
+
+    @GetMapping("/{workspaceId}/{userId}")
+    public List<ChatResponse.Chat> getChat(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @PathVariable Long userId) {
+        return chatService.getChat(userDetails.getUser(), workspaceId, userId);
+    }
 }

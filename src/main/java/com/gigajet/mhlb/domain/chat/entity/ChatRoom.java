@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Id;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 
 @Data
@@ -27,8 +28,8 @@ public class ChatRoom {
     private String lastMessage;
 
     @Builder
-    public ChatRoom(List<Long> userList, Long workspaceId, String inBoxId) {
-        this.userList = userList;
+    public ChatRoom(HashSet<Long> userSet, Long workspaceId, String inBoxId, List<UserAndMessage> userAndMessages) {
+        this.userSet = userSet;
         this.workspaceId = workspaceId;
         this.inBoxId = inBoxId;
         this.lastChat = LocalDateTime.now();
