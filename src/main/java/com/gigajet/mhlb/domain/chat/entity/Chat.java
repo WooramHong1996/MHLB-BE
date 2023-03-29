@@ -20,12 +20,13 @@ public class Chat  {
     private String inBoxId;
     private int unread;
     private LocalDateTime createdAt;
-//    @Builder
-//    public Chat(Long workspaceId, String message,Long senderId, String inBoxId) {
-//        this.workspaceId = workspaceId;
-//        this.message = message;
-//        this.senderId = senderId;
-//        this.inBoxId = inBoxId;
-//        this.unread = 1;
-//    }
+
+    @Builder
+    public Chat(Long workspaceId, String message,Long senderId, String inBoxId) {
+        this.workspaceId = workspaceId;
+        this.message = message;
+        this.senderId = senderId;
+        this.inBoxId = inBoxId;
+        this.unread = 1;
+    }
 }

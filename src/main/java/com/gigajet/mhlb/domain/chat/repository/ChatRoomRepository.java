@@ -9,6 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
-//    ChatRoom findByUserListAndWorkspaceId(List<Long> userIdList, Long workspaceId);
-//    Page<ChatRoom> findByWorkspaceIdAndUserListIn(Pageable pageable, Long workspaceId, List<Long> list);
+    ChatRoom findByUserListAndWorkspaceId(List<Long> userIdList, Long workspaceId);
+    ChatRoom findByInBoxId(String inboxId);
+//    List<ChatRoom> findByWorkspaceIdAndUserListIn(Long workspaceId, List<Long> list);
+//    List<ChatRoom> findByWorkspaceIdAndUserListIn(Long workspaceId, Long userId);
+    List<ChatRoom> findByWorkspaceIdAndUserListInOrderByLastChatDesc(Long id,Long userId);
 }

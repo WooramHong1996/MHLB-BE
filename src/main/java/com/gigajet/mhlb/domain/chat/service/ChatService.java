@@ -6,6 +6,11 @@ import com.gigajet.mhlb.domain.chat.entity.Chat;
 import com.gigajet.mhlb.domain.chat.entity.ChatRoom;
 import com.gigajet.mhlb.domain.chat.repository.ChatRepository;
 import com.gigajet.mhlb.domain.chat.repository.ChatRoomRepository;
+import com.gigajet.mhlb.domain.user.entity.User;
+import com.gigajet.mhlb.domain.user.repository.UserRepository;
+import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
+import com.gigajet.mhlb.exception.CustomException;
+import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,46 +46,51 @@ public class ChatService {
         chatRepository.save(chat);
     }
 
+    public ChatResponse.GetUuid getUuid(User user, Long workspaceId, Long opponentsId) {
+        if (user.getId() == opponentsId) {
+            throw new CustomException(ErrorCode.WRONG_USER);
+        }
+        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
+        List<Long> userIdList = new ArrayList<>();
+        if (user.getId() > opponentsId) {
+            userIdList.add(user.getId());
+            userIdList.add(opponentsId);
+        } else {
+            userIdList.add(opponentsId);
+            userIdList.add(user.getId());
+        }
 
-//    @Transactional(readOnly = true)//이전메시지 불러오기 레거시
-//    public Flux<Chat> getMsg(User user, Long userId, Long workspaceId) {
-//        List<Long> userIdList = new ArrayList<>();
-//        if(user.getId()>userId) {
-//            userIdList.add(user.getId());
-//            userIdList.add(userId);
-//        }else{
-//            userIdList.add(userId);
-//            userIdList.add(user.getId());
-//        }
-//        ChatRoom chatRoom = chatMemRepository.findByUserListAndWorkspaceId(userIdList, workspaceId);
-//
-//        return chatRepository.findByWorkspaceIdAndRoomNum(chatRoom.getWorkspaceId(), chatRoom.getRoomNum()).subscribeOn(Schedulers.boundedElastic());
-//    }
+        ChatRoom chatRoom = chatRoomRepository.findByUserListAndWorkspaceId(userIdList, workspaceId);
+        if (chatRoom == null) {
+            String inboxId = String.valueOf(UUID.randomUUID());
 
-//    @Transactional//방 불러오기 레거시
-//    public ChatResponse setMsg(User user, Long userId, Long workspaceId, ChatRequest chatRequest) {
-//        List<Long> userIdList = new ArrayList<>();
-//        if(user.getId()>userId) {
-//            userIdList.add(user.getId());
-//            userIdList.add(userId);
-//        }else{
-//            userIdList.add(userId);
-//            userIdList.add(user.getId());
-//        }
-//        ChatRoom chatRoom = chatMemRepository.findByUserListAndWorkspaceId(userIdList, workspaceId);
-//
-//            Chat chat = Chat.builder()
-//                    .message(chatRequest.getMessage())
-//                    .sender(user.getEmail())
-//                    .workspaceId(workspaceId)
-//                    .roomNum(chatRoom.getRoomNum())
-//                    .build();
-//            chat.setCreatedAt(LocalDateTime.now());
-//
-//            chatRepository.insert(chat).subscribe(System.out::println);
-//
-//            return new ChatResponse(chat);
-//
-//    }
+            ChatRoom inbox = ChatRoom.builder()
+                    .inBoxId(inboxId)
+                    .userList(userIdList)
+                    .workspaceId(workspaceId)
+                    .build();
+            chatRoomRepository.save(inbox);
+            return new ChatResponse.GetUuid(inbox.getInBoxId());
+        }
+        return new ChatResponse.GetUuid(chatRoom.getInBoxId());
+    }
+
+    public List<ChatResponse.Inbox> getInbox(User user, Long workspaceId) {
+        List<ChatResponse.Inbox> response = new ArrayList<>();
+        List<ChatRoom> list = chatRoomRepository.findByWorkspaceIdAndUserListInOrderByLastChatDesc(workspaceId, user.getId());
+
+        for (ChatRoom chatRoom : list) {
+            for (Long aLong : chatRoom.getUserList()) {
+                if(user.getId()==aLong){
+                    continue;
+                }
+                Optional<User> opponents = userRepository.findById(aLong);
+                response.add(new ChatResponse.Inbox(chatRoom,opponents.get(),0));
+            }
+        }
+
+        return response;
+    }
 }

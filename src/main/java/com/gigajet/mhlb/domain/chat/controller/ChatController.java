@@ -3,12 +3,14 @@ package com.gigajet.mhlb.domain.chat.controller;
 import com.gigajet.mhlb.domain.chat.dto.ChatRequestDto;
 import com.gigajet.mhlb.domain.chat.dto.ChatResponse;
 import com.gigajet.mhlb.domain.chat.service.ChatService;
+import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +26,13 @@ public class ChatController {
         sendingOperations.convertAndSend("/sub/" + chat.getUuid(), chat);
     }
 
-//    @PostMapping("/api/inbox/{workspaceId}")
-//    public
+    @PostMapping("/{workspaceId}")
+    public ChatResponse.GetUuid findChatRoom(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @RequestBody ChatRequestDto.UserId userId) {
+        return chatService.getUuid(userDetails.getUser(), workspaceId, userId.getUserId());
+    }
+
+    @GetMapping("/{workspaceId}")
+    public List<ChatResponse.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId) {
+        return chatService.getInbox(userDetails.getUser(),workspaceId);
+    }
 }

@@ -24,7 +24,6 @@ public enum ErrorCode {
     INVALID_CODE(BAD_REQUEST, "invalid code"),
     STATUS_NOT_CHANGED(BAD_REQUEST,"같은 상태로는 변경할 수 없습니다"),
 
-
     /* 401 UNAUTHORIZED : 인증 실패 */
     INVALID_TOKEN(UNAUTHORIZED, "invalid token"),
     NULL_TOKEN(UNAUTHORIZED, "null token"),
