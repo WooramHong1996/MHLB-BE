@@ -52,7 +52,7 @@ public class StatusSseHandler {
         List<SseEmitter> emitterList = emitters.get(workspaceId);
 
         if (emitterList == null) {
-            throw new CustomException(ErrorCode.PERMISSION_DINED);
+            return;
         }
 
         for (SseEmitter emitter : emitterList) {
