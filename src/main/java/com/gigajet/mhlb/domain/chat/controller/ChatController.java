@@ -14,13 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/inbox")
 public class ChatController {
+    private final ChatService chatService;
     private final SimpMessageSendingOperations sendingOperations;
 
     @MessageMapping("/inbox")//메시지매핑은 리퀘스트매핑 못받음
-    public void sendMsg(ChatRequestDto message) {
-        chatService.sendMsg(message);
+    public void sendMsg(ChatRequestDto.Chat chat) {
+        chatService.sendMsg(chat);
 
-        sendingOperations.convertAndSend("/sub/" + message.getUuid(), message);
+        sendingOperations.convertAndSend("/sub/" + chat.getUuid(), chat);
     }
 
 //    @PostMapping("/api/inbox/{workspaceId}")

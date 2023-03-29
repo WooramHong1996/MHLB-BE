@@ -18,7 +18,7 @@ public class Chat  {
     private String message;
     private Long workspaceId;
     private String inBoxId;
-    private Integer unread;
+    private int unread;
     private LocalDateTime createdAt;
 //    @Builder
 //    public Chat(Long workspaceId, String message,Long senderId, String inBoxId) {

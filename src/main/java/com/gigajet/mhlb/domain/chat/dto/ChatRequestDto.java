@@ -4,9 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
 public class ChatRequestDto {
-    private String uuid;
-    private Long workspaceId;
-    private String message;
+
+    @Getter
+    public static class UserId{
+        private Long userId;
+    }
+
+    @Getter
+    public static class Chat {
+        private String uuid;
+        private Long workspaceId;
+        private Long senderId;
+        private String message;
+    }
 }

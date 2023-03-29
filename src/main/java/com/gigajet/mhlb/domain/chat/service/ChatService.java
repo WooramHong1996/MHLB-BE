@@ -10,18 +10,35 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class ChatService {
 
-//    private final ChatRepository chatRepository;
+    private final ChatRepository chatRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final WorkspaceUserRepository workspaceUserRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public ChatResponse sendMsg(ChatRequestDto message){
-//        chatRepository.save(new Chat());
-        chatRoomRepository.save(new ChatRoom());
-        return null;
+    public void sendMsg(ChatRequestDto.Chat message) {
+        Chat chat = Chat.builder()
+                .inBoxId(message.getUuid())
+                .senderId(message.getSenderId())
+                .workspaceId(message.getWorkspaceId())
+                .message(message.getMessage())
+                .build();
+
+        ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
+        chat.setCreatedAt(LocalDateTime.now());
+        chatRoom.update(chat);
+        chatRoomRepository.save(chatRoom);
+        chatRepository.save(chat);
     }
 
 
