@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 public class ChatRequestDto {
 
     @Getter
-    public static class UserId{
+    public static class UserId {
         private Long userId;
     }
 
@@ -15,7 +15,6 @@ public class ChatRequestDto {
     public static class Chat {
         private String uuid;
         private Long workspaceId;
-        private Long senderId;
         private String message;
     }
 }

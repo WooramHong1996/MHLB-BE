@@ -23,7 +23,7 @@ public class ChatController {
     public void sendMsg(ChatRequestDto.Chat chat) {
         chatService.sendMsg(chat);
 
-        sendingOperations.convertAndSend("/sub/" + chat.getUuid(), chat);
+        sendingOperations.convertAndSend("/sub/inbox/" + chat.getUuid(), chat);
     }
 
     @PostMapping("/{workspaceId}")
@@ -33,6 +33,6 @@ public class ChatController {
 
     @GetMapping("/{workspaceId}")
     public List<ChatResponse.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId) {
-        return chatService.getInbox(userDetails.getUser(),workspaceId);
+        return chatService.getInbox(userDetails.getUser(), workspaceId);
     }
 }

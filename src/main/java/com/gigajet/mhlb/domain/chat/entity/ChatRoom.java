@@ -16,7 +16,9 @@ public class ChatRoom {
     @Id
     private String id;
 
+    private HashSet<Long> userSet;
     private List<Long> userList;
+    private List<UserAndMessage> userAndMessages;
 
     private Long workspaceId;
 
@@ -30,11 +32,12 @@ public class ChatRoom {
         this.workspaceId = workspaceId;
         this.inBoxId = inBoxId;
         this.lastChat = LocalDateTime.now();
+        this.userAndMessages = userAndMessages;
         this.lastMessage = "아직 대화가 없습니다";
 
     }
 
-    public void update(Chat chat){
+    public void update(Chat chat) {
         this.lastMessage = chat.getMessage();
         this.lastChat = chat.getCreatedAt();
     }
