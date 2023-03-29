@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ChatResponse {
     @Getter
-    public static class GetUuid{
+    public static class GetUuid {
         private String uuid;
 
         public GetUuid(String uuid) {
@@ -20,7 +20,7 @@ public class ChatResponse {
     }
 
     @Getter
-    public static class Inbox{
+    public static class Inbox {
         private String uuid;
         private String userImage;
         private String userName;
@@ -28,7 +28,7 @@ public class ChatResponse {
         private String message;
         private Integer unreadMessages;
 
-        public Inbox(ChatRoom chatRoom, User user, Integer count){
+        public Inbox(ChatRoom chatRoom, User user, Integer count) {
             this.uuid = chatRoom.getInBoxId();
             this.userImage = user.getImage();
             this.userName = user.getUsername();
