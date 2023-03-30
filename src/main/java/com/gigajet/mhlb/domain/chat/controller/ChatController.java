@@ -1,7 +1,7 @@
 package com.gigajet.mhlb.domain.chat.controller;
 
 import com.gigajet.mhlb.domain.chat.dto.ChatRequestDto;
-import com.gigajet.mhlb.domain.chat.dto.ChatResponse;
+import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
 import com.gigajet.mhlb.domain.chat.service.ChatService;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -27,17 +27,17 @@ public class ChatController {
     }
 
     @PostMapping("/{workspaceId}")
-    public ChatResponse.GetUuid findChatRoom(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @RequestBody ChatRequestDto.UserId userId) {
+    public ChatResponseDto.GetUuid findChatRoom(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @RequestBody ChatRequestDto.UserId userId) {
         return chatService.getUuid(userDetails.getUser(), workspaceId, userId.getUserId());
     }
 
     @GetMapping("/{workspaceId}")
-    public List<ChatResponse.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId) {
+    public List<ChatResponseDto.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId) {
         return chatService.getInbox(userDetails.getUser(), workspaceId);
     }
 
     @GetMapping("/{workspaceId}/{userId}")
-    public List<ChatResponse.Chat> getChat(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @PathVariable Long userId) {
+    public List<ChatResponseDto.Chat> getChat(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @PathVariable Long userId) {
         return chatService.getChat(userDetails.getUser(), workspaceId, userId);
     }
 }

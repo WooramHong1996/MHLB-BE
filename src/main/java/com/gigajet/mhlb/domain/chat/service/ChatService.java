@@ -1,7 +1,7 @@
 package com.gigajet.mhlb.domain.chat.service;
 
 import com.gigajet.mhlb.domain.chat.dto.ChatRequestDto;
-import com.gigajet.mhlb.domain.chat.dto.ChatResponse;
+import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
 import com.gigajet.mhlb.domain.chat.entity.Chat;
 import com.gigajet.mhlb.domain.chat.entity.ChatRoom;
 import com.gigajet.mhlb.domain.chat.entity.UserAndMessage;
@@ -43,7 +43,7 @@ public class ChatService {
         chatRepository.save(chat);
     }
 
-    public ChatResponse.GetUuid getUuid(User user, Long workspaceId, Long opponentsId) {
+    public ChatResponseDto.GetUuid getUuid(User user, Long workspaceId, Long opponentsId) {
         if (user.getId() == opponentsId) {
             throw new CustomException(ErrorCode.WRONG_USER);
         }
@@ -70,15 +70,15 @@ public class ChatService {
                     .workspaceId(workspaceId)
                     .build();
             chatRoomRepository.save(inbox);
-            return new ChatResponse.GetUuid(inbox.getInBoxId());
+            return new ChatResponseDto.GetUuid(inbox.getInBoxId());
         }
-        return new ChatResponse.GetUuid(chatRoom.getInBoxId());
+        return new ChatResponseDto.GetUuid(chatRoom.getInBoxId());
     }
 
-    public List<ChatResponse.Inbox> getInbox(User user, Long workspaceId) {
+    public List<ChatResponseDto.Inbox> getInbox(User user, Long workspaceId) {
         workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
-        List<ChatResponse.Inbox> response = new ArrayList<>();
+        List<ChatResponseDto.Inbox> response = new ArrayList<>();
         List<ChatRoom> list = chatRoomRepository.findByWorkspaceIdAndUserSetInOrderByLastChat(workspaceId, user.getId());
 
         for (ChatRoom chatRoom : list) {
@@ -87,18 +87,18 @@ public class ChatService {
                     continue;
                 }
                 Optional<User> opponents = userRepository.findById(aLong);
-                response.add(new ChatResponse.Inbox(chatRoom, opponents.get(), 0));
+                response.add(new ChatResponseDto.Inbox(chatRoom, opponents.get(), 0));
             }
         }
         return response;
     }
 
-    public List<ChatResponse.Chat> getChat(User user, Long workspaceId, Long opponentsId) {
+    public List<ChatResponseDto.Chat> getChat(User user, Long workspaceId, Long opponentsId) {
         workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
         workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
         userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
-        List<ChatResponse.Chat> chatList = new ArrayList<>();
+        List<ChatResponseDto.Chat> chatList = new ArrayList<>();
 
         HashSet<Long> userIdSet = new HashSet<>();
         userIdSet.add(user.getId());
@@ -108,7 +108,7 @@ public class ChatService {
 
         List<Chat> messageList = chatRepository.findByInBoxId(chatRoom.getInBoxId());
         for (Chat chat : messageList) {
-            chatList.add(new ChatResponse.Chat(chat.getSenderId(), chat.getMessage()));
+            chatList.add(new ChatResponseDto.Chat(chat.getSenderId(), chat.getMessage()));
         }
         return chatList;
     }

@@ -20,9 +20,7 @@ public class ChatRoom {
     private HashSet<Long> userSet;
     private List<Long> userList;
     private List<UserAndMessage> userAndMessages;
-
     private Long workspaceId;
-
     private String inBoxId;
     private LocalDateTime lastChat;
     private String lastMessage;

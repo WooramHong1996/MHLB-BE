@@ -18,7 +18,6 @@ public class Chat  {
     private String message;
     private Long workspaceId;
     private String inBoxId;
-    private int unread;
     private LocalDateTime createdAt;
 
     @Builder
@@ -27,6 +26,5 @@ public class Chat  {
         this.message = message;
         this.senderId = senderId;
         this.inBoxId = inBoxId;
-        this.unread = 1;
     }
 }

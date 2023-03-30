@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
-public class ChatResponse {
+public class ChatResponseDto {
     @Getter
     public static class GetUuid {
         private String uuid;

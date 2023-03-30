@@ -8,8 +8,5 @@ import java.util.List;
 
 @Repository
 public interface ChatRepository extends MongoRepository<Chat, String> {
-//    @Query("{'workspaceId' : ?1, 'roomNum' : ?2}")
-//    Page<Chat> findByWorkspaceIdAndRoomNum(Pageable pageable, Long workspaceId, String inBoxId);
-
     List<Chat> findByInBoxId(String uuid);
 }
