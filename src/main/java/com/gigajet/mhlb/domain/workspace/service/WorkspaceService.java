@@ -110,7 +110,7 @@ public class WorkspaceService {
         }
 
         for (WorkspaceOrder workspaceOrder : orderList) {
-            workspaceOrderRepository.orderUpdate(orderMap.get(workspaceOrder.getWorkspaceUser().getWorkspace().getId()),workspaceOrder.getWorkspaceUser().getId());
+            workspaceOrderRepository.orderUpdate(orderMap.get(workspaceOrder.getWorkspaceUser().getWorkspace().getId()), workspaceOrder.getWorkspaceUser().getId());
         }
 
         return SendMessageDto.toResponseEntity(SuccessCode.ORDER_CHANGE_SUCCESS);
@@ -213,17 +213,18 @@ public class WorkspaceService {
 
         peopleList.sort(new StatusComparator());
 
-        peopleList.add(0,new WorkspaceResponseDto.People(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user)));//본인이 가장 먼저 나오게 해야함
+        peopleList.add(0, new WorkspaceResponseDto.People(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user)));//본인이 가장 먼저 나오게 해야함
 
         return peopleList;
     }
 }
-class StatusComparator implements Comparator<WorkspaceResponseDto.People>{
+
+class StatusComparator implements Comparator<WorkspaceResponseDto.People> {
     @Override
     public int compare(WorkspaceResponseDto.People o1, WorkspaceResponseDto.People o2) {
-        if(o1.getColor()==o2.getColor()){
-            return o1.getUserName().compareTo(o2.getUserName());
+        if (o1.getColor() == o2.getColor()) {
+            return o1.getUserName().toLowerCase().compareTo(o2.getUserName().toLowerCase());
         }
-        return Integer.compare(o1.getColor(),o2.getColor());
+        return Integer.compare(o1.getColor(), o2.getColor());
     }
 }
