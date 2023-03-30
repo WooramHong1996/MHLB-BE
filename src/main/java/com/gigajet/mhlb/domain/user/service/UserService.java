@@ -1,12 +1,12 @@
 package com.gigajet.mhlb.domain.user.service;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
+import com.gigajet.mhlb.common.util.AESUtil;
 import com.gigajet.mhlb.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
-import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceInviteRepository;
@@ -16,7 +16,6 @@ import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +31,7 @@ public class UserService {
     private final WorkspaceInviteRepository workspaceInviteRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
 
-    private final PasswordEncoder passwordEncoder;
+    private final AESUtil aesUtil;
     private final JwtUtil jwtUtil;
 
     @Transactional(readOnly = true)
@@ -58,7 +57,7 @@ public class UserService {
             throw new CustomException(ErrorCode.DUPLICATE_EMAIL);
         }
 
-        String password = passwordEncoder.encode(registerDto.getPassword());
+        String password = aesUtil.encrypt(registerDto.getPassword());
 
         User user = new User(registerDto, password);
 
@@ -85,7 +84,7 @@ public class UserService {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
 
-        String password = passwordEncoder.encode(registerDto.getPassword());
+        String password = aesUtil.encrypt(registerDto.getPassword());
 
         User user = new User(registerDto, password);
         userRepository.save(user);
@@ -100,7 +99,7 @@ public class UserService {
     public ResponseEntity<SendMessageDto> login(UserRequestDto.Login loginDto, HttpServletResponse response) {
         User user = userRepository.findByEmail(loginDto.getEmail()).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
 
-        if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
+        if (!aesUtil.encrypt(loginDto.getPassword()).equals(user.getPassword())) {
             throw new CustomException(ErrorCode.WRONG_PASSWORD);
         }
 
