@@ -18,9 +18,10 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
-                .addEndpoint("/inbox")
-                .setAllowedOrigins("http://localhost:8080")
-                .setAllowedOrigins("chrome-extension://ggnhohnkfcpcanfekomdkjffnfcjnjam")
+                .addEndpoint("/stomp/chat")
+//                .setAllowedOriginPatterns("*")
+                .setAllowedOriginPatterns("http://localhost:3000")
+                .setAllowedOriginPatterns("chrome-extension://ggnhohnkfcpcanfekomdkjffnfcjnjam")
                 .withSockJS();
     }
 }

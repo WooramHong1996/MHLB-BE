@@ -27,7 +27,6 @@ public enum ErrorCode {
     STATUS_NOT_EXIST(BAD_REQUEST, "존재하지 않는 상태값 입니다"),
     INVALID_INVITATION(BAD_REQUEST, "Invalid invitation"),
 
-
     /* 401 UNAUTHORIZED : 인증 실패 */
     INVALID_TOKEN(UNAUTHORIZED, "invalid token"),
     NULL_TOKEN(UNAUTHORIZED, "null token"),
