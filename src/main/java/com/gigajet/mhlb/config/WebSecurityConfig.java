@@ -49,7 +49,6 @@ public class WebSecurityConfig {
 
         http.authorizeRequests()
                 .antMatchers("/api/users/**").permitAll()
-//                .antMatchers("/stomp/chat/**").authenticated()//로그인된사람만 접근가능
                 .antMatchers("/stomp/chat/**").permitAll()
                 .anyRequest().authenticated();
 //                .anyRequest().permitAll();
