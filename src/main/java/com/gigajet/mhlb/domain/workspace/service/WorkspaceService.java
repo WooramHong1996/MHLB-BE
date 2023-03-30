@@ -121,7 +121,7 @@ public class WorkspaceService {
 
     @Transactional
     public WorkspaceInvite invite(User user, Long id, String invitedUserEmail) {
-        WorkspaceUser managerUser = getWorkspaceuser(user, id);
+        WorkspaceUser managerUser = getWorkspaceUser(user, id);
 
         Optional<WorkspaceInvite> checkInvite = workspaceInviteRepository.findByWorkspaceAndEmail(managerUser.getWorkspace(), invitedUserEmail);
         // 기존에 초대 한 사람인지 확인
@@ -145,7 +145,7 @@ public class WorkspaceService {
 
     @Transactional(readOnly = true)
     public List<WorkspaceResponseDto.Invite> getInvite(User user, Long id) {
-        WorkspaceUser workspaceUser = getWorkspaceuser(user, id);
+        WorkspaceUser workspaceUser = getWorkspaceUser(user, id);
         checkRole(workspaceUser);
 
         List<WorkspaceResponseDto.Invite> inviteList = new ArrayList<>();
@@ -159,21 +159,21 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public ResponseEntity<SendMessageDto> deleteInvite(User user, Long id, Long inviteid) {
-        WorkspaceUser workspaceUser = getWorkspaceuser(user, id);
+    public ResponseEntity<SendMessageDto> deleteInvite(User user, Long id, Long inviteId) {
+        WorkspaceUser workspaceUser = getWorkspaceUser(user, id);
         checkRole(workspaceUser);
 
-        Optional<WorkspaceInvite> workspaceInvite = workspaceInviteRepository.findByWorkspace_IdAndId(id, inviteid);
+        Optional<WorkspaceInvite> workspaceInvite = workspaceInviteRepository.findByWorkspace_IdAndId(id, inviteId);
         if (workspaceInvite.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_USER);
         }
 
-        workspaceInviteRepository.deleteById(inviteid);
+        workspaceInviteRepository.deleteById(inviteId);
 
         return SendMessageDto.toResponseEntity(SuccessCode.CANCLE_INVITE);
     }
 
-    private WorkspaceUser getWorkspaceuser(User user, Long id) {
+    private WorkspaceUser getWorkspaceUser(User user, Long id) {
         Optional<WorkspaceUser> workspace = workspaceUserRepository.findByUserAndWorkspaceId(user, id);//유저가 워크스페이스에 가입 되어있는지 확인
         if (workspace.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
@@ -201,7 +201,7 @@ public class WorkspaceService {
 
     @Transactional(readOnly = true)
     public List<WorkspaceResponseDto.People> getPeople(User user, Long id) {
-        getWorkspaceuser(user, id);
+        getWorkspaceUser(user, id);
 
         List<WorkspaceResponseDto.People> peopleList = new ArrayList<>();
         List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);

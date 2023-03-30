@@ -4,11 +4,9 @@ import com.gigajet.mhlb.domain.status.dto.StatusRequestDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Getter
@@ -31,10 +29,10 @@ public class SqlStatus {
         this.updateTime = LocalTime.now();
     }
 
-    public SqlStatus(User user, StatusRequestDto statusRequestDto) {
+    public SqlStatus(User user, StatusRequestDto status) {
         this.user = user;
-        this.status = statusRequestDto.getStatus();
         this.updateDay = LocalDate.now();
         this.updateTime = LocalTime.now();
+        this.status = status.textOf();
     }
 }
