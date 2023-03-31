@@ -27,10 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.ADMIN;
 import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.MEMBER;
@@ -113,7 +110,7 @@ public class WorkspaceService {
         }
 
         for (WorkspaceOrder workspaceOrder : orderList) {
-            workspaceOrderRepository.orderUpdate(orderMap.get(workspaceOrder.getWorkspaceUser().getWorkspace().getId()),workspaceOrder.getWorkspaceUser().getId());
+            workspaceOrderRepository.orderUpdate(orderMap.get(workspaceOrder.getWorkspaceUser().getWorkspace().getId()), workspaceOrder.getWorkspaceUser().getId());
         }
 
         return SendMessageDto.toResponseEntity(SuccessCode.ORDER_CHANGE_SUCCESS);
@@ -206,8 +203,6 @@ public class WorkspaceService {
         List<WorkspaceResponseDto.People> peopleList = new ArrayList<>();
         List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
 
-        peopleList.add(new WorkspaceResponseDto.People(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user)));//본인이 가장 먼저 나오게 해야함
-
         for (WorkspaceUser workspaceUser : workspaceUserList) {
             if (workspaceUser.getUser().getId() == user.getId()) {
                 continue;
@@ -216,6 +211,20 @@ public class WorkspaceService {
             peopleList.add(new WorkspaceResponseDto.People(status));
         }
 
+        peopleList.sort(new StatusComparator());
+
+        peopleList.add(0, new WorkspaceResponseDto.People(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user)));//본인이 가장 먼저 나오게 해야함
+
         return peopleList;
+    }
+}
+
+class StatusComparator implements Comparator<WorkspaceResponseDto.People> {
+    @Override
+    public int compare(WorkspaceResponseDto.People o1, WorkspaceResponseDto.People o2) {
+        if (o1.getColor() == o2.getColor()) {
+            return o1.getUserName().toLowerCase().compareTo(o2.getUserName().toLowerCase());
+        }
+        return Integer.compare(o1.getColor(), o2.getColor());
     }
 }
