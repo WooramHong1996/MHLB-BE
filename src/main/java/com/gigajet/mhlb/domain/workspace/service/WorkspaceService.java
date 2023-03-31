@@ -38,12 +38,13 @@ public class WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
-    private final S3Handler s3Handler;
     private final WorkspaceInviteRepository workspaceInviteRepository;
     private final WorkspaceOrderRepository workspaceOrderRepository;
     private final SqlStatusRepository statusRepository;
 
-    @Value("{workspace.default.image}")
+    private final S3Handler s3Handler;
+
+    @Value("${workspace.default.image}")
     private String defaultImage;
 
     @Transactional(readOnly = true)
@@ -64,7 +65,7 @@ public class WorkspaceService {
     public WorkspaceResponseDto.CreateResponse workspaceCreate(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
         String imageUrl = "";
 
-        if (image == null) {
+        if (image.isEmpty()) {
             imageUrl = defaultImage;
         } else {
             imageUrl = s3Handler.upload(image);

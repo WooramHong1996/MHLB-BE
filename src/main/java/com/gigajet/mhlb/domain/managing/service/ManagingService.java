@@ -17,6 +17,7 @@ import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,11 +34,13 @@ public class ManagingService {
     private final WorkspaceUserRepository workspaceUserRepository;
     private final WorkspaceRepository workspaceRepository;
     private final UserRepository userRepository;
+    private final WorkspaceInviteRepository workspaceInviteRepository;
+    private final WorkspaceOrderRepository workspaceOrderRepository;
+
     private final S3Handler s3Handler;
 
-    private final WorkspaceInviteRepository workspaceInviteRepository;
-
-    private final WorkspaceOrderRepository workspaceOrderRepository;
+    @Value("${workspace.default.image}")
+    private String defaultImage;
 
     @Transactional(readOnly = true)
     public ManagingResponseDto.Management management(User user, Long id) {
@@ -51,8 +54,11 @@ public class ManagingService {
 
         Workspace workspace = workspaceRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
-        s3Handler.delete(workspace.getImage());
         String newImage = s3Handler.upload(workspaceImage);
+
+        if (!workspace.getImage().equals(defaultImage)) {
+            s3Handler.delete(workspace.getImage());
+        }
 
         workspace.imageChange(newImage);
 
