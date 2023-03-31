@@ -51,8 +51,8 @@ public class ManagingService {
 
         Workspace workspace = workspaceRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
-        s3Handler.delete(workspace.getImage());
         String newImage = s3Handler.upload(workspaceImage);
+        s3Handler.delete(workspace.getImage());
 
         workspace.imageChange(newImage);
 

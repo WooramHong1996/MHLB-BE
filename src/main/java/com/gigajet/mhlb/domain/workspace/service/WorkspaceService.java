@@ -64,7 +64,7 @@ public class WorkspaceService {
     public WorkspaceResponseDto.CreateResponse workspaceCreate(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
         String imageUrl = "";
 
-        if (image == null) {
+        if (image.isEmpty()) {
             imageUrl = defaultImage;
         } else {
             imageUrl = s3Handler.upload(image);

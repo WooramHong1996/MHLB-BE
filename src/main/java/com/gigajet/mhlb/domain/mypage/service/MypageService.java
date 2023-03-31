@@ -73,8 +73,8 @@ public class MypageService {
 
     public MypageResponseDto.Image updateImage(User user, MultipartFile userImage) throws IOException {
         // 디폴트 이미지면 삭제 불가하게
-        s3Handler.delete(user.getImage());
         String imageUrl = s3Handler.upload(userImage);
+        s3Handler.delete(user.getImage());
         userRepository.updateImage(imageUrl, user.getId());
 
         return new MypageResponseDto.Image(imageUrl);
