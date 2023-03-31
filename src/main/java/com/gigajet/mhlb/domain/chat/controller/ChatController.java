@@ -12,6 +12,9 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 
 import java.util.List;
 
@@ -23,7 +26,22 @@ public class ChatController {
     private final SimpMessageSendingOperations sendingOperations;
 
     @EventListener(SessionConnectEvent.class)
+    public void connect(SessionConnectEvent event) {
+        chatService.readMessages(StompHeaderAccessor.wrap(event.getMessage()));
+    }
 
+    @EventListener(SessionSubscribeEvent.class)
+    public void subcribe(SessionSubscribeEvent event) {
+        String endpoint = StompHeaderAccessor.wrap(event.getMessage()).getDestination();
+        chatService.subcribe(endpoint);
+
+    }
+
+    @EventListener(SessionDisconnectEvent.class)
+    public void unSubcribe(SessionUnsubscribeEvent event) {
+        String endpoint = StompHeaderAccessor.wrap(event.getMessage()).getDestination();
+        chatService.unSubcribe(endpoint);
+    }
 
     @MessageMapping("/inbox")//메시지매핑은 리퀘스트매핑 못받음
     public void sendMsg(ChatRequestDto.Chat message, StompHeaderAccessor accessor) {

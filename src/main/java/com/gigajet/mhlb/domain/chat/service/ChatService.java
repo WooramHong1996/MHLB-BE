@@ -7,6 +7,7 @@ import com.gigajet.mhlb.domain.chat.entity.ChatRoom;
 import com.gigajet.mhlb.domain.chat.entity.UserAndMessage;
 import com.gigajet.mhlb.domain.chat.repository.ChatRepository;
 import com.gigajet.mhlb.domain.chat.repository.ChatRoomRepository;
+import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
@@ -14,11 +15,13 @@ import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +31,13 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
+    private final SqlStatusRepository statusRepository;
+
     private final JwtUtil jwtUtil;
     private static Long chatId = 0l;
+
+    private final ConcurrentHashMap<String, Integer> endpointMap = new ConcurrentHashMap<>();
+    private final int full = 2;
 
     @Transactional
     public ChatResponseDto.Chat sendMsg(ChatRequestDto.Chat message, String email) {
@@ -44,6 +52,14 @@ public class ChatService {
         chatId++;
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
         chat.setCreatedAt(LocalDateTime.now());
+        if (full == endpointMap.get("/sub/inbox/" + message.getUuid())) {
+            for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
+                if (id == userAndMessage.getUserId()) {
+                    continue;
+                }
+                userAndMessage.addUnread();
+            }
+        }
         chatRoom.update(chat);
         chatRoomRepository.save(chatRoom);
         chatRepository.save(chat);
@@ -87,15 +103,18 @@ public class ChatService {
 
         List<ChatResponseDto.Inbox> response = new ArrayList<>();
         List<ChatRoom> list = chatRoomRepository.findByWorkspaceIdAndUserSetInOrderByLastChat(workspaceId, user.getId());
-
+        //user 요청자
+        ChatResponseDto.Inbox inbox = new ChatResponseDto.Inbox();
         for (ChatRoom chatRoom : list) {
-            for (Long aLong : chatRoom.getUserSet()) {
-                if (user.getId() == aLong) {
+            for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {//리스트대로 돌림
+                if (user.getId() == userAndMessage.getUserId()) {
+                    inbox.unreadMessage(userAndMessage.getUnread());
                     continue;
                 }
-                Optional<User> opponents = userRepository.findById(aLong);
-                response.add(new ChatResponseDto.Inbox(chatRoom, opponents.get(), 0));
+                Optional<User> opponents = userRepository.findById(userAndMessage.getUserId());
+                inbox.inbox(chatRoom, opponents.get(), statusRepository.findTopByUserIdOrderByUpdateDayDescUpdateTimeDesc(userAndMessage.getUserId()).getStatus().getColor());
             }
+            response.add(inbox);
         }
         return response;
     }
@@ -122,5 +141,35 @@ public class ChatService {
 
     public String resolveTocken(String authorization) {
         return jwtUtil.getUserEmail(authorization.substring(7));
+    }
+
+    public void readMessages(StompHeaderAccessor accessor) {
+        String email = resolveTocken(accessor.getFirstNativeHeader("Authorization"));
+
+        Long id = userRepository.findByEmail(email).get().getId();
+
+        String uuid = accessor.getFirstNativeHeader("uuid");
+
+        ChatRoom chatRoom = chatRoomRepository.findByInBoxId(uuid);
+
+        for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
+            if (id != userAndMessage.getUserId()) {
+                continue;
+            }
+            userAndMessage.resetUnread();
+        }
+
+        chatRoomRepository.save(chatRoom);
+    }
+
+    public void subcribe(String endpoint) {
+        if (endpointMap.get(endpoint) == null) {
+            endpointMap.put(endpoint, 1);
+        }
+        endpointMap.put(endpoint, endpointMap.get(endpoint) + 1);
+    }
+
+    public void unSubcribe(String endpoint) {
+        endpointMap.put(endpoint, endpointMap.get(endpoint) - 1);
     }
 }

@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SqlStatusRepository extends JpaRepository<SqlStatus, Long> {
     SqlStatus findTopByUserOrderByUpdateDayDescUpdateTimeDesc(User user);
+    SqlStatus findTopByUserIdOrderByUpdateDayDescUpdateTimeDesc(Long id);
 }

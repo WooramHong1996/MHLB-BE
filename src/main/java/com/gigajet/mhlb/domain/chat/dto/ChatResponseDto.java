@@ -20,20 +20,28 @@ public class ChatResponseDto {
     }
 
     @Getter
+    @NoArgsConstructor
     public static class Inbox {
         private String uuid;
         private String userImage;
         private String userName;
         private LocalDateTime lastChat;
         private String message;
-        private Integer unreadMessages;
+        private Long userId;
+        private Long unreadMessages;
+        private Integer color;
 
         public Inbox(ChatRoom chatRoom, User user, Integer count) {
             this.uuid = chatRoom.getInBoxId();
+            this.userId = user.getId();
             this.userImage = user.getImage();
             this.userName = user.getUsername();
             this.lastChat = chatRoom.getLastChat();
             this.message = chatRoom.getLastMessage();
+        }
+
+        public void unreadMessage(Long unreadMessages) {
+            this.unreadMessages = unreadMessages;
         }
     }
 
