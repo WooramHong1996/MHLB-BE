@@ -36,7 +36,7 @@ public class AESUtil {
             byte[] encrypted = cipher.doFinal(text.getBytes(StandardCharsets.UTF_8));
             encryptedValue = Base64.getEncoder().encodeToString(encrypted);
         } catch (Exception e) {
-            log.error("encryptAES256 error ", e);
+            log.error("encryptAES128 error : {}", e.getMessage());
         }
         return encryptedValue;
     }
