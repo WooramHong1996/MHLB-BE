@@ -40,9 +40,7 @@ public class S3Handler {
 
         File uploadFile = convert(multipartFile).orElseThrow(() -> new CustomException(ErrorCode.FAIL_CONVERT));
 
-        if (multipartFile.getSize() > 5L) {
-            resizing(uploadFile);
-        }
+        resizing(uploadFile);
 
         String uploadImageUrl = putS3(uploadFile, UUID.randomUUID() + "-" + originalFilename);
         removeNewFile(uploadFile);
