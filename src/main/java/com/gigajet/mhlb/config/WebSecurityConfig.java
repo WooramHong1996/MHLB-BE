@@ -28,7 +28,7 @@ public class WebSecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers(PathRequest.toH2Console())
+//                .requestMatchers(PathRequest.toH2Console())
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
@@ -42,7 +42,7 @@ public class WebSecurityConfig {
 
         http.authorizeRequests()
                 .antMatchers("/api/users/**").permitAll()
-                .antMatchers("/stomp/chat/**").permitAll()
+                .antMatchers("/stomp/**").permitAll()
                 .anyRequest().authenticated();
 //                .anyRequest().permitAll();
 
