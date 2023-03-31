@@ -31,13 +31,14 @@ public class ChatResponseDto {
         private Long unreadMessages;
         private Integer color;
 
-        public Inbox(ChatRoom chatRoom, User user, Integer count) {
+        public void inbox(ChatRoom chatRoom, User user, Integer status) {
             this.uuid = chatRoom.getInBoxId();
             this.userId = user.getId();
             this.userImage = user.getImage();
             this.userName = user.getUsername();
             this.lastChat = chatRoom.getLastChat();
             this.message = chatRoom.getLastMessage();
+            this.color = status;
         }
 
         public void unreadMessage(Long unreadMessages) {

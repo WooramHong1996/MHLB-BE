@@ -30,6 +30,7 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
         registry
                 .addEndpoint("/stomp/chat")
 //                .setAllowedOriginPatterns("*")
+//                .setHandshakeHandler(new UserHandshakeHandler)
                 .setAllowedOriginPatterns("http://localhost:3000")
                 .setAllowedOrigins("chrome-extension://ggnhohnkfcpcanfekomdkjffnfcjnjam")
                 .withSockJS();
