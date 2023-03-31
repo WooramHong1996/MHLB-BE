@@ -1,6 +1,7 @@
 package com.gigajet.mhlb.domain.mail.service;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
+import com.gigajet.mhlb.common.util.AESUtil;
 import com.gigajet.mhlb.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.mail.dto.MailResponseDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
@@ -18,7 +19,6 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +37,7 @@ public class MailService {
 
     private final JavaMailSender mailSender;
     private final RedisTemplate<String, String> redisTemplate;
-    private final PasswordEncoder passwordEncoder;
+    private final AESUtil aesUtil;
 
     @Value("${spring.mail.username}")
     private String myAddress;
@@ -112,7 +112,7 @@ public class MailService {
         }
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
-        user.resetPassword(passwordEncoder.encode(passwordDto.getPassword()));
+        user.resetPassword(aesUtil.encrypt(passwordDto.getPassword()));
 
         return SendMessageDto.toResponseEntity(SuccessCode.RESET_PASSWORD_SUCCESS);
     }
