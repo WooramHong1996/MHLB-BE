@@ -11,9 +11,10 @@ import java.time.LocalDateTime;
 @Data
 @Document(collection = "chat")
 @NoArgsConstructor
-public class Chat  {
+public class Chat {
     @Id
     private String id;
+    private Long messageId;
     private Long senderId;
     private String message;
     private Long workspaceId;
@@ -21,10 +22,11 @@ public class Chat  {
     private LocalDateTime createdAt;
 
     @Builder
-    public Chat(Long workspaceId, String message,Long senderId, String inBoxId) {
+    public Chat(Long workspaceId, String message, Long senderId, String inBoxId, Long messageId) {
         this.workspaceId = workspaceId;
         this.message = message;
         this.senderId = senderId;
         this.inBoxId = inBoxId;
+        this.messageId = messageId;
     }
 }

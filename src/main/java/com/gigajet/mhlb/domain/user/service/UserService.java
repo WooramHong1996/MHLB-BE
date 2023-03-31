@@ -30,7 +30,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final WorkspaceInviteRepository workspaceInviteRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
-
     private final AESUtil aesUtil;
     private final JwtUtil jwtUtil;
 

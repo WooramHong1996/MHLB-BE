@@ -91,4 +91,8 @@ public class JwtUtil {
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
+
+    public String getUserEmail(String authorization) {
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authorization).getBody().getSubject();
+    }
 }

@@ -12,6 +12,7 @@ import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,20 +28,26 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
+    private static Long chatId = 0l;
 
     @Transactional
-    public void sendMsg(ChatRequestDto.Chat message) {
+    public ChatResponseDto.Chat sendMsg(ChatRequestDto.Chat message, String email) {
+        Long id = userRepository.findByEmail(email).get().getId();
         Chat chat = Chat.builder()
+                .senderId(id)
                 .inBoxId(message.getUuid())
                 .workspaceId(message.getWorkspaceId())
                 .message(message.getMessage())
+                .messageId(chatId)
                 .build();
-
+        chatId++;
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
         chat.setCreatedAt(LocalDateTime.now());
         chatRoom.update(chat);
         chatRoomRepository.save(chatRoom);
         chatRepository.save(chat);
+        return new ChatResponseDto.Chat(chat);
     }
 
     public ChatResponseDto.GetUuid getUuid(User user, Long workspaceId, Long opponentsId) {
@@ -108,8 +115,12 @@ public class ChatService {
 
         List<Chat> messageList = chatRepository.findByInBoxId(chatRoom.getInBoxId());
         for (Chat chat : messageList) {
-            chatList.add(new ChatResponseDto.Chat(chat.getSenderId(), chat.getMessage()));
+            chatList.add(new ChatResponseDto.Chat(chat));
         }
         return chatList;
+    }
+
+    public String resolveTocken(String authorization) {
+        return jwtUtil.getUserEmail(authorization.substring(7));
     }
 }

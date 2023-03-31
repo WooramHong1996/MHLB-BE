@@ -39,12 +39,16 @@ public class ChatResponseDto {
 
     @Getter
     public static class Chat {
-        private Long senderId;
+        private Long messageId;
+        private Long userId;
         private String message;
+        private LocalDateTime createdAt;
 
-        public Chat(Long senderId, String message) {
-            this.message = message;
-            this.senderId = senderId;
+        public Chat(com.gigajet.mhlb.domain.chat.entity.Chat chat) {
+            this.messageId = chat.getMessageId();
+            this.message = chat.getMessage();
+            this.userId = chat.getSenderId();
+            this.createdAt = chat.getCreatedAt();
         }
     }
 }

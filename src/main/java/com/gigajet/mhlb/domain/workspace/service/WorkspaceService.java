@@ -184,7 +184,7 @@ public class WorkspaceService {
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional//(readOnly = true)
     public List<WorkspaceResponseDto.OrderList> getOrder(User user) {
         List<WorkspaceResponseDto.OrderList> orderLists = new ArrayList<>();
         List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);
