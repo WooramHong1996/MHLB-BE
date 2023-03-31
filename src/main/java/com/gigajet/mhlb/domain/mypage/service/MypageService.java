@@ -18,6 +18,7 @@ import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,9 @@ public class MypageService {
     private final WorkspaceOrderRepository workspaceOrderRepository;
 
     private final S3Handler s3Handler;
+
+    @Value("${user.default.image}")
+    private String defaultImage;
 
     @Transactional(readOnly = true)
     public MypageResponseDto.Info userInfo(User user) {
@@ -72,9 +76,11 @@ public class MypageService {
     }
 
     public MypageResponseDto.Image updateImage(User user, MultipartFile userImage) throws IOException {
-        // 디폴트 이미지면 삭제 불가하게
         String imageUrl = s3Handler.upload(userImage);
-        s3Handler.delete(user.getImage());
+        if (!user.getImage().equals(defaultImage)) {
+            s3Handler.delete(user.getImage());
+        }
+
         userRepository.updateImage(imageUrl, user.getId());
 
         return new MypageResponseDto.Image(imageUrl);

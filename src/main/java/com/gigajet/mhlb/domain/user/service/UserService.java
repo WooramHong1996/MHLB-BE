@@ -15,6 +15,7 @@ import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,9 @@ public class UserService {
 
     private final AESUtil aesUtil;
     private final JwtUtil jwtUtil;
+
+    @Value("${user.default.image}")
+    private String defaultImage;
 
     @Transactional(readOnly = true)
     public ResponseEntity<SendMessageDto> duplicateEmail(String email) {
@@ -59,7 +63,7 @@ public class UserService {
 
         String password = aesUtil.encrypt(registerDto.getPassword());
 
-        User user = new User(registerDto, password);
+        User user = new User(registerDto, password, defaultImage);
 
         userRepository.save(user);
 
@@ -86,7 +90,7 @@ public class UserService {
 
         String password = aesUtil.encrypt(registerDto.getPassword());
 
-        User user = new User(registerDto, password);
+        User user = new User(registerDto, password, defaultImage);
         userRepository.save(user);
 
         workspaceUserRepository.save(new WorkspaceUser(user, workspace));
