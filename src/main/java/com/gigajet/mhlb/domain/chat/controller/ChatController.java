@@ -31,22 +31,21 @@ public class ChatController {
     }
 
     @EventListener(SessionSubscribeEvent.class)
-    public void subcribe(SessionSubscribeEvent event) {
+    public void subscribe(SessionSubscribeEvent event) {
         String endpoint = StompHeaderAccessor.wrap(event.getMessage()).getDestination();
-        chatService.subcribe(endpoint);
-
+        chatService.subscribe(endpoint);
     }
 
     @EventListener(SessionDisconnectEvent.class)
-    public void unSubcribe(SessionUnsubscribeEvent event) {
+    public void unSubscribe(SessionUnsubscribeEvent event) {
         String endpoint = StompHeaderAccessor.wrap(event.getMessage()).getDestination();
-        chatService.unSubcribe(endpoint);
+        chatService.unSubscribe(endpoint);
     }
 
     @MessageMapping("/inbox")//메시지매핑은 리퀘스트매핑 못받음
     public void sendMsg(ChatRequestDto.Chat message, StompHeaderAccessor accessor) {
         String authorization = accessor.getFirstNativeHeader("Authorization");
-        String email = chatService.resolveTocken(authorization);
+        String email = chatService.resolveToken(authorization);
         ChatResponseDto.Chat response = chatService.sendMsg(message, email);
         sendingOperations.convertAndSend("/sub/inbox/" + message.getUuid(), response);
     }

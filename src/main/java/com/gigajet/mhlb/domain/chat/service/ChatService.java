@@ -41,6 +41,7 @@ public class ChatService {
 
     @Transactional
     public ChatResponseDto.Chat sendMsg(ChatRequestDto.Chat message, String email) {
+        //탈퇴한 사람에게 메시지 보낼 수 없도록 막는 로직 구현 필요
         Long id = userRepository.findByEmail(email).get().getId();
         Chat chat = Chat.builder()
                 .senderId(id)
@@ -52,7 +53,9 @@ public class ChatService {
         chatId++;
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
         chat.setCreatedAt(LocalDateTime.now());
+        //해당 엔드포인트의 구독자가 full의 수와 같지 않은 경우 읽지 않은 메시지를 +1하는 로직
         if (full == endpointMap.get("/sub/inbox/" + message.getUuid())) {
+            //이여야 했는데 부호를 반대로 썼음 -> 왜 되는지 모르는 상태임 //수정필요
             for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
                 if (id == userAndMessage.getUserId()) {
                     continue;
@@ -66,6 +69,7 @@ public class ChatService {
         return new ChatResponseDto.Chat(chat);
     }
 
+    @Transactional
     public ChatResponseDto.GetUuid getUuid(User user, Long workspaceId, Long opponentsId) {
         if (user.getId() == opponentsId) {
             throw new CustomException(ErrorCode.WRONG_USER);
@@ -98,6 +102,7 @@ public class ChatService {
         return new ChatResponseDto.GetUuid(chatRoom.getInBoxId());
     }
 
+    @Transactional
     public List<ChatResponseDto.Inbox> getInbox(User user, Long workspaceId) {
         workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
@@ -112,6 +117,7 @@ public class ChatService {
                     continue;
                 }
                 Optional<User> opponents = userRepository.findById(userAndMessage.getUserId());
+                //퇴사한 유저인지 확인하여 퇴사한 경우 채팅 보낼 수 없도록 기능 수정 필요
                 inbox.inbox(chatRoom, opponents.get(), statusRepository.findTopByUserIdOrderByUpdateDayDescUpdateTimeDesc(userAndMessage.getUserId()).getStatus().getColor());
             }
             response.add(inbox);
@@ -119,6 +125,7 @@ public class ChatService {
         return response;
     }
 
+    @Transactional
     public List<ChatResponseDto.Chat> getChat(User user, Long workspaceId, Long opponentsId) {
         workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
         workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
@@ -131,6 +138,9 @@ public class ChatService {
         userIdSet.add(opponentsId);
 
         ChatRoom chatRoom = chatRoomRepository.findByUserSetAndWorkspaceId(userIdSet, workspaceId);
+        if (chatRoom == null) {
+            return new ArrayList<>();
+        }
 
         List<Chat> messageList = chatRepository.findByInBoxId(chatRoom.getInBoxId());
         for (Chat chat : messageList) {
@@ -139,12 +149,13 @@ public class ChatService {
         return chatList;
     }
 
-    public String resolveTocken(String authorization) {
+    public String resolveToken(String authorization) {
         return jwtUtil.getUserEmail(authorization.substring(7));
     }
 
+    @Transactional
     public void readMessages(StompHeaderAccessor accessor) {
-        String email = resolveTocken(accessor.getFirstNativeHeader("Authorization"));
+        String email = resolveToken(accessor.getFirstNativeHeader("Authorization"));
 
         Long id = userRepository.findByEmail(email).get().getId();
 
@@ -162,14 +173,14 @@ public class ChatService {
         chatRoomRepository.save(chatRoom);
     }
 
-    public void subcribe(String endpoint) {
+    public void subscribe(String endpoint) {
         if (endpointMap.get(endpoint) == null) {
             endpointMap.put(endpoint, 1);
         }
         endpointMap.put(endpoint, endpointMap.get(endpoint) + 1);
     }
 
-    public void unSubcribe(String endpoint) {
+    public void unSubscribe(String endpoint) {
         endpointMap.put(endpoint, endpointMap.get(endpoint) - 1);
     }
 }
