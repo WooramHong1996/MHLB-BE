@@ -103,7 +103,7 @@ public class ManagingService {
         checkRole(user, id);
 
         Optional<WorkspaceUser> delete = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(userid, id, 1);
-        if(Optional.empty().isEmpty()){
+        if(delete.isEmpty()){
             throw new CustomException(ErrorCode.WRONG_USER);
         }
         delete.get().updateIsShow();

@@ -18,7 +18,6 @@ public class ChatRoom {
     private String id;
 
     private HashSet<Long> userSet;
-    private List<Long> userList;
     private List<UserAndMessage> userAndMessages;
     private Long workspaceId;
     private String inBoxId;
