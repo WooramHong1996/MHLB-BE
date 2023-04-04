@@ -50,7 +50,11 @@ public class WorkspaceUser {
         this.role = role;
     }
 
-    public void updateIsShow() {
+    public void offIsShow() {
         this.isShow = 0;
+    }
+
+    public void onIsShow() {
+        this.isShow = 1;
     }
 }

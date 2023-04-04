@@ -8,24 +8,7 @@ import lombok.Getter;
 
 public class WorkspaceResponseDto {
     @Getter
-    public static class CreateResponse {
-        private String workspaceImage;
-
-        private String workspaceTitle;
-
-        private String workspaceDesc;
-
-        public CreateResponse(Workspace workspace) {
-            this.workspaceImage = workspace.getImage();
-
-            this.workspaceTitle = workspace.getTitle();
-
-            this.workspaceDesc = workspace.getDescription();
-        }
-    }
-
-    @Getter
-    public static class AllList {
+    public static class Response {
         private Long workspaceId;
 
         private String workspaceImage;
@@ -34,7 +17,7 @@ public class WorkspaceResponseDto {
 
         private String workspaceDesc;
 
-        public AllList(Workspace workspace) {
+        public Response(Workspace workspace) {
             this.workspaceId = workspace.getId();
 
             this.workspaceImage = workspace.getImage();

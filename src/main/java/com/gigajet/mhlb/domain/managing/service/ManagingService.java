@@ -103,13 +103,13 @@ public class ManagingService {
         checkRole(user, id);
 
         Optional<WorkspaceUser> delete = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(userid, id, 1);
-        if(delete.isEmpty()){
+        if (delete.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_USER);
         }
-        delete.get().updateIsShow();
+        delete.get().offIsShow();
 
-        Optional<WorkspaceOrder> order = workspaceOrderRepository.findByWorkspaceUserAndIsShow(delete.get(),1);
-        order.get().updateIsShow();
+        Optional<WorkspaceOrder> order = workspaceOrderRepository.findByWorkspaceUserAndIsShow(delete.get(), 1);
+        order.get().offIsShow();
 
         return ResponseEntity.ok(SendMessageDto.builder().message("ok").build());
     }
@@ -146,11 +146,11 @@ public class ManagingService {
         Optional<Workspace> workspace = workspaceRepository.findByIdAndIsShow(id, 1);
         workspace.get().updateIsShow();
 
-        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_IdAndIsShow(id,1);
+        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
         for (WorkspaceUser workspaceUser : workspaceUsers) {
-            workspaceUser.updateIsShow();
+            workspaceUser.offIsShow();
 
-            workspaceOrderRepository.findByWorkspaceUserAndIsShow(workspaceUser, 1).get().updateIsShow();
+            workspaceOrderRepository.findByWorkspaceUserAndIsShow(workspaceUser, 1).get().offIsShow();
         }
 
         workspaceInviteRepository.deleteByWorkspace(manager.getWorkspace());
