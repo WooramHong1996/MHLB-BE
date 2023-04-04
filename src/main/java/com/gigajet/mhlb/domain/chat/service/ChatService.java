@@ -34,7 +34,7 @@ public class ChatService {
     private final SqlStatusRepository statusRepository;
 
     private final JwtUtil jwtUtil;
-    private static Long chatId = 0l;
+    private static Long chatId = 0L;
 
     private final ConcurrentHashMap<String, Integer> endpointMap = new ConcurrentHashMap<>();
     private final int full = 2;
@@ -107,10 +107,11 @@ public class ChatService {
         workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
         List<ChatResponseDto.Inbox> response = new ArrayList<>();
-        List<ChatRoom> list = chatRoomRepository.findByWorkspaceIdAndUserSetInOrderByLastChat(workspaceId, user.getId());
+        List<ChatRoom> list = chatRoomRepository.findByWorkspaceIdAndUserSetInOrderByLastChatDesc(workspaceId, user.getId());
         //user 요청자
-        ChatResponseDto.Inbox inbox = new ChatResponseDto.Inbox();
+
         for (ChatRoom chatRoom : list) {
+            ChatResponseDto.Inbox inbox = new ChatResponseDto.Inbox();
             for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {//리스트대로 돌림
                 if (user.getId() == userAndMessage.getUserId()) {
                     inbox.unreadMessage(userAndMessage.getUnread());

@@ -12,5 +12,5 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
     //    ChatRoom findByUserListAndWorkspaceId(List<Long> userIdList, Long workspaceId);
     ChatRoom findByUserSetAndWorkspaceId(HashSet<Long> userSet, Long workspaceId);
     ChatRoom findByInBoxId(String inboxId);
-    List<ChatRoom> findByWorkspaceIdAndUserSetInOrderByLastChat(Long id, Long userId);
+    List<ChatRoom> findByWorkspaceIdAndUserSetInOrderByLastChatDesc(Long id, Long userId);
 }
