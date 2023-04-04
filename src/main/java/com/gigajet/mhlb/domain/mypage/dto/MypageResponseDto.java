@@ -56,6 +56,8 @@ public class MypageResponseDto {
 
         private String workspaceDesc;
 
+        private String userRole;
+
         @Builder
         public WorkspaceList(Workspace workspace) {
             this.workspaceId = workspace.getId();
@@ -65,6 +67,8 @@ public class MypageResponseDto {
             this.workspaceTitle = workspace.getTitle();
 
             this.workspaceDesc = workspace.getDescription();
+
+            this.userRole = getUserRole();
         }
     }
 

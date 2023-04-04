@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.ADMIN;
+
 @Service
 @RequiredArgsConstructor
 public class MypageService {
@@ -58,7 +60,7 @@ public class MypageService {
         List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByUser(user);
 
         List<MypageResponseDto.WorkspaceList> workspaceLists = new ArrayList<>();
-        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShow(user, 1);
+        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShowOrderByRoleDesc(user, 1);
 
         for (WorkspaceInvite workspaceInvite : workspaceInviteList) {
             inviteLists.add(new MypageResponseDto.InviteList(workspaceInvite.getWorkspace()));
@@ -67,6 +69,7 @@ public class MypageService {
         for (WorkspaceUser workspaceUser : workspaceUsers) {
             workspaceLists.add(new MypageResponseDto.WorkspaceList(workspaceUser.getWorkspace()));
         }
+
         return new MypageResponseDto.AllList(inviteLists, workspaceLists);
     }
 
@@ -121,8 +124,8 @@ public class MypageService {
         if (workspaceUserOptional.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
-        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
+        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
         Optional<WorkspaceUser> alreadyExist = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 0);
         if (alreadyExist.isPresent()) {
             alreadyExist.get().onIsShow();

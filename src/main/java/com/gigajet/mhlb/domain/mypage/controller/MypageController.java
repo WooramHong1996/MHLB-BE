@@ -59,7 +59,7 @@ public class MypageController {
         return mypageService.updateJob(userDetails.getUser(), jobRequest);
     }
 
-    @DeleteMapping("/{workspaceId}")
+    @PatchMapping("/{workspaceId}")
     public ResponseEntity<SendMessageDto> deleteWorkspace(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                           @PathVariable Long workspaceId) {
         return mypageService.deleteWorkspace(userDetails.getUser(), workspaceId);
