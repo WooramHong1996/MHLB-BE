@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.ADMIN;
+
 @Service
 @RequiredArgsConstructor
 public class MypageService {
@@ -58,15 +60,16 @@ public class MypageService {
         List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByUser(user);
 
         List<MypageResponseDto.WorkspaceList> workspaceLists = new ArrayList<>();
-        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShow(user, 1);
+        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShowOrderByRoleDesc(user, 1);
 
-        for (WorkspaceInvite workspaceInvite: workspaceInviteList) {
+        for (WorkspaceInvite workspaceInvite : workspaceInviteList) {
             inviteLists.add(new MypageResponseDto.InviteList(workspaceInvite.getWorkspace()));
         }
 
         for (WorkspaceUser workspaceUser : workspaceUsers) {
             workspaceLists.add(new MypageResponseDto.WorkspaceList(workspaceUser.getWorkspace()));
         }
+
         return new MypageResponseDto.AllList(inviteLists, workspaceLists);
     }
 
@@ -106,7 +109,7 @@ public class MypageService {
 
     @Transactional
     public ResponseEntity<SendMessageDto> deleteWorkspace(User user, long workspaceId) {
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, workspaceId).orElseThrow( ()-> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
         workspaceUser.updateIsShow();
 //        workspaceUserRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
@@ -121,7 +124,7 @@ public class MypageService {
         if (workspaceUserOptional.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
-        Optional<Workspace> workspace= workspaceRepository.findById(workspaceId);
+        Optional<Workspace> workspace = workspaceRepository.findById(workspaceId);
 
         WorkspaceUser workspaceUser = new WorkspaceUser(user, workspace.get());
 
