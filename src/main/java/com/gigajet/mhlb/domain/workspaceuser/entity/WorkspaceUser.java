@@ -30,7 +30,7 @@ public class WorkspaceUser {
     private Integer isShow;
 
     @OneToOne(mappedBy = "workspaceUser")
-    private WorkspaceOrder workspaceorder;
+    private WorkspaceOrder workspaceOrder;
 
     public WorkspaceUser(User user, Workspace workspace, WorkspaceUserRole role) {
         this.user = user;
