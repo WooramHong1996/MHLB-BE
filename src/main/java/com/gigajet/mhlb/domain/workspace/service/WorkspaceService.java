@@ -48,21 +48,21 @@ public class WorkspaceService {
     private String defaultImage;
 
     @Transactional(readOnly = true)
-    public List<WorkspaceResponseDto.AllList> workspaceAllList(User user) {
+    public List<WorkspaceResponseDto.Response> workspaceAllList(User user) {
 
-        List<WorkspaceResponseDto.AllList> allLists = new ArrayList<>();
+        List<WorkspaceResponseDto.Response> allLists = new ArrayList<>();
 
         List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShow(user, 1);
 
         for (WorkspaceUser workspaceUser : workspaceUsers) {
-            allLists.add(new WorkspaceResponseDto.AllList(workspaceUser.getWorkspace()));
+            allLists.add(new WorkspaceResponseDto.Response(workspaceUser.getWorkspace()));
         }
 
         return allLists;
     }
 
     @Transactional
-    public WorkspaceResponseDto.CreateResponse workspaceCreate(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
+    public WorkspaceResponseDto.Response workspaceCreate(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
         String imageUrl = "";
 
         if (image == null) {
@@ -84,7 +84,7 @@ public class WorkspaceService {
 
         workspaceOrderRepository.save(workspaceOrder);
 
-        return new WorkspaceResponseDto.CreateResponse(workspace);
+        return new WorkspaceResponseDto.Response(workspace);
     }
 
     public List inboxGet(User user, Long id, Integer size) {

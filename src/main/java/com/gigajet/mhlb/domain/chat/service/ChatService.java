@@ -34,7 +34,7 @@ public class ChatService {
     private final SqlStatusRepository statusRepository;
 
     private final JwtUtil jwtUtil;
-    private static Long chatId = 0l;
+    private static Long chatId = 0L;
 
     private final ConcurrentHashMap<String, Integer> endpointMap = new ConcurrentHashMap<>();
     private final int full = 2;
