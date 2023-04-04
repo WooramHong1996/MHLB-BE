@@ -14,11 +14,15 @@ public interface WorkspaceUserRepository extends JpaRepository<WorkspaceUser, Lo
 
     List<WorkspaceUser> findByUserAndIsShow(User user, Integer isShow);
 
+    List<WorkspaceUser> findByUserAndIsShowOrderByRoleDesc(User user, Integer isShow);
+
+
     Optional<WorkspaceUser> findByUserAndWorkspaceId(User user, Long id);
 
     List<WorkspaceUser> findByWorkspace_IdAndIsShow(Long id, Integer isShow);
 
     void deleteByUser_IdAndWorkspace_Id(Long userId, Long workspaceId);
+
 
     Optional<WorkspaceUser> findByUser_IdAndWorkspace_IdAndIsShow(Long userId, Long workspaceId, Integer isShow);
 
