@@ -132,7 +132,11 @@ public class WorkspaceService {
             if (invitedUser.isEmpty()) {
                 return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, managerUser.getWorkspace()));
             } else {
-                if (workspaceUserRepository.findByUserAndWorkspace(invitedUser.get(), managerUser.getWorkspace()).isPresent()) {
+                Optional<WorkspaceUser> existUser = workspaceUserRepository.findByUserAndWorkspace(invitedUser.get(), managerUser.getWorkspace());
+
+                if (existUser.isEmpty() || existUser.get().getIsShow() == 0) { //최초 초대거나 재초대인 경우
+                    return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, invitedUser.get(), managerUser.getWorkspace()));
+                } else if (existUser.get().getIsShow() == 1) {//이미 있는 유저인 경우
                     throw new CustomException(ErrorCode.ALREADY_INVITED);
                 }
 
@@ -185,7 +189,7 @@ public class WorkspaceService {
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional//(readOnly = true)
     public List<WorkspaceResponseDto.OrderList> getOrder(User user) {
         List<WorkspaceResponseDto.OrderList> orderLists = new ArrayList<>();
         List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);

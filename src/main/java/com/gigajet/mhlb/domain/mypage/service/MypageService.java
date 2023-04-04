@@ -60,7 +60,7 @@ public class MypageService {
         List<MypageResponseDto.WorkspaceList> workspaceLists = new ArrayList<>();
         List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShow(user, 1);
 
-        for (WorkspaceInvite workspaceInvite: workspaceInviteList) {
+        for (WorkspaceInvite workspaceInvite : workspaceInviteList) {
             inviteLists.add(new MypageResponseDto.InviteList(workspaceInvite.getWorkspace()));
         }
 
@@ -106,9 +106,9 @@ public class MypageService {
 
     @Transactional
     public ResponseEntity<SendMessageDto> deleteWorkspace(User user, long workspaceId) {
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, workspaceId).orElseThrow( ()-> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
-        workspaceUser.updateIsShow();
+        workspaceUser.offIsShow();
 //        workspaceUserRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
 
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.DELETE_SUCCESS));
@@ -121,17 +121,24 @@ public class MypageService {
         if (workspaceUserOptional.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
-        Optional<Workspace> workspace= workspaceRepository.findById(workspaceId);
+        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
-        WorkspaceUser workspaceUser = new WorkspaceUser(user, workspace.get());
+        Optional<WorkspaceUser> alreadyExist = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 0);
+        if (alreadyExist.isPresent()) {
+            alreadyExist.get().onIsShow();
+            workspaceOrderRepository.findByWorkspaceUserAndIsShow(alreadyExist.get(), 0).get().onIsShow();
+        } else {
+            WorkspaceUser workspaceUser = new WorkspaceUser(user, workspace);
 
-        Long count = workspaceUserRepository.countByUserAndIsShow(user, 1);
+            Long count = workspaceUserRepository.countByUserAndIsShow(user, 1);
 
-        WorkspaceOrder workspaceOrder = new WorkspaceOrder(count, workspaceUser);
+            WorkspaceOrder workspaceOrder = new WorkspaceOrder(count, workspaceUser);
 
-        workspaceUserRepository.save(workspaceUser);
+            workspaceUserRepository.save(workspaceUser);
 
-        workspaceOrderRepository.save(workspaceOrder);
+            workspaceOrderRepository.save(workspaceOrder);
+
+        }
 
         workspaceInviteRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
 
