@@ -12,6 +12,7 @@ import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceOrder;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
+import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceInviteRepository;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceOrderRepository;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,8 +69,10 @@ public class MypageService {
         }
 
         for (WorkspaceUser workspaceUser : workspaceUsers) {
-            workspaceLists.add(new MypageResponseDto.WorkspaceList(workspaceUser.getWorkspace(), workspaceUser.getWorkspaceOrder().getWorkspaceUser()));
+            workspaceLists.add(new MypageResponseDto.WorkspaceList(workspaceUser.getWorkspace(),workspaceUser.getWorkspaceOrder().getWorkspaceUser()));
         }
+
+        workspaceLists.sort(new WorkspaceComparator());
 
         return new MypageResponseDto.AllList(inviteLists, workspaceLists);
     }
@@ -160,5 +164,15 @@ public class MypageService {
         workspaceInviteRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
 
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.DELETE_SUCCESS));
+    }
+}
+
+class WorkspaceComparator implements Comparator<MypageResponseDto.WorkspaceList> {
+    @Override
+    public int compare(MypageResponseDto.WorkspaceList o1, MypageResponseDto.WorkspaceList o2) {
+        if (o1.getUserRole() == o2.getUserRole() || o1.getUserRole() != WorkspaceUserRole.ADMIN && o2.getUserRole() != WorkspaceUserRole.ADMIN) {
+            return o1.getWorkspaceTitle().toLowerCase().compareTo(o2.getWorkspaceTitle().toLowerCase());
+        }
+        return Integer.compare(o2.getUserRole().ordinal(), o1.getUserRole().ordinal());
     }
 }
