@@ -17,4 +17,9 @@ public class MypageRequestDto {
     public static class Job {
         private String userJob;
     }
+
+    @Getter
+    public static class Invite {
+        private Boolean invite;
+    }
 }
