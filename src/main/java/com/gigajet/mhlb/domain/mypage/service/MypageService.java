@@ -117,22 +117,25 @@ public class MypageService {
 
     @Transactional
     public ResponseEntity<SendMessageDto> inviteWorkspace(User user, long workspaceId) {
-        Optional<WorkspaceInvite> workspaceUserOptional = workspaceInviteRepository.findByWorkspace_IdAndUserId(workspaceId, user.getId());
+        WorkspaceInvite workspaceUserOptional = workspaceInviteRepository.findByWorkspace_IdAndUserId(workspaceId, user.getId()).orElseThrow(()-> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
-        if (workspaceUserOptional.isEmpty()) {
-            throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
+        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        Optional<WorkspaceUser> alreadyExist = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 0);
+        if (alreadyExist.isPresent()) {
+            alreadyExist.get().onIsShow();
+            workspaceOrderRepository.findByWorkspaceUserAndIsShow(alreadyExist.get(), 0).get().onIsShow();
+        } else {
+            WorkspaceUser workspaceUser = new WorkspaceUser(user, workspace);
+
+            Long count = workspaceUserRepository.countByUserAndIsShow(user, 1);
+
+            WorkspaceOrder workspaceOrder = new WorkspaceOrder(count, workspaceUser);
+
+            workspaceUserRepository.save(workspaceUser);
+
+            workspaceOrderRepository.save(workspaceOrder);
+
         }
-        Optional<Workspace> workspace = workspaceRepository.findById(workspaceId);
-
-        WorkspaceUser workspaceUser = new WorkspaceUser(user, workspace.get());
-
-        Long count = workspaceUserRepository.countByUserAndIsShow(user, 1);
-
-        WorkspaceOrder workspaceOrder = new WorkspaceOrder(count, workspaceUser);
-
-        workspaceUserRepository.save(workspaceUser);
-
-        workspaceOrderRepository.save(workspaceOrder);
 
         workspaceInviteRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
 
