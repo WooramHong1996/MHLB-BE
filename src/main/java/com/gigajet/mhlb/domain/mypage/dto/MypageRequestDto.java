@@ -17,4 +17,5 @@ public class MypageRequestDto {
     public static class Job {
         private String userJob;
     }
+
 }

@@ -71,7 +71,7 @@ public class MypageController {
         return mypageService.inviteWorkspace(userDetails.getUser(), workspaceId);
     }
 
-    @DeleteMapping("/{workspaceId}/reject")
+    @DeleteMapping("/{workspaceId}/invite")
     public ResponseEntity<SendMessageDto> rejectWorkspace(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                           @PathVariable Long workspaceId) {
         return mypageService.rejectWorkspace(userDetails.getUser(), workspaceId);
