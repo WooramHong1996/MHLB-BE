@@ -47,18 +47,16 @@ public class WorkspaceService {
     @Value("${workspace.default.image}")
     private String defaultImage;
 
-    @Transactional(readOnly = true)
+    @Transactional//(readOnly = true)
     public List<WorkspaceResponseDto.Response> workspaceAllList(User user) {
+        List<WorkspaceResponseDto.Response> orderLists = new ArrayList<>();
+        List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);
 
-        List<WorkspaceResponseDto.Response> allLists = new ArrayList<>();
-
-        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShow(user, 1);
-
-        for (WorkspaceUser workspaceUser : workspaceUsers) {
-            allLists.add(new WorkspaceResponseDto.Response(workspaceUser.getWorkspace()));
+        for (WorkspaceOrder workspaceOrder : workspaceOrderList) {
+            orderLists.add(new WorkspaceResponseDto.Response(workspaceOrder.getWorkspaceUser().getWorkspace()));
         }
 
-        return allLists;
+        return orderLists;
     }
 
     @Transactional
@@ -124,7 +122,7 @@ public class WorkspaceService {
         Optional<WorkspaceInvite> checkInvite = workspaceInviteRepository.findByWorkspaceAndEmail(managerUser.getWorkspace(), invitedUserEmail);
         // 기존에 초대 한 사람인지 확인
         if (checkInvite.isPresent()) {
-            return checkInvite.get();
+            throw new CustomException(ErrorCode.ALREADY_INVITED);
         } else {
             // 해당 유저가 회원가입 되어있는지 먼저 확인
             Optional<User> invitedUser = userRepository.findByEmail(invitedUserEmail);
