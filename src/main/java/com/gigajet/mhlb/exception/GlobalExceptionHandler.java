@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @Slf4j
@@ -17,4 +18,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return SendMessageDto.toResponseEntity(exception.getErrorCode());
     }
 
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<SendMessageDto> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exception) {
+        log.error("MaxUploadSizeExceededException throw Exception : {}", exception.getMessage());
+        return ResponseEntity.badRequest().body(new SendMessageDto("over max size", 400));
+    }
 }
