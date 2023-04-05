@@ -7,9 +7,6 @@ import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.geometry.Positions;
-import net.coobird.thumbnailator.resizers.configurations.ScalingMode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,9 +27,11 @@ public class S3Handler {
 
     private final AmazonS3 amazonS3;
 
+    private final ImageUtil imageUtil;
+
     // upload 컴포넌트
     public String upload(MultipartFile multipartFile) throws IOException {
-        if (multipartFile.isEmpty()) {
+        if (multipartFile == null) {
             throw new CustomException(ErrorCode.NULL_MULTIPART_FILE);
         }
 
@@ -40,7 +39,12 @@ public class S3Handler {
 
         File uploadFile = convert(multipartFile).orElseThrow(() -> new CustomException(ErrorCode.FAIL_CONVERT));
 
-        resizing(uploadFile);
+        if (!imageUtil.checkMimeType(uploadFile)) {
+            removeNewFile(uploadFile);
+            throw new CustomException(ErrorCode.NOT_IMAGE);
+        }
+
+        imageUtil.resizing(uploadFile);
 
         String uploadImageUrl = putS3(uploadFile, UUID.randomUUID() + "-" + originalFilename);
         removeNewFile(uploadFile);
@@ -52,22 +56,6 @@ public class S3Handler {
     public void delete(String fileName) {
         amazonS3.deleteObject(bucket, fileName.substring(fileName.lastIndexOf('/') + 1));
         log.info(fileName.substring(fileName.lastIndexOf('/') + 1));
-    }
-
-    // 리사이징
-    private void resizing(File file) {
-        try {
-            Thumbnails.of(file)
-                    .size(256, 256)
-                    .scalingMode(ScalingMode.BICUBIC)
-                    .outputQuality(0.8)
-                    .crop(Positions.CENTER)
-                    .allowOverwrite(true)
-                    .toFile(file.getName());
-        } catch (IOException e) {
-            log.error("resizing error : {}", e.getMessage());
-            throw new CustomException(ErrorCode.RESIZING_FAILED);
-        }
     }
 
     // S3 upload
