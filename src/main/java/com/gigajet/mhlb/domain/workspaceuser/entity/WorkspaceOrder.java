@@ -9,7 +9,6 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 public class WorkspaceOrder {
-    //순서저장용
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,5 +30,11 @@ public class WorkspaceOrder {
         this.orders = orders;
     }
 
-    public void updateIsShow(){this.isShow = 0;}
+    public void offIsShow() {
+        this.isShow = 0;
+    }
+
+    public void onIsShow() {
+        this.isShow = 1;
+    }
 }
