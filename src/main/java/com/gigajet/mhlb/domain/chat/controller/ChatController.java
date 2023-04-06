@@ -25,6 +25,20 @@ public class ChatController {
     private final ChatService chatService;
     private final SimpMessageSendingOperations sendingOperations;
     private final RedisRepository redisRepository;
+    private final UserRepository userRepository;
+
+    /**
+     * websocket "/pub/chat/enter"로 들어오는 메시징을 처리한다.
+     * 채팅방에 입장했을 경우
+     */
+    @MessageMapping("/chat/enter")
+    public void enter(ChatRequestDto.Chat chatMessageRequest, StompHeaderAccessor accessor) {
+        String authorization = accessor.getFirstNativeHeader("Authorization");
+        String email = chatService.resolveToken(authorization);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+
+        chatService.enter(user.getId(), chatMessageRequest.getUuid());
+    }
 
 //    @EventListener(SessionConnectEvent.class)
 //    public void connect(SessionConnectEvent event) {

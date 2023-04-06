@@ -49,17 +49,16 @@ public class ChatService {
     private final ConcurrentHashMap<String, Integer> endpointMap = new ConcurrentHashMap<>();
     private final int full = 2;
 
-    public void enter(String uuid, String email) {
-        Long id = userRepository.findByEmail(email).get().getId();
+    public void enter(Long userId, String uuid) {
 
         // 그룹채팅은 해시코드가 존재하지 않고 일대일 채팅은 해시코드가 존재한다.
         ChatRoom chatRoom = chatRoomRepository.findById(uuid).orElseThrow(() -> new CustomException(ErrorCode.WRONG_CHAT_ROOM_ID));
 
         // 채팅방에 들어온 정보를 Redis 저장
-        redisRepository.userEnterRoomInfo(id, uuid);
+        redisRepository.userEnterRoomInfo(userId, uuid);
 
         // 그룹채팅은 해시코드가 존재하지 않고 일대일 채팅은 해시코드가 존재한다.
-            redisRepository.initChatRoomMessageInfo(chatRoom.getId()+"", id);
+            redisRepository.initChatRoomMessageInfo(chatRoom.getId()+"", userId);
     }
 
     @Transactional
@@ -110,6 +109,7 @@ public class ChatService {
         message.setSenderId(chat.getSenderId());
         message.setMessageId(chatId);
         message.setType(ChatRequestDto.MessageType.TALK);
+//        message.setCreatAt(chat.getCreatedAt());
         String topic = channelTopic.getTopic();
 
             // 일대일 채팅 이면서 안읽은 메세지 업데이트

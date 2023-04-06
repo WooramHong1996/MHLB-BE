@@ -51,7 +51,7 @@ public class RedisConfig {
     }
 
     @Bean
-    public ChannelTopic channelTopic() {
+    public ChannelTopic ChannelTopic() {
         return new ChannelTopic("chatroom");
     }
 

@@ -25,6 +25,7 @@ public class ChatRequestDto {
         private Long senderId;
         private int count;
         private Long otherUserIds;
+        private LocalDateTime creatAt;
 
         public Chat(ChatRequestDto.Chat chatMessageDto, int count) {
             this.type = MessageType.UNREAD_MESSAGE_COUNT_ALARM; // 메시지 타입
