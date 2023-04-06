@@ -43,6 +43,7 @@ public class WebSecurityConfig {
         http.authorizeRequests()
                 .antMatchers("/api/users/**").permitAll()
                 .antMatchers("/stomp/**").permitAll()
+                .antMatchers("/actuator/**").permitAll()
                 .anyRequest().authenticated();
 //                .anyRequest().permitAll();
 
