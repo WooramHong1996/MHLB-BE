@@ -2,13 +2,18 @@ package com.gigajet.mhlb.common.dto;
 
 import com.gigajet.mhlb.common.util.SuccessCode;
 import com.gigajet.mhlb.exception.ErrorCode;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 
 @Getter
+@Schema(description = "메세지 DTO")
 public class SendMessageDto {
+
+    @Schema(description = "메세지")
     private final String message;
+    @Schema(description = "상태코드")
     private final int statusCode;
 
     @Builder
