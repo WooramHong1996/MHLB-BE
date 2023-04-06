@@ -27,12 +27,26 @@ public class S3Handler {
 
     private final AmazonS3 amazonS3;
 
+    private final ImageUtil imageUtil;
+
     // upload 컴포넌트
     public String upload(MultipartFile multipartFile) throws IOException {
-        String fileName = UUID.randomUUID() + "-" + multipartFile.getOriginalFilename();
+        if (multipartFile == null) {
+            throw new CustomException(ErrorCode.NULL_MULTIPART_FILE);
+        }
+
+        String originalFilename = multipartFile.getOriginalFilename();
+
         File uploadFile = convert(multipartFile).orElseThrow(() -> new CustomException(ErrorCode.FAIL_CONVERT));
 
-        String uploadImageUrl = putS3(uploadFile, fileName);
+        if (!imageUtil.checkMimeType(uploadFile)) {
+            removeNewFile(uploadFile);
+            throw new CustomException(ErrorCode.NOT_IMAGE);
+        }
+
+        imageUtil.resizing(uploadFile);
+
+        String uploadImageUrl = putS3(uploadFile, UUID.randomUUID() + "-" + originalFilename);
         removeNewFile(uploadFile);
 
         return uploadImageUrl;

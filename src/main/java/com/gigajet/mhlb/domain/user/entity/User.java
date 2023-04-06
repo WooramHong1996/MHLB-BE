@@ -41,12 +41,8 @@ public class User {
     @Column(nullable = false)
     private Integer isShow;
 
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
-//    @JsonIgnoreProperties("User")
-//    private List<WorkspaceUser> workspaceUsers;
-
-    public User(UserRequestDto.Register registerDto, String password) {
-        this.image = registerDto.getUserImage();
+    public User(UserRequestDto.Register registerDto, String password, String image) {
+        this.image = image;
         this.email = registerDto.getEmail();
         this.username = registerDto.getUserName();
         this.description = registerDto.getUserDesc();

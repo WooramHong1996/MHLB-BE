@@ -1,6 +1,7 @@
 package com.gigajet.mhlb.domain.mail.controller;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
+import com.gigajet.mhlb.domain.mail.dto.MailResponseDto;
 import com.gigajet.mhlb.domain.mail.service.MailService;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,12 @@ public class MailController {
     @PostMapping("/reset/password/{uuid}")
     public ResponseEntity<SendMessageDto> resetPassword(@PathVariable String uuid, @RequestBody UserRequestDto.Password passwordDto) {
         return mailService.resetPassword(uuid, passwordDto);
+    }
+
+    // 워크스페이스 초대 인증 코드 유효 검사 및 회원가입 유무 검사
+    @PostMapping("/check/invite/code/{uuid}")
+    public ResponseEntity<MailResponseDto.CheckInviteCode> checkInviteCode(@PathVariable String uuid) {
+        return mailService.checkInviteCode(uuid);
     }
 
 }

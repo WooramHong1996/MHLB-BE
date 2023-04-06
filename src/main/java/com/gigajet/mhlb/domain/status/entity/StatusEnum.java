@@ -6,13 +6,13 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum StatusEnum {
-    WIP("근무", 0),
-    BRB("자리비움", 1),
-    COB("업무종료", 3),
-    OOO("휴가중", 3),
-    OTL("식사중", 1),
-    IC("회의", 1),
-    OOT("출장중", 2);
+    WIP("Working", 0),
+    BRB("AFK", 1),
+    COB("NotWorking", 3),
+    OOO("Leave", 3),
+    OTL("Eating", 1),
+    IC("Meeting", 1),
+    OOT("BusinessTrip", 2);
 
     private final String status;
     /**

@@ -27,11 +27,11 @@ public class StatusService {
 
     @Transactional
     public StatusResponseDto statusUpdate(User user, StatusRequestDto statusRequestDto) {
-        if(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user).getStatus()==statusRequestDto.getStatus()){
+        if (statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user).getStatus().equals(statusRequestDto.textOf())) {
             throw new CustomException(ErrorCode.STATUS_NOT_CHANGED);
         }
 
-        SqlStatus status = new SqlStatus(user,statusRequestDto);
+        SqlStatus status = new SqlStatus(user, statusRequestDto);
 
         statusRepository.save(status);
 

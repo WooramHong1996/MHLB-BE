@@ -2,6 +2,8 @@ package com.gigajet.mhlb.domain.mypage.dto;
 
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
+import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
+import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -56,8 +58,10 @@ public class MypageResponseDto {
 
         private String workspaceDesc;
 
+        private WorkspaceUserRole userRole;
+
         @Builder
-        public WorkspaceList(Workspace workspace) {
+        public WorkspaceList(Workspace workspace, WorkspaceUser workspaceUser) {
             this.workspaceId = workspace.getId();
 
             this.workspaceImage = workspace.getImage();
@@ -65,6 +69,8 @@ public class MypageResponseDto {
             this.workspaceTitle = workspace.getTitle();
 
             this.workspaceDesc = workspace.getDescription();
+
+            this.userRole = workspaceUser.getRole();
         }
     }
 

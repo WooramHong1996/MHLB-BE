@@ -20,16 +20,14 @@ import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.ADMIN;
 import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.MEMBER;
@@ -40,31 +38,33 @@ public class WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
-    private final S3Handler s3Handler;
     private final WorkspaceInviteRepository workspaceInviteRepository;
     private final WorkspaceOrderRepository workspaceOrderRepository;
     private final SqlStatusRepository statusRepository;
 
-    @Transactional(readOnly = true)
-    public List<WorkspaceResponseDto.AllList> workspaceAllList(User user) {
+    private final S3Handler s3Handler;
 
-        List<WorkspaceResponseDto.AllList> allLists = new ArrayList<>();
+    @Value("${workspace.default.image}")
+    private String defaultImage;
 
-        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShow(user, 1);
+    @Transactional//(readOnly = true)
+    public List<WorkspaceResponseDto.Response> workspaceAllList(User user) {
+        List<WorkspaceResponseDto.Response> orderLists = new ArrayList<>();
+        List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);
 
-        for (WorkspaceUser workspaceUser : workspaceUsers) {
-            allLists.add(new WorkspaceResponseDto.AllList(workspaceUser.getWorkspace()));
+        for (WorkspaceOrder workspaceOrder : workspaceOrderList) {
+            orderLists.add(new WorkspaceResponseDto.Response(workspaceOrder.getWorkspaceUser().getWorkspace()));
         }
 
-        return allLists;
+        return orderLists;
     }
 
     @Transactional
-    public WorkspaceResponseDto.CreateResponse workspaceCreate(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
+    public WorkspaceResponseDto.Response workspaceCreate(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
         String imageUrl = "";
 
         if (image == null) {
-            imageUrl = "https://mhlbbucket.s3.ap-northeast-2.amazonaws.com/ea1f0590-771d-4b25-9f9f-968bae140a7f-trys-ketch-%EB%85%BC%EB%A6%AC%EC%A0%81%EC%9D%B8+%EC%BF%A0%ED%82%A4.png";
+            imageUrl = defaultImage;
         } else {
             imageUrl = s3Handler.upload(image);
         }
@@ -82,7 +82,7 @@ public class WorkspaceService {
 
         workspaceOrderRepository.save(workspaceOrder);
 
-        return new WorkspaceResponseDto.CreateResponse(workspace);
+        return new WorkspaceResponseDto.Response(workspace);
     }
 
     public List inboxGet(User user, Long id, Integer size) {
@@ -109,47 +109,47 @@ public class WorkspaceService {
         }
 
         for (WorkspaceOrder workspaceOrder : orderList) {
-            workspaceOrder.updateOrder(orderMap.get(workspaceOrder.getWorkspaceUser().getWorkspace().getId()));
-            workspaceOrderRepository.save(workspaceOrder);
+            workspaceOrderRepository.orderUpdate(orderMap.get(workspaceOrder.getWorkspaceUser().getWorkspace().getId()), workspaceOrder.getWorkspaceUser().getId());
         }
 
         return SendMessageDto.toResponseEntity(SuccessCode.ORDER_CHANGE_SUCCESS);
     }
 
     @Transactional
-    public Optional<User> invite(User user, Long id, String email) {
-        Optional<WorkspaceUser> workspace = getWorkspaceuser(user, id);
+    public WorkspaceInvite invite(User user, Long id, String invitedUserEmail) {
+        WorkspaceUser managerUser = getWorkspaceUser(user, id);
 
-        Optional<WorkspaceInvite> checkInvite = workspaceInviteRepository.findByWorkspaceAndEmail(workspace.get().getWorkspace(), email);
+        Optional<WorkspaceInvite> checkInvite = workspaceInviteRepository.findByWorkspaceAndEmail(managerUser.getWorkspace(), invitedUserEmail);
+        // 기존에 초대 한 사람인지 확인
         if (checkInvite.isPresent()) {
-            throw new CustomException(ErrorCode.ALREADY_INVITED);//기존에 초대 한 사람인지 확인
+            throw new CustomException(ErrorCode.ALREADY_INVITED);
+        } else {
+            // 해당 유저가 회원가입 되어있는지 먼저 확인
+            Optional<User> invitedUser = userRepository.findByEmail(invitedUserEmail);
+
+            if (invitedUser.isEmpty()) {
+                return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, managerUser.getWorkspace()));
+            } else {
+                Optional<WorkspaceUser> existUser = workspaceUserRepository.findByUserAndWorkspace(invitedUser.get(), managerUser.getWorkspace());
+
+                if (existUser.isEmpty() || existUser.get().getIsShow() == 0) { //최초 초대거나 재초대인 경우
+                    return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, invitedUser.get(), managerUser.getWorkspace()));
+                } else if (existUser.get().getIsShow() == 1) {//이미 있는 유저인 경우
+                    throw new CustomException(ErrorCode.ALREADY_INVITED);
+                }
+
+                return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, invitedUser.get(), managerUser.getWorkspace()));
+            }
         }
-
-        Optional<User> invited = userRepository.findByEmail(email);//해당 유저가 회원가입 되어있는지 먼저 확인
-
-        if (invited.isEmpty()) {//회원가입 되어있지 않으면 그대로 반환 후 메일서비스로 넘김
-            WorkspaceInvite workspaceInvite = new WorkspaceInvite(email, workspace.get().getWorkspace());
-            workspaceInviteRepository.save(workspaceInvite);
-            return invited;
-        }
-
-        Optional<WorkspaceUser> workspaceUser = workspaceUserRepository.findByUserAndWorkspace(invited.get(), workspace.get().getWorkspace());
-        if (workspaceUser.isPresent()) {//워크스페이스에 가입된 유저인지 확인
-            throw new CustomException(ErrorCode.WRONG_USER);
-        }
-
-        WorkspaceInvite workspaceInvite = new WorkspaceInvite(email, invited.get(), workspace.get().getWorkspace());
-        workspaceInviteRepository.save(workspaceInvite);
-        return invited;
     }
 
     @Transactional(readOnly = true)
     public List<WorkspaceResponseDto.Invite> getInvite(User user, Long id) {
-        Optional<WorkspaceUser> workspaceUser = getWorkspaceuser(user, id);
-        checkrole(workspaceUser);
+        WorkspaceUser workspaceUser = getWorkspaceUser(user, id);
+        checkRole(workspaceUser);
 
         List<WorkspaceResponseDto.Invite> inviteList = new ArrayList<>();
-        List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByWorkspaceOrderByIdDesc(workspaceUser.get().getWorkspace());
+        List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByWorkspaceOrderByIdDesc(workspaceUser.getWorkspace());
 
         for (WorkspaceInvite workspaceInvite : workspaceInviteList) {
             inviteList.add(new WorkspaceResponseDto.Invite(workspaceInvite));
@@ -159,41 +159,41 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public ResponseEntity<SendMessageDto> deleteInvite(User user, Long id, Long inviteid) {
-        Optional<WorkspaceUser> workspaceUser = getWorkspaceuser(user, id);
-        checkrole(workspaceUser);
+    public ResponseEntity<SendMessageDto> deleteInvite(User user, Long id, Long inviteId) {
+        WorkspaceUser workspaceUser = getWorkspaceUser(user, id);
+        checkRole(workspaceUser);
 
-        Optional<WorkspaceInvite> workspaceInvite = workspaceInviteRepository.findByWorkspace_IdAndId(id, inviteid);
+        Optional<WorkspaceInvite> workspaceInvite = workspaceInviteRepository.findByWorkspace_IdAndId(id, inviteId);
         if (workspaceInvite.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_USER);
         }
 
-        workspaceInviteRepository.deleteById(inviteid);
+        workspaceInviteRepository.deleteById(inviteId);
 
         return SendMessageDto.toResponseEntity(SuccessCode.CANCLE_INVITE);
     }
 
-    private Optional<WorkspaceUser> getWorkspaceuser(User user, Long id) {
+    private WorkspaceUser getWorkspaceUser(User user, Long id) {
         Optional<WorkspaceUser> workspace = workspaceUserRepository.findByUserAndWorkspaceId(user, id);//유저가 워크스페이스에 가입 되어있는지 확인
         if (workspace.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
-        return workspace;
+        return workspace.get();
     }
 
-    private void checkrole(Optional<WorkspaceUser> workspaceUser) {
-        if (workspaceUser.get().getRole() == MEMBER) {
+    private void checkRole(WorkspaceUser workspaceUser) {
+        if (workspaceUser.getRole() == MEMBER) {
             throw new CustomException(ErrorCode.WRONG_USER);
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional//(readOnly = true)
     public List<WorkspaceResponseDto.OrderList> getOrder(User user) {
         List<WorkspaceResponseDto.OrderList> orderLists = new ArrayList<>();
         List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);
 
         for (WorkspaceOrder workspaceOrder : workspaceOrderList) {
-            orderLists.add(new WorkspaceResponseDto.OrderList(workspaceOrder.getWorkspaceUser().getWorkspace()));
+            orderLists.add(new WorkspaceResponseDto.OrderList(workspaceOrder.getWorkspaceUser().getWorkspace(), workspaceOrder.getOrders()));
         }
 
         return orderLists;
@@ -201,21 +201,33 @@ public class WorkspaceService {
 
     @Transactional(readOnly = true)
     public List<WorkspaceResponseDto.People> getPeople(User user, Long id) {
-        getWorkspaceuser(user, id);
+        getWorkspaceUser(user, id);
 
         List<WorkspaceResponseDto.People> peopleList = new ArrayList<>();
         List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
 
-        peopleList.add(new WorkspaceResponseDto.People(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user)));//본인이 가장 먼저 나오게 해야함
-
         for (WorkspaceUser workspaceUser : workspaceUserList) {
-            if(workspaceUser.getUser().getId() == user.getId()){
+            if (workspaceUser.getUser().getId() == user.getId()) {
                 continue;
             }
             SqlStatus status = statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(workspaceUser.getUser());
             peopleList.add(new WorkspaceResponseDto.People(status));
         }
 
+        peopleList.sort(new StatusComparator());
+
+        peopleList.add(0, new WorkspaceResponseDto.People(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user)));//본인이 가장 먼저 나오게 해야함
+
         return peopleList;
+    }
+}
+
+class StatusComparator implements Comparator<WorkspaceResponseDto.People> {
+    @Override
+    public int compare(WorkspaceResponseDto.People o1, WorkspaceResponseDto.People o2) {
+        if (o1.getColor() == o2.getColor()) {
+            return o1.getUserName().toLowerCase().compareTo(o2.getUserName().toLowerCase());
+        }
+        return Integer.compare(o1.getColor(), o2.getColor());
     }
 }

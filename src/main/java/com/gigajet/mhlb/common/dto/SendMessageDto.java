@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 
 @Getter
 public class SendMessageDto {
-    private String message;
-    private int statusCode;
+    private final String message;
+    private final int statusCode;
 
     @Builder
     public SendMessageDto(String message, int statusCode) {

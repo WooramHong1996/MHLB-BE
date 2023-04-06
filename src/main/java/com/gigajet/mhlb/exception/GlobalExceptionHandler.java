@@ -9,6 +9,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -26,6 +27,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<SendMessageDto> handleCustomException(CustomException exception) {
         log.error("CustomException throw Exception : {}", exception.getErrorCode());
         return SendMessageDto.toResponseEntity(exception.getErrorCode());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<SendMessageDto> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exception) {
+        log.error("MaxUploadSizeExceededException throw Exception : {}", exception.getMessage());
+        return ResponseEntity.badRequest().body(new SendMessageDto("over max size", 400));
     }
 
     @Override
