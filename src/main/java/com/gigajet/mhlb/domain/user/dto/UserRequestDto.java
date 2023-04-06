@@ -23,17 +23,11 @@ public class UserRequestDto {
         @NotBlank(message = "blank")
         @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "wrong pattern")
         private String email;
-
         @NotBlank(message = "blank")
         @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$", message = "wrong pattern")
         private String password;
-
         private String userName;
-
-        private String userImage;
-
         private String userJob;
-
         private String userDesc;
 
     }
@@ -44,7 +38,6 @@ public class UserRequestDto {
         @NotBlank(message = "blank")
         @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "wrong pattern")
         private String email;
-
         private String password;
 
     }
