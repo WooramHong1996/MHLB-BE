@@ -29,7 +29,8 @@ public class WebSecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
 //                .requestMatchers(PathRequest.toH2Console())
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                .antMatchers("/swagger-ui/**", "/api-docs/json/**");
     }
 
     @Bean
