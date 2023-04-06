@@ -20,11 +20,12 @@ public class UserRequestDto {
     @Getter
     public static class Register {
 
-        @NotBlank(message = "값이 입력되지 않음")
-        @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "잘못된 형식의 이메일")
+        @NotBlank(message = "blank")
+        @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "wrong pattern")
         private String email;
 
-        @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$", message = "잘못된 형식의 비밀번호")
+        @NotBlank(message = "blank")
+        @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$", message = "wrong pattern")
         private String password;
 
         private String userName;
@@ -40,8 +41,8 @@ public class UserRequestDto {
     @Getter
     public static class Login {
 
-        @NotBlank(message = "값이 입력되지 않음")
-        @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "잘못된 형식의 이메일")
+        @NotBlank(message = "blank")
+        @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "wrong pattern")
         private String email;
 
         private String password;
@@ -51,8 +52,8 @@ public class UserRequestDto {
     @Getter
     public static class Password {
 
-        @NotBlank(message = "값이 입력되지 않음")
-        @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\\\d)[a-zA-Z\\\\d]{8,20}$", message = "잘못된 형식의 비밀번호")
+        @NotBlank(message = "blank")
+        @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$", message = "wrong pattern")
         private String password;
 
     }

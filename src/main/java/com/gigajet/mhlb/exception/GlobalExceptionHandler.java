@@ -42,14 +42,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         log.error("MethodArgumentNotValidException throw Exception : {}", BAD_REQUEST);
 
-        for (int i = 0; i <= allErrors.size(); i++) {
-            log.error(allErrors.get(i).getField() + " : " + allErrors.get(i).getDefaultMessage());
-            errors.put(allErrors.get(i).getField(), allErrors.get(i).getDefaultMessage());
+        for (FieldError allError : allErrors) {
+            String fieldName = allError.getField();
+            log.error(fieldName + " : " + allError.getDefaultMessage());
+
+            if (errors.containsKey(fieldName)) {
+                errors.put(fieldName, errors.get(fieldName) + ", " + allError.getDefaultMessage());
+                continue;
+            }
+            errors.put(fieldName, allError.getDefaultMessage());
         }
 
-        return ResponseEntity
-                .status(BAD_REQUEST)
-                .body(errors);
+        return ResponseEntity.badRequest().body(errors);
     }
 
 }
