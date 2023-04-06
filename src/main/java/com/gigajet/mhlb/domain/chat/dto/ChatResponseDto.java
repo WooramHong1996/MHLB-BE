@@ -2,6 +2,7 @@ package com.gigajet.mhlb.domain.chat.dto;
 
 import com.gigajet.mhlb.domain.chat.entity.ChatRoom;
 import com.gigajet.mhlb.domain.user.entity.User;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -52,12 +53,19 @@ public class ChatResponseDto {
         private Long userId;
         private String message;
         private LocalDateTime createdAt;
+        private ChatRequestDto.MessageType type;
 
         public Chat(com.gigajet.mhlb.domain.chat.entity.Chat chat) {
             this.messageId = chat.getMessageId();
             this.message = chat.getMessage();
             this.userId = chat.getSenderId();
             this.createdAt = chat.getCreatedAt();
+        }
+
+        public Chat(ChatRequestDto.Chat chat){
+            this.messageId = chat.getMessageId();
+            this.message = chat.getMessage();
+            this.userId = chat.getSenderId();
         }
     }
 }
