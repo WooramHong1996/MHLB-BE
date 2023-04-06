@@ -12,7 +12,6 @@ import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceOrder;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceInviteRepository;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceOrderRepository;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
@@ -27,11 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
-import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.ADMIN;
 
 @Service
 @RequiredArgsConstructor
@@ -71,8 +67,6 @@ public class MypageService {
         for (WorkspaceUser workspaceUser : workspaceUsers) {
             workspaceLists.add(new MypageResponseDto.WorkspaceList(workspaceUser.getWorkspace(), workspaceUser.getWorkspaceOrder().getWorkspaceUser()));
         }
-
-        workspaceLists.sort(new WorkspaceComparator());
 
         return new MypageResponseDto.AllList(inviteLists, workspaceLists);
     }
@@ -115,7 +109,7 @@ public class MypageService {
     public ResponseEntity<SendMessageDto> deleteWorkspace(User user, long workspaceId) {
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
-        workspaceUser.offIsShow();
+        workspaceUser.onIsShow();
 //        workspaceUserRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
 
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.DELETE_SUCCESS));
@@ -123,11 +117,7 @@ public class MypageService {
 
     @Transactional
     public ResponseEntity<SendMessageDto> inviteWorkspace(User user, long workspaceId) {
-        Optional<WorkspaceInvite> workspaceUserOptional = workspaceInviteRepository.findByWorkspace_IdAndUserId(workspaceId, user.getId());
-
-        if (workspaceUserOptional.isEmpty()) {
-            throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
-        }
+        WorkspaceInvite workspaceUserOptional = workspaceInviteRepository.findByWorkspace_IdAndUserId(workspaceId, user.getId()).orElseThrow(()-> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
         Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
         Optional<WorkspaceUser> alreadyExist = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 0);
@@ -169,14 +159,4 @@ public class MypageService {
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.INVITE_REJECT));
     }
 
-}
-
-class WorkspaceComparator implements Comparator<MypageResponseDto.WorkspaceList> {
-    @Override
-    public int compare(MypageResponseDto.WorkspaceList o1, MypageResponseDto.WorkspaceList o2) {
-        if (o1.getUserRole() == o2.getUserRole() || o1.getUserRole() != WorkspaceUserRole.ADMIN && o2.getUserRole() != WorkspaceUserRole.ADMIN) {
-            return o1.getWorkspaceTitle().toLowerCase().compareTo(o2.getWorkspaceTitle().toLowerCase());
-        }
-        return Integer.compare(o2.getUserRole().ordinal(), o1.getUserRole().ordinal());
-    }
 }

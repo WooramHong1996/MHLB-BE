@@ -18,10 +18,10 @@ public class MypageResponseDto {
 
         private final String userDesc;
 
+
         private final String userImage;
 
         private final String userJob;
-
         @Builder
         public Info(User user) {
             this.userName = user.getUsername();

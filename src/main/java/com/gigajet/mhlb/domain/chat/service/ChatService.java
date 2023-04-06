@@ -5,6 +5,7 @@ import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
 import com.gigajet.mhlb.domain.chat.entity.Chat;
 import com.gigajet.mhlb.domain.chat.entity.ChatRoom;
 import com.gigajet.mhlb.domain.chat.entity.UserAndMessage;
+import com.gigajet.mhlb.domain.chat.redis.RedisRepository;
 import com.gigajet.mhlb.domain.chat.repository.ChatRepository;
 import com.gigajet.mhlb.domain.chat.repository.ChatRoomRepository;
 import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
@@ -15,6 +16,8 @@ import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import static com.gigajet.mhlb.exception.ErrorCode.WRONG_CHAT_ROOM_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +38,10 @@ public class ChatService {
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
     private final SqlStatusRepository statusRepository;
+    private final RedisRepository redisRepository;
+    private final ChannelTopic channelTopic;
+    private final RedisTemplate redisTemplate;
+
 
     private final JwtUtil jwtUtil;
     private static Long chatId = 0L;
@@ -39,9 +49,22 @@ public class ChatService {
     private final ConcurrentHashMap<String, Integer> endpointMap = new ConcurrentHashMap<>();
     private final int full = 2;
 
+    public void enter(String uuid, String email) {
+        Long id = userRepository.findByEmail(email).get().getId();
+
+        // 그룹채팅은 해시코드가 존재하지 않고 일대일 채팅은 해시코드가 존재한다.
+        ChatRoom chatRoom = chatRoomRepository.findById(uuid).orElseThrow(() -> new CustomException(ErrorCode.WRONG_CHAT_ROOM_ID));
+
+        // 채팅방에 들어온 정보를 Redis 저장
+        redisRepository.userEnterRoomInfo(id, uuid);
+
+        // 그룹채팅은 해시코드가 존재하지 않고 일대일 채팅은 해시코드가 존재한다.
+            redisRepository.initChatRoomMessageInfo(chatRoom.getId()+"", id);
+    }
+
     @Transactional
     public ChatResponseDto.Chat sendMsg(ChatRequestDto.Chat message, String email) {
-        //탈퇴한 사람에게 메시지 보낼 수 없도록 막는 로직 구현 필요
+        //탈퇴한 사람 메시지 보낼 수 없도록 막는 로직 구현 필요
         Long id = userRepository.findByEmail(email).get().getId();
         Chat chat = Chat.builder()
                 .senderId(id)
@@ -67,6 +90,56 @@ public class ChatService {
         chatRoomRepository.save(chatRoom);
         chatRepository.save(chat);
         return new ChatResponseDto.Chat(chat);
+    }
+
+    @Transactional
+    public void sendMessage(ChatRequestDto.Chat message, String email) {
+        Long id = userRepository.findByEmail(email).get().getId();
+        Chat chat = Chat.builder()
+                .senderId(id)
+                .inBoxId(message.getUuid())
+                .workspaceId(message.getWorkspaceId())
+                .message(message.getMessage())
+                .messageId(chatId)
+                .build();
+        chatId++;
+        ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
+        chat.setCreatedAt(LocalDateTime.now());
+
+        chatRepository.save(chat);
+        message.setSenderId(chat.getSenderId());
+        message.setMessageId(chatId);
+        message.setType(ChatRequestDto.MessageType.TALK);
+        String topic = channelTopic.getTopic();
+
+            // 일대일 채팅 이면서 안읽은 메세지 업데이트
+            redisTemplate.convertAndSend(topic, message);
+            updateUnReadMessageCount(message, id);
+    }
+
+    //안읽은 메세지 업데이트
+    private void updateUnReadMessageCount(ChatRequestDto.Chat message, Long id) {
+        ChatRoom chatRoom = chatRoomRepository.findByInBoxId(message.getUuid());
+        HashSet<Long> userIds = chatRoom.getUserSet();
+        Long otherUserId=0L;
+        for (long userId: userIds) {
+            if(userId != id){
+                otherUserId = userId;
+            }
+        }
+        String roomId = String.valueOf(message.getUuid());
+
+        if (!redisRepository.existChatRoomUserInfo(otherUserId) || !redisRepository.getUserEnterRoomId(otherUserId).equals(roomId)) {
+
+            redisRepository.addChatRoomMessageCount(roomId, otherUserId);
+            int unReadMessageCount = redisRepository.getChatRoomMessageCount(roomId+"", otherUserId);
+
+            String topic = channelTopic.getTopic();
+
+            ChatRequestDto.Chat messageRequest = new ChatRequestDto.Chat(message, unReadMessageCount);
+
+            redisTemplate.convertAndSend(topic, messageRequest);
+        }
     }
 
     @Transactional
@@ -101,7 +174,6 @@ public class ChatService {
         }
         return new ChatResponseDto.GetUuid(chatRoom.getInBoxId());
     }
-
     @Transactional
     public List<ChatResponseDto.Inbox> getInbox(User user, Long workspaceId) {
         workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));

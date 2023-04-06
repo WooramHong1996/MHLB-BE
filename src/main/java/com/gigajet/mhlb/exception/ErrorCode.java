@@ -17,6 +17,7 @@ public enum ErrorCode {
     WRONG_ADMIN_TOKEN(BAD_REQUEST, "wrong admin token"),
     DUPLICATE_TITLE(BAD_REQUEST, "duplicate title"),
     WRONG_WORKSPACE_ID(BAD_REQUEST, "wrong workspace id"),
+    WRONG_CHAT_ROOM_ID(BAD_REQUEST, "wrong chatRoom id"),
     WRONG_USER(BAD_REQUEST, "wrong user"),
     NOT_SAME_EMAIL(BAD_REQUEST, "not same email"),
     SAME_PERMISSION(BAD_REQUEST, "same role"),

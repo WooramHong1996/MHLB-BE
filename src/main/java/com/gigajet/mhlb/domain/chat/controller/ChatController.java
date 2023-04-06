@@ -2,6 +2,7 @@ package com.gigajet.mhlb.domain.chat.controller;
 
 import com.gigajet.mhlb.domain.chat.dto.ChatRequestDto;
 import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
+import com.gigajet.mhlb.domain.chat.redis.RedisRepository;
 import com.gigajet.mhlb.domain.chat.service.ChatService;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.List;
 public class ChatController {
     private final ChatService chatService;
     private final SimpMessageSendingOperations sendingOperations;
+    private final RedisRepository redisRepository;
 
     @EventListener(SessionConnectEvent.class)
     public void connect(SessionConnectEvent event) {
@@ -46,8 +48,9 @@ public class ChatController {
     public void sendMsg(ChatRequestDto.Chat message, StompHeaderAccessor accessor) {
         String authorization = accessor.getFirstNativeHeader("Authorization");
         String email = chatService.resolveToken(authorization);
-        ChatResponseDto.Chat response = chatService.sendMsg(message, email);
-        sendingOperations.convertAndSend("/sub/inbox/" + message.getUuid(), response);
+//        ChatResponseDto.Chat response = chatService.sendMsg(message, email);
+        chatService.sendMessage(message, email);
+//        sendingOperations.convertAndSend("/sub/inbox/" + message.getUuid(), response);
     }
 
     @PostMapping("/{workspaceId}")
