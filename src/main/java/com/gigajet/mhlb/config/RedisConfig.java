@@ -30,13 +30,13 @@ public class RedisConfig {
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(
             RedisConnectionFactory connectionFactory,
-//            MessageListenerAdapter listenerAdapter,
+            MessageListenerAdapter listenerAdapter,
             ChannelTopic channelTopic
     ) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // RedisMessageListenerContainer 에 Bean 으로 등록한 listenerAdapter, channelTopic 추가
-//        container.addMessageListener(listenerAdapter, channelTopic);
+        container.addMessageListener(listenerAdapter, channelTopic);
         return container;
     }
 

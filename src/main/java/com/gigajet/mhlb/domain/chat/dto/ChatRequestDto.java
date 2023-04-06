@@ -1,9 +1,8 @@
 package com.gigajet.mhlb.domain.chat.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 public class ChatRequestDto {
 
@@ -14,6 +13,9 @@ public class ChatRequestDto {
 
     @Getter
     @Setter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Chat {
         private String uuid;
         private Long messageId;

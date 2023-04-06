@@ -28,7 +28,7 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
-                .addEndpoint("/stomp/chat")
+                .addEndpoint("/stomp/ws")
 //                .setAllowedOriginPatterns("*")
 //                .setHandshakeHandler(new UserHandshakeHandler)
                 .setAllowedOriginPatterns("http://localhost:3000")
