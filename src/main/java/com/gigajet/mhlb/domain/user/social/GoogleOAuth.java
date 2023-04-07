@@ -16,10 +16,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GoogleOAuth implements SocialOAuth {
+public class GoogleOAuth {
 
-    @Value("${OAuth2.google.url}")
-    private String googleLoginUrl;
     @Value("${OAuth2.google.client-id}")
     private String googleClientId;
     @Value("${OAuth2.google.callback-url}")
@@ -30,25 +28,6 @@ public class GoogleOAuth implements SocialOAuth {
     private String googleDataAccessScope;
 
     private final RestTemplate restTemplate;
-
-    @Override
-    public String getOAuthRedirectURL() {
-
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("scope", googleDataAccessScope);
-        paramMap.put("response_type", "code");
-        paramMap.put("client_id", googleClientId);
-        paramMap.put("redirect_uri", googleCallbackUrl);
-
-        String parameters = paramMap.entrySet().stream()
-                .map(x -> x.getKey() + "=" + x.getValue())
-                .collect(Collectors.joining("&"));
-
-        String redirectURL = googleLoginUrl + "?" + parameters;
-        log.info(redirectURL);
-
-        return redirectURL;
-    }
 
     public GoogleOAuthRequestDto.Token getAccessToken(String code) {
         Map<String, Object> paramMap = new HashMap<>();

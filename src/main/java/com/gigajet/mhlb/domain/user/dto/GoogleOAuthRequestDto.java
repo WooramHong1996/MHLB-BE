@@ -16,7 +16,7 @@ public class GoogleOAuthRequestDto {
     }
 
     @Getter
-    public class GoogleUser {
+    public static class GoogleUser {
 
         private String id;
         private String email;
