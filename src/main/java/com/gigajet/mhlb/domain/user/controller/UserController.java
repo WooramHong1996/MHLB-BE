@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.Map;
 
@@ -29,18 +30,18 @@ public class UserController {
 
     // 중복 체크
     @PostMapping("/duplicate-email")
-    public ResponseEntity<SendMessageDto> duplicateEmail(@RequestBody UserRequestDto.CheckEmail emailDto) {
+    public ResponseEntity<SendMessageDto> duplicateEmail(@Valid @RequestBody UserRequestDto.CheckEmail emailDto) {
         return userService.duplicateEmail(emailDto.getEmail());
     }
 
     // 유효 체크
     @PostMapping("/validate-email")
-    public ResponseEntity<SendMessageDto> validateEmail(@RequestBody UserRequestDto.CheckEmail emailDto) {
+    public ResponseEntity<SendMessageDto> validateEmail(@Valid @RequestBody UserRequestDto.CheckEmail emailDto) {
         return userService.validateEmail(emailDto.getEmail());
     }
 
     @PostMapping("/register")
-    public ResponseEntity<SendMessageDto> register(@RequestBody UserRequestDto.Register registerDto) {
+    public ResponseEntity<SendMessageDto> register(@Valid @RequestBody UserRequestDto.Register registerDto) {
         User user = userService.register(registerDto);
         return statusService.register(user);
     }
@@ -54,7 +55,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<SendMessageDto> login(@RequestBody UserRequestDto.Login loginDto, HttpServletResponse response) {
+    public ResponseEntity<SendMessageDto> login(@Valid @RequestBody UserRequestDto.Login loginDto, HttpServletResponse response) {
         return userService.login(loginDto, response);
     }
 
