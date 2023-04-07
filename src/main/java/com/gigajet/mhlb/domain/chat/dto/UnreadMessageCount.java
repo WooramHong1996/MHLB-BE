@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 @Setter
 public class UnreadMessageCount {
     private Long otherUserId;
-    private int unreadCount;
+    private Long unreadCount;
     private String roomId;
     private String type;
 

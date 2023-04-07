@@ -23,11 +23,11 @@ public class ChatRequestDto {
         private String message;
         private MessageType type; // 메시지 타입
         private Long senderId;
-        private int count;
+        private Long count;
         private Long otherUserIds;
-        private LocalDateTime creatAt;
+        private String creatAt;
 
-        public Chat(ChatRequestDto.Chat chatMessageDto, int count) {
+        public Chat(ChatRequestDto.Chat chatMessageDto, Long count) {
             this.type = MessageType.UNREAD_MESSAGE_COUNT_ALARM; // 메시지 타입
             this.uuid = chatMessageDto.uuid; // 방 이름
             this.otherUserIds = chatMessageDto.otherUserIds; // 상대방 privateKey

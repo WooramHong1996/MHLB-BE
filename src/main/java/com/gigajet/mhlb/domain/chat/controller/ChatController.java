@@ -10,6 +10,9 @@ import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -71,13 +74,38 @@ public class ChatController {
         return chatService.getUuid(userDetails.getUser(), workspaceId, userId.getUserId());
     }
 
+//    @GetMapping("/{workspaceId}")
+//    public List<ChatResponseDto.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Long workspaceId) {
+//        return chatService.getInbox(userDetails.getUser(), workspaceId);
+//    }
+
     @GetMapping("/{workspaceId}")
     public List<ChatResponseDto.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId) {
         return chatService.getInbox(userDetails.getUser(), workspaceId);
     }
 
+//    @GetMapping("/{workspaceId}/{userId}")
+//    public List<ChatResponseDto.Chating> getChat(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @PathVariable Long userId) {
+//        return chatService.getChat(userDetails.getUser(), workspaceId, userId);
+//    }
+
+//    @GetMapping("/{workspaceId}/{userId}")
+//    public List<ChatResponseDto.Chating> getChat(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Long workspaceId, @RequestParam Long userId,
+//                                              @PageableDefault(page = 0, size = 25, sort = "messageId", direction = Sort.Direction.DESC)Pageable pageable) {
+//        return chatService.getChat(userDetails.getUser(), workspaceId, userId, pageable);
+//    }
+
     @GetMapping("/{workspaceId}/{userId}")
-    public List<ChatResponseDto.Chat> getChat(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @PathVariable Long userId) {
-        return chatService.getChat(userDetails.getUser(), workspaceId, userId);
+    public List<ChatResponseDto.Chating> getChat(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @PathVariable Long userId,
+                                                 @PageableDefault(page = 0, size = 25, sort = "messageId", direction = Sort.Direction.ASC)Pageable pageable) {
+        return chatService.getChat(userDetails.getUser(), workspaceId, userId, pageable);
     }
+
+    // 채팅 알람
+//    @MessageMapping("/chat/alarm")
+//    public void chatAlarm(ChatRequestDto.Chat chatMessageRequest, StompHeaderAccessor accessor) {
+//        String authorization = accessor.getFirstNativeHeader("Authorization");
+//        String email = chatService.resolveToken(authorization);
+//        chatService.sendChatAlarm(chatMessageRequest, email);
+//    }
 }

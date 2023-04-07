@@ -48,18 +48,32 @@ public class ChatResponseDto {
     }
 
     @Getter
-    public static class Chat {
+    public static class Chating {
         private Long messageId;
         private Long userId;
         private String message;
         private LocalDateTime createdAt;
 
-        public Chat(com.gigajet.mhlb.domain.chat.entity.Chat chat) {
+        public Chating(com.gigajet.mhlb.domain.chat.entity.Chat chat) {
             this.messageId = chat.getMessageId();
             this.message = chat.getMessage();
             this.userId = chat.getSenderId();
             this.createdAt = chat.getCreatedAt();
         }
+        public Chating(ChatResponseDto.Chat chat) {
+            this.messageId = chat.getMessageId();
+            this.message = chat.getMessage();
+            this.userId = chat.getUserId();
+            this.createdAt = LocalDateTime.now();
+        }
+
+    }
+    @Getter
+    public static class Chat {
+        private Long messageId;
+        private Long userId;
+        private String message;
+        private String createdAt;
 
         public Chat(ChatRequestDto.Chat chat){
             this.messageId = chat.getMessageId();
