@@ -29,7 +29,8 @@ public class WebSecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
 //                .requestMatchers(PathRequest.toH2Console())
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                .antMatchers("/swagger-ui/**", "/api-docs/json/**");
     }
 
     @Bean
@@ -43,6 +44,7 @@ public class WebSecurityConfig {
         http.authorizeRequests()
                 .antMatchers("/api/users/**").permitAll()
                 .antMatchers("/stomp/**").permitAll()
+                .antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated();
 //                .anyRequest().permitAll();
 
