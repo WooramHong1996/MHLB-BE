@@ -44,13 +44,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         for (FieldError allError : allErrors) {
             String fieldName = allError.getField();
-            log.error(fieldName + " : " + allError.getDefaultMessage());
 
-            if (errors.containsKey(fieldName)) {
-                errors.put(fieldName, errors.get(fieldName) + ", " + allError.getDefaultMessage());
+            if (errors.containsKey(fieldName) && errors.get(fieldName).equals("blank")) {
                 continue;
             }
+
             errors.put(fieldName, allError.getDefaultMessage());
+            log.error(fieldName + " : " + allError.getDefaultMessage());
         }
 
         return ResponseEntity.badRequest().body(errors);
