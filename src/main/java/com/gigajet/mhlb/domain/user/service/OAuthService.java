@@ -31,6 +31,11 @@ public class OAuthService {
 
     private final HttpServletResponse response;
 
+    public void sendRedirect() throws IOException {
+        String redirectURL = googleOAuth.getOAuthRedirectURL();
+        response.sendRedirect(redirectURL);
+    }
+
     public ResponseEntity<SendMessageDto> oAuthLogin(String code) {
         GoogleOAuthRequestDto.Token tokenRequestDto = googleOAuth.getAccessToken(code);
         GoogleOAuthRequestDto.GoogleUser googleUserDto = googleOAuth.getUserInfo(tokenRequestDto);

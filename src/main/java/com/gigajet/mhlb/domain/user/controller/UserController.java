@@ -74,6 +74,11 @@ public class UserController {
     /*
         소셜 로그인
      */
+    @GetMapping("/auth/google")
+    public void socialLoginRedirect() throws IOException {
+        oAuthService.sendRedirect();
+    }
+
     @GetMapping("/auth/google/callback")
     public ResponseEntity<SendMessageDto> callback(@RequestParam(name = "code") String code) {
         return oAuthService.oAuthLogin(code);
