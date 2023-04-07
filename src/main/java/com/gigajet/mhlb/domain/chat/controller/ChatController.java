@@ -4,18 +4,17 @@ import com.gigajet.mhlb.domain.chat.dto.ChatRequestDto;
 import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
 import com.gigajet.mhlb.domain.chat.redis.RedisRepository;
 import com.gigajet.mhlb.domain.chat.service.ChatService;
+import com.gigajet.mhlb.domain.user.entity.User;
+import com.gigajet.mhlb.domain.user.repository.UserRepository;
+import com.gigajet.mhlb.exception.CustomException;
+import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.socket.messaging.SessionConnectEvent;
-import org.springframework.web.socket.messaging.SessionDisconnectEvent;
-import org.springframework.web.socket.messaging.SessionSubscribeEvent;
-import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 
 import java.util.List;
 
@@ -26,23 +25,37 @@ public class ChatController {
     private final ChatService chatService;
     private final SimpMessageSendingOperations sendingOperations;
     private final RedisRepository redisRepository;
+    private final UserRepository userRepository;
 
-    @EventListener(SessionConnectEvent.class)
-    public void connect(SessionConnectEvent event) {
-        chatService.readMessages(StompHeaderAccessor.wrap(event.getMessage()));
+    /**
+     * websocket "/pub/chat/enter"로 들어오는 메시징을 처리한다.
+     * 채팅방에 입장했을 경우
+     */
+    @MessageMapping("/chat/enter")
+    public void enter(ChatRequestDto.Chat chatMessageRequest, StompHeaderAccessor accessor) {
+        String authorization = accessor.getFirstNativeHeader("Authorization");
+        String email = chatService.resolveToken(authorization);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+
+        chatService.enter(user.getId(), chatMessageRequest.getUuid());
     }
 
-    @EventListener(SessionSubscribeEvent.class)
-    public void subscribe(SessionSubscribeEvent event) {
-        String endpoint = StompHeaderAccessor.wrap(event.getMessage()).getDestination();
-        chatService.subscribe(endpoint);
-    }
+//    @EventListener(SessionConnectEvent.class)
+//    public void connect(SessionConnectEvent event) {
+//        chatService.readMessages(StompHeaderAccessor.wrap(event.getMessage()));
+//    }
+//
+//    @EventListener(SessionSubscribeEvent.class)
+//    public void subscribe(SessionSubscribeEvent event) {
+//        String endpoint = StompHeaderAccessor.wrap(event.getMessage()).getDestination();
+//        chatService.subscribe(endpoint);
+//    }
 
-    @EventListener(SessionDisconnectEvent.class)
-    public void unSubscribe(SessionUnsubscribeEvent event) {
-        String endpoint = StompHeaderAccessor.wrap(event.getMessage()).getDestination();
-        chatService.unSubscribe(endpoint);
-    }
+//    @EventListener(SessionDisconnectEvent.class)
+//    public void unSubscribe(SessionUnsubscribeEvent event) {
+//        String endpoint = StompHeaderAccessor.wrap(event.getMessage()).getDestination();
+//        chatService.unSubscribe(endpoint);
+//    }
 
     @MessageMapping("/inbox")//메시지매핑은 리퀘스트매핑 못받음
     public void sendMsg(ChatRequestDto.Chat message, StompHeaderAccessor accessor) {

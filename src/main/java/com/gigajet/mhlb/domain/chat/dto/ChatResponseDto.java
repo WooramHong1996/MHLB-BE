@@ -53,7 +53,6 @@ public class ChatResponseDto {
         private Long userId;
         private String message;
         private LocalDateTime createdAt;
-        private ChatRequestDto.MessageType type;
 
         public Chat(com.gigajet.mhlb.domain.chat.entity.Chat chat) {
             this.messageId = chat.getMessageId();
@@ -66,6 +65,7 @@ public class ChatResponseDto {
             this.messageId = chat.getMessageId();
             this.message = chat.getMessage();
             this.userId = chat.getSenderId();
+            this.createdAt = chat.getCreatAt();
         }
     }
 }

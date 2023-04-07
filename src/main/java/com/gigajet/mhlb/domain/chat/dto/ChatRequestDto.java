@@ -1,9 +1,8 @@
 package com.gigajet.mhlb.domain.chat.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 public class ChatRequestDto {
 
@@ -14,6 +13,9 @@ public class ChatRequestDto {
 
     @Getter
     @Setter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Chat {
         private String uuid;
         private Long messageId;
@@ -23,6 +25,7 @@ public class ChatRequestDto {
         private Long senderId;
         private int count;
         private Long otherUserIds;
+        private LocalDateTime creatAt;
 
         public Chat(ChatRequestDto.Chat chatMessageDto, int count) {
             this.type = MessageType.UNREAD_MESSAGE_COUNT_ALARM; // 메시지 타입
