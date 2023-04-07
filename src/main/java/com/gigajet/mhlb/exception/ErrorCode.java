@@ -28,6 +28,7 @@ public enum ErrorCode {
     INVALID_INVITATION(BAD_REQUEST, "Invalid invitation"),
     NULL_MULTIPART_FILE(BAD_REQUEST, "null multipart file"),
     RESIZING_FAILED(BAD_REQUEST, "resizing failed"),
+    NOT_IMAGE(BAD_REQUEST, "not image"),
 
     /* 401 UNAUTHORIZED : 인증 실패 */
     INVALID_TOKEN(UNAUTHORIZED, "invalid token"),
