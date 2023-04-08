@@ -37,7 +37,7 @@ public class TimeCheckAop {
      * <br><strong>클래스 객체를 포함해야 하는경우 패키지 경로를 포함해주어야함</strong>
      * @author Galmaeki
      */
-    @Around("execution(* com.gigajet.mhlb.domain..*Controller.*(..))")
+//    @Around("execution(* com.gigajet.mhlb.domain..*Controller.*(..))")
 //    @Around("execution(* com.gigajet..*(..))")
     public Object timeChecker(ProceedingJoinPoint joinPoint) throws Throwable {
         Long start = System.currentTimeMillis();
