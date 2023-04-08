@@ -34,14 +34,14 @@ public class ChatController {
      * websocket "/pub/chat/enter"로 들어오는 메시징을 처리한다.
      * 채팅방에 입장했을 경우
      */
-    @MessageMapping("/chat/enter")
-    public void enter(ChatRequestDto.Chat chatMessageRequest, StompHeaderAccessor accessor) {
-        String authorization = accessor.getFirstNativeHeader("Authorization");
-        String email = chatService.resolveToken(authorization);
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
-
-        chatService.enter(user.getId(), chatMessageRequest.getUuid());
-    }
+//    @MessageMapping("/chat/enter")
+//    public void enter(ChatRequestDto.Chat chatMessageRequest, StompHeaderAccessor accessor) {
+//        String authorization = accessor.getFirstNativeHeader("Authorization");
+//        String email = chatService.resolveToken(authorization);
+//        User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+//
+//        chatService.enter(user.getId(), chatMessageRequest.getUuid());
+//    }
 
 //    @EventListener(SessionConnectEvent.class)
 //    public void connect(SessionConnectEvent event) {
@@ -74,15 +74,15 @@ public class ChatController {
         return chatService.getUuid(userDetails.getUser(), workspaceId, userId.getUserId());
     }
 
-//    @GetMapping("/{workspaceId}")
-//    public List<ChatResponseDto.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Long workspaceId) {
-//        return chatService.getInbox(userDetails.getUser(), workspaceId);
-//    }
-
-    @GetMapping("/{workspaceId}")
-    public List<ChatResponseDto.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId) {
+    @GetMapping
+    public List<ChatResponseDto.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Long workspaceId) {
         return chatService.getInbox(userDetails.getUser(), workspaceId);
     }
+
+//    @GetMapping("/{workspaceId}")
+//    public List<ChatResponseDto.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId) {
+//        return chatService.getInbox(userDetails.getUser(), workspaceId);
+//    }
 
 //    @GetMapping("/{workspaceId}/{userId}")
 //    public List<ChatResponseDto.Chating> getChat(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @PathVariable Long userId) {

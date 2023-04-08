@@ -51,7 +51,7 @@ public class ChatService {
     //이부분 api 짜야할거같아요
     public void enter(Long userId, String uuid) {
         // 그룹채팅은 해시코드가 존재하지 않고 일대일 채팅은 해시코드가 존재한다.
-        ChatRoom chatRoom = chatRoomRepository.findById(uuid).orElseThrow(() -> new CustomException(ErrorCode.WRONG_CHAT_ROOM_ID));
+        ChatRoom chatRoom = chatRoomRepository.findByInBoxId(uuid);
 
         // 채팅방에 들어온 정보를 Redis 저장
         redisRepository.userEnterRoomInfo(userId, uuid);
@@ -245,41 +245,12 @@ public class ChatService {
         for (Chat chat : messageList) {
             chatList.add(new ChatResponseDto.Chating(chat));
         }
+        enter(user.getId(), chatRoom.getInBoxId());
         return chatList;
     }
 
     public String resolveToken(String authorization) {
         return jwtUtil.getUserEmail(authorization.substring(7));
-    }
-
-    @Transactional
-    public void readMessages(StompHeaderAccessor accessor) {
-        String email = resolveToken(accessor.getFirstNativeHeader("Authorization"));
-
-        Long id = userRepository.findByEmail(email).get().getId();
-
-        String uuid = accessor.getFirstNativeHeader("uuid");
-
-        ChatRoom chatRoom = chatRoomRepository.findByInBoxId(uuid);
-
-        for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
-            if (id != userAndMessage.getUserId()) {
-                continue;
-            }
-            userAndMessage.resetUnread();
-        }
-        chatRoomRepository.save(chatRoom);
-    }
-
-    public void subscribe(String endpoint) {
-        if (endpointMap.get(endpoint) == null) {
-            endpointMap.put(endpoint, 1);
-        }
-        endpointMap.put(endpoint, endpointMap.get(endpoint) + 1);
-    }
-
-    public void unSubscribe(String endpoint) {
-        endpointMap.put(endpoint, endpointMap.get(endpoint) - 1);
     }
 
 //    public void sendChatAlarm(ChatRequestDto.Chat chatMessageRequest, String email) {
