@@ -31,19 +31,21 @@ public class RedisConfig {
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(
             RedisConnectionFactory connectionFactory,
-            @Qualifier("ChatMessageListenerAdapter") MessageListenerAdapter ChatMessageListenerAdapter,
-            @Qualifier("statusMessageListenerAdapter") MessageListenerAdapter handleMessageListenerAdapter
+            @Qualifier("chatMessageListenerAdapter") MessageListenerAdapter chatMessageListenerAdapter,
+            @Qualifier("statusMessageListenerAdapter") MessageListenerAdapter handleMessageListenerAdapter,
+            @Qualifier("alarmMessageListenerAdapter") MessageListenerAdapter alarmMessageListenerAdapter
     ) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // RedisMessageListenerContainer 에 Bean 으로 등록한 listenerAdapter, channelTopic 추가
-        container.addMessageListener(ChatMessageListenerAdapter, new ChannelTopic("chatMessageChannel"));
+        container.addMessageListener(chatMessageListenerAdapter, new ChannelTopic("chatMessageChannel"));
         container.addMessageListener(handleMessageListenerAdapter, new ChannelTopic("statusMessageChannel"));
+        container.addMessageListener(alarmMessageListenerAdapter, new ChannelTopic("alarmMessageChannel"));
         return container;
     }
 
     @Bean
-    public MessageListenerAdapter ChatMessageListenerAdapter(ChatSubscriber subscriber) {
+    public MessageListenerAdapter chatMessageListenerAdapter(ChatSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber);
     }
 
@@ -52,6 +54,10 @@ public class RedisConfig {
         return new MessageListenerAdapter(subscriber);
     }
 
+    @Bean
+    public MessageListenerAdapter alarmMessageListenerAdapter(AlarmSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber);
+    }
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {

@@ -37,12 +37,12 @@ public class ChatService {
     private final SqlStatusRepository statusRepository;
     private final MessageIdRepository messageIdRepository;
 
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;//private final RedisTemplate redisTemplate;
 
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public void sendMsg(ChatRequestDto.Chat message, String email) {
+    public void sendMsg(ChatRequestDto.Chat message, String email, String sessionId) {
         MessageId messageId = messageIdRepository.findTopByKey(1);
         messageId.addMessageId();
 //        MessageId messageId = new MessageId(1L);
@@ -60,6 +60,17 @@ public class ChatService {
         chat.setCreatedAt(LocalDateTime.now());
 
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
+
+        Map<Object, Object> room = redisTemplate.opsForHash().entries("/sub/inbox/" + message.getUuid());
+        if (room.size() == 1) { //방에 혼자일 경우 상대의 안읽은 메시지를 +1
+            for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
+                if (id == userAndMessage.getUserId()) {
+                    continue;
+                }
+                userAndMessage.addUnread();
+            }
+        }
+
         chatRoom.update(chat);
         chatRoomRepository.save(chatRoom);
 
@@ -158,9 +169,7 @@ public class ChatService {
 
     @Transactional
     public void readMessages(StompHeaderAccessor accessor) {
-        String email = resolveToken(accessor.getFirstNativeHeader("Authorization"));
-
-        Long id = userRepository.findByEmail(email).get().getId();
+        Long id = userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))).get().getId();
 
         String uuid = accessor.getFirstNativeHeader("uuid");
 
@@ -175,10 +184,63 @@ public class ChatService {
         chatRoomRepository.save(chatRoom);
     }
 
+    /**
+     * disconnect시 endpoint의 값을 받아올 수 없으므로 sessionId : endpoint의 데이터를 저장해둠
+     */
+    @Transactional
     public void checkRoom(StompHeaderAccessor accessor) {
-        String destination = accessor.getDestination();
-        Long userId = userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))).get().getId();
-        //여기서 입장 및 퇴장 로직을 구성 할 예정 입니다.
-        System.out.println(destination);
+        Map<Object, Object> room = redisTemplate.opsForHash().entries(accessor.getDestination());
+        if (room.size() == 0) {//해당 채팅방 최초 접속시
+            Map<String, String> userSessionInfo = new HashMap<>();
+
+            userSessionInfo.put("sessionId", accessor.getSessionId());
+
+            redisTemplate.opsForHash().putAll(accessor.getDestination(), userSessionInfo);
+            redisTemplate.opsForValue().set(accessor.getSessionId(), accessor.getDestination());
+
+        } else {//채팅방에 이미 유저가 존재 할 경우
+            Map<String, String> updatedData = new HashMap<>();
+//구현부
+            for (Map.Entry<Object, Object> entry : room.entrySet()) {
+                String key = (String) entry.getKey();
+                String value = (String) entry.getValue();
+                updatedData.put(key, value);
+            }
+            updatedData.put("sessionId1", accessor.getSessionId());
+            redisTemplate.opsForHash().putAll(accessor.getDestination(), updatedData);
+
+            redisTemplate.opsForValue().set(accessor.getSessionId(), accessor.getDestination());
+            Map<Object, Object> test = redisTemplate.opsForHash().entries(accessor.getDestination());
+            System.out.println();
+        }
+    }
+
+    @Transactional
+    public void exitRoom(StompHeaderAccessor accessor) {
+        String sessionId = accessor.getSessionId();
+        String endpoint = (String) redisTemplate.opsForValue().get(sessionId);
+
+        Map<Object, Object> room = redisTemplate.opsForHash().entries(endpoint);
+
+        if (room.size() == 1) {//disconnect시 마지막 인원일 경우 바로 삭제
+            redisTemplate.delete(sessionId);
+            redisTemplate.delete(endpoint);
+        } else {
+            Map<String, String> updatedData = new HashMap<>();
+
+            for (Map.Entry<Object, Object> entry : room.entrySet()) {
+                if ((entry.getValue()).equals(sessionId)) {
+                    continue;
+                }
+                String key = (String) entry.getKey();
+                String value = (String) entry.getValue();
+                updatedData.put(key, value);
+                System.out.println();
+            }
+
+            redisTemplate.delete(endpoint);
+            redisTemplate.opsForHash().putAll(endpoint, updatedData);//기존 값 제거 후 새 값 저장
+            redisTemplate.delete(sessionId);
+        }
     }
 }

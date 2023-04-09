@@ -14,8 +14,8 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
-import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 
 import java.util.List;
 
@@ -31,26 +31,26 @@ public class ChatController {
     }
 
     @EventListener(SessionSubscribeEvent.class)
-    public void Subscribe(SessionSubscribeEvent event) {
+    public void subscribe(SessionSubscribeEvent event) {
         chatService.checkRoom(StompHeaderAccessor.wrap(event.getMessage()));
     }
 
-    @EventListener(SessionUnsubscribeEvent.class)
-    public void Subscribe(SessionUnsubscribeEvent event) {
-        chatService.checkRoom(StompHeaderAccessor.wrap(event.getMessage()));
+    @EventListener(SessionDisconnectEvent.class)
+    public void disconnect(SessionDisconnectEvent event) {
+        chatService.exitRoom(StompHeaderAccessor.wrap(event.getMessage()));
     }
 
     @MessageMapping("/inbox")
     public void sendMsg(ChatRequestDto.Chat message, StompHeaderAccessor accessor) {
         String authorization = accessor.getFirstNativeHeader("Authorization");
         String email = chatService.resolveToken(authorization);
-        chatService.sendMsg(message, email);
+        chatService.sendMsg(message, email, accessor.getSessionId());
     }
 
     @GetMapping("/{workspaceId}/{userId}")
     public List<ChatResponseDto.Chatting> getChat(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                 @PathVariable Long workspaceId, @PathVariable Long userId,
-                                                 @PageableDefault(size = 25, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+                                                  @PathVariable Long workspaceId, @PathVariable Long userId,
+                                                  @PageableDefault(size = 25, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return chatService.getChat(userDetails.getUser(), workspaceId, userId, pageable);
     }
 
