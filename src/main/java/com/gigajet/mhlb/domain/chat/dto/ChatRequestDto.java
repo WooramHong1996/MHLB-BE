@@ -17,4 +17,19 @@ public class ChatRequestDto {
         private Long workspaceId;
         private String message;
     }
+
+    @Getter
+    public static class Convert {
+        private String uuid;
+        private Long workspaceId;
+        private String message;
+        private String email;
+
+        public Convert(ChatRequestDto.Chat chat, String email) {
+            this.uuid = chat.getUuid();
+            this.workspaceId = chat.getWorkspaceId();
+            this.message = chat.getMessage();
+            this.email = email;
+        }
+    }
 }

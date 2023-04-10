@@ -4,9 +4,11 @@ import com.gigajet.mhlb.domain.chat.dto.ChatRequestDto;
 import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
 import com.gigajet.mhlb.domain.chat.entity.Chat;
 import com.gigajet.mhlb.domain.chat.entity.ChatRoom;
+import com.gigajet.mhlb.domain.chat.entity.MessageId;
 import com.gigajet.mhlb.domain.chat.entity.UserAndMessage;
 import com.gigajet.mhlb.domain.chat.repository.ChatRepository;
 import com.gigajet.mhlb.domain.chat.repository.ChatRoomRepository;
+import com.gigajet.mhlb.domain.chat.repository.MessageIdRepository;
 import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
@@ -15,47 +17,52 @@ import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
 public class ChatService {
-
     private final ChatRepository chatRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
     private final SqlStatusRepository statusRepository;
+    private final MessageIdRepository messageIdRepository;
+
+    private final RedisTemplate<String, Object> redisTemplate;//private final RedisTemplate redisTemplate;
 
     private final JwtUtil jwtUtil;
-    private static Long chatId = 0L;
-
-    private final ConcurrentHashMap<String, Integer> endpointMap = new ConcurrentHashMap<>();
-    private final int full = 2;
 
     @Transactional
-    public ChatResponseDto.Chat sendMsg(ChatRequestDto.Chat message, String email) {
-        //탈퇴한 사람에게 메시지 보낼 수 없도록 막는 로직 구현 필요
+    public void sendMsg(ChatRequestDto.Chat message, String email, String sessionId) {
+        MessageId messageId = messageIdRepository.findTopByKey(1);
+        messageId.addMessageId();
+//        MessageId messageId = new MessageId(1L);
+        messageIdRepository.save(messageId);
+
         Long id = userRepository.findByEmail(email).get().getId();
+
         Chat chat = Chat.builder()
                 .senderId(id)
                 .inBoxId(message.getUuid())
                 .workspaceId(message.getWorkspaceId())
                 .message(message.getMessage())
-                .messageId(chatId)
+                .messageId(messageId.getMessageId())
                 .build();
-        chatId++;
-        ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
         chat.setCreatedAt(LocalDateTime.now());
-        //해당 엔드포인트의 구독자가 full의 수와 같지 않은 경우 읽지 않은 메시지를 +1하는 로직
-        if (full == endpointMap.get("/sub/inbox/" + message.getUuid())) {
-            //이여야 했는데 부호를 반대로 썼음 -> 왜 되는지 모르는 상태임 //수정필요
+
+        ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
+
+        Map<Object, Object> room = redisTemplate.opsForHash().entries("/sub/inbox/" + message.getUuid());
+        if (room.size() == 1) { //방에 혼자일 경우 상대의 안읽은 메시지를 +1
             for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
                 if (id == userAndMessage.getUserId()) {
                     continue;
@@ -63,10 +70,40 @@ public class ChatService {
                 userAndMessage.addUnread();
             }
         }
+
         chatRoom.update(chat);
         chatRoomRepository.save(chatRoom);
+
         chatRepository.save(chat);
-        return new ChatResponseDto.Chat(chat);
+
+        redisTemplate.convertAndSend("chatMessageChannel", new ChatResponseDto.Convert(chat));
+    }
+
+    @Transactional
+    public List<ChatResponseDto.Chatting> getChat(User user, Long workspaceId, Long opponentsId, Pageable pageable) {
+        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+
+        userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+
+        List<ChatResponseDto.Chatting> chatList = new ArrayList<>();
+
+        HashSet<Long> userIdSet = new HashSet<>();
+        userIdSet.add(user.getId());
+        userIdSet.add(opponentsId);
+
+        ChatRoom chatRoom = chatRoomRepository.findByUserSetAndWorkspaceId(userIdSet, workspaceId);
+        if (chatRoom == null) {
+            return new ArrayList<>();
+        }
+
+        Slice<Chat> messageList = chatRepository.findByInBoxId(chatRoom.getInBoxId(), pageable);
+        for (Chat chat : messageList) {
+            chatList.add(new ChatResponseDto.Chatting(chat));
+        }
+
+        Collections.sort(chatList, (a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()));
+        return chatList;
     }
 
     @Transactional
@@ -126,39 +163,13 @@ public class ChatService {
         return response;
     }
 
-    @Transactional
-    public List<ChatResponseDto.Chat> getChat(User user, Long workspaceId, Long opponentsId) {
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
-
-        userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
-        List<ChatResponseDto.Chat> chatList = new ArrayList<>();
-
-        HashSet<Long> userIdSet = new HashSet<>();
-        userIdSet.add(user.getId());
-        userIdSet.add(opponentsId);
-
-        ChatRoom chatRoom = chatRoomRepository.findByUserSetAndWorkspaceId(userIdSet, workspaceId);
-        if (chatRoom == null) {
-            return new ArrayList<>();
-        }
-
-        List<Chat> messageList = chatRepository.findByInBoxId(chatRoom.getInBoxId());
-        for (Chat chat : messageList) {
-            chatList.add(new ChatResponseDto.Chat(chat));
-        }
-        return chatList;
-    }
-
     public String resolveToken(String authorization) {
         return jwtUtil.getUserEmail(authorization.substring(7));
     }
 
     @Transactional
     public void readMessages(StompHeaderAccessor accessor) {
-        String email = resolveToken(accessor.getFirstNativeHeader("Authorization"));
-
-        Long id = userRepository.findByEmail(email).get().getId();
+        Long id = userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))).get().getId();
 
         String uuid = accessor.getFirstNativeHeader("uuid");
 
@@ -170,18 +181,66 @@ public class ChatService {
             }
             userAndMessage.resetUnread();
         }
-
         chatRoomRepository.save(chatRoom);
     }
 
-    public void subscribe(String endpoint) {
-        if (endpointMap.get(endpoint) == null) {
-            endpointMap.put(endpoint, 1);
+    /**
+     * disconnect시 endpoint의 값을 받아올 수 없으므로 sessionId : endpoint의 데이터를 저장해둠
+     */
+    @Transactional
+    public void checkRoom(StompHeaderAccessor accessor) {
+        Map<Object, Object> room = redisTemplate.opsForHash().entries(accessor.getDestination());
+        if (room.size() == 0) {//해당 채팅방 최초 접속시
+            Map<String, String> userSessionInfo = new HashMap<>();
+
+            userSessionInfo.put("sessionId", accessor.getSessionId());
+
+            redisTemplate.opsForHash().putAll(accessor.getDestination(), userSessionInfo);
+            redisTemplate.opsForValue().set(accessor.getSessionId(), accessor.getDestination());
+
+        } else {//채팅방에 이미 유저가 존재 할 경우
+            Map<String, String> updatedData = new HashMap<>();
+//구현부
+            for (Map.Entry<Object, Object> entry : room.entrySet()) {
+                String key = (String) entry.getKey();
+                String value = (String) entry.getValue();
+                updatedData.put(key, value);
+            }
+            updatedData.put("sessionId1", accessor.getSessionId());
+            redisTemplate.opsForHash().putAll(accessor.getDestination(), updatedData);
+
+            redisTemplate.opsForValue().set(accessor.getSessionId(), accessor.getDestination());
+            Map<Object, Object> test = redisTemplate.opsForHash().entries(accessor.getDestination());
+            System.out.println();
         }
-        endpointMap.put(endpoint, endpointMap.get(endpoint) + 1);
     }
 
-    public void unSubscribe(String endpoint) {
-        endpointMap.put(endpoint, endpointMap.get(endpoint) - 1);
+    @Transactional
+    public void exitRoom(StompHeaderAccessor accessor) {
+        String sessionId = accessor.getSessionId();
+        String endpoint = (String) redisTemplate.opsForValue().get(sessionId);
+
+        Map<Object, Object> room = redisTemplate.opsForHash().entries(endpoint);
+
+        if (room.size() == 1) {//disconnect시 마지막 인원일 경우 바로 삭제
+            redisTemplate.delete(sessionId);
+            redisTemplate.delete(endpoint);
+        } else {
+            Map<String, String> updatedData = new HashMap<>();
+
+            for (Map.Entry<Object, Object> entry : room.entrySet()) {
+                if ((entry.getValue()).equals(sessionId)) {
+                    continue;
+                }
+                String key = (String) entry.getKey();
+                String value = (String) entry.getValue();
+                updatedData.put(key, value);
+                System.out.println();
+            }
+
+            redisTemplate.delete(endpoint);
+            redisTemplate.opsForHash().putAll(endpoint, updatedData);//기존 값 제거 후 새 값 저장
+            redisTemplate.delete(sessionId);
+        }
     }
 }

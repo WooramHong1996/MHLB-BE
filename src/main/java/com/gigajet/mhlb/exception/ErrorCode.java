@@ -30,6 +30,7 @@ public enum ErrorCode {
     RESIZING_FAILED(BAD_REQUEST, "resizing failed"),
     NOT_IMAGE(BAD_REQUEST, "not image"),
     SOCIAL_USER(BAD_REQUEST, "social user"),
+    UNDEFINED_REQUEST(BAD_REQUEST, "올바르지 않은 요청입니다"),
 
     /* 401 UNAUTHORIZED : 인증 실패 */
     INVALID_TOKEN(UNAUTHORIZED, "invalid token"),
