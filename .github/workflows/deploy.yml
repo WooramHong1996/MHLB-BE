@@ -69,6 +69,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: pinme-container # 컨테이너 이름
+          service: pinme-service # 서비스 이름이 아닐까?
           cluster: pinme-cluster # 클러스터 이름
           wait-for-service-stability: true
