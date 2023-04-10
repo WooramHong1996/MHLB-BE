@@ -6,15 +6,16 @@ import com.gigajet.mhlb.domain.chat.service.ChatService;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
-import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 
 import java.util.List;
 
@@ -23,7 +24,6 @@ import java.util.List;
 @RequestMapping("/api/inbox")
 public class ChatController {
     private final ChatService chatService;
-    private final SimpMessageSendingOperations sendingOperations;
 
     @EventListener(SessionConnectEvent.class)
     public void connect(SessionConnectEvent event) {
@@ -32,23 +32,28 @@ public class ChatController {
 
     @EventListener(SessionSubscribeEvent.class)
     public void subscribe(SessionSubscribeEvent event) {
-        String endpoint = StompHeaderAccessor.wrap(event.getMessage()).getDestination();
-        chatService.subscribe(endpoint);
+        chatService.checkRoom(StompHeaderAccessor.wrap(event.getMessage()));
     }
 
     @EventListener(SessionDisconnectEvent.class)
-    public void unSubscribe(SessionUnsubscribeEvent event) {
-        String endpoint = StompHeaderAccessor.wrap(event.getMessage()).getDestination();
-        chatService.unSubscribe(endpoint);
+    public void disconnect(SessionDisconnectEvent event) {
+        chatService.exitRoom(StompHeaderAccessor.wrap(event.getMessage()));
     }
 
-    @MessageMapping("/inbox")//메시지매핑은 리퀘스트매핑 못받음
+    @MessageMapping("/inbox")
     public void sendMsg(ChatRequestDto.Chat message, StompHeaderAccessor accessor) {
         String authorization = accessor.getFirstNativeHeader("Authorization");
         String email = chatService.resolveToken(authorization);
-        ChatResponseDto.Chat response = chatService.sendMsg(message, email);
-        sendingOperations.convertAndSend("/sub/inbox/" + message.getUuid(), response);
+        chatService.sendMsg(message, email, accessor.getSessionId());
     }
+
+    @GetMapping("/{workspaceId}/{userId}")
+    public List<ChatResponseDto.Chatting> getChat(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                  @PathVariable Long workspaceId, @PathVariable Long userId,
+                                                  @PageableDefault(size = 25, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return chatService.getChat(userDetails.getUser(), workspaceId, userId, pageable);
+    }
+
 
     @PostMapping("/{workspaceId}")
     public ChatResponseDto.GetUuid findChatRoom(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @RequestBody ChatRequestDto.UserId userId) {
@@ -58,10 +63,5 @@ public class ChatController {
     @GetMapping("/{workspaceId}")
     public List<ChatResponseDto.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId) {
         return chatService.getInbox(userDetails.getUser(), workspaceId);
-    }
-
-    @GetMapping("/{workspaceId}/{userId}")
-    public List<ChatResponseDto.Chat> getChat(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @PathVariable Long userId) {
-        return chatService.getChat(userDetails.getUser(), workspaceId, userId);
     }
 }

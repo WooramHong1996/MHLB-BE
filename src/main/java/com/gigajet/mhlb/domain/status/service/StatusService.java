@@ -7,23 +7,32 @@ import com.gigajet.mhlb.domain.status.dto.StatusResponseDto;
 import com.gigajet.mhlb.domain.status.entity.SqlStatus;
 import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
+import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
 import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class StatusService {
     private final SqlStatusRepository statusRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
+    private final UserRepository userRepository;
+
+    private final JwtUtil jwtUtil;
+
+    private final RedisTemplate redisTemplate;
 
     @Transactional
     public StatusResponseDto statusUpdate(User user, StatusRequestDto statusRequestDto) {
@@ -79,5 +88,24 @@ public class StatusService {
 
     public void checkUser(User user, Long id) {
         workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+    }
+
+    @Transactional
+    public void SocketStatusUpdate(StatusRequestDto statusRequestDto, String authorization) {
+        Optional<User> user = userRepository.findByEmail(jwtUtil.getUserEmail(authorization.substring(7)));
+        if (statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user.get()).getStatus().equals(statusRequestDto.textOf())) {
+            throw new CustomException(ErrorCode.STATUS_NOT_CHANGED);
+        }
+
+        SqlStatus status = new SqlStatus(user.get(), statusRequestDto);
+
+        statusRepository.save(status);
+
+        List<WorkspaceUser> workspaces = workspaceUserRepository.findByUserAndIsShow(user.get(), 1);
+
+        StatusResponseDto.Convert convert = new StatusResponseDto.Convert(status, workspaces);
+
+
+        redisTemplate.convertAndSend("statusMessageChannel", convert);
     }
 }

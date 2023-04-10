@@ -8,9 +8,10 @@ import com.gigajet.mhlb.domain.status.service.StatusService;
 import com.gigajet.mhlb.domain.status.sse.StatusSseHandler;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -25,14 +26,22 @@ public class StatusController {
     private final StatusService statusService;
     private final StatusSseHandler sseHandler;
 
+    @MessageMapping("/status")
+    public void changeStatus(StatusRequestDto statusRequestDto, StompHeaderAccessor accessor) {
+        String authorization = accessor.getFirstNativeHeader("Authorization");
+        statusService.SocketStatusUpdate(statusRequestDto, authorization);
+    }
+
     @PostMapping
-    public ResponseEntity<SendMessageDto> stausUpdate(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                      @RequestBody StatusRequestDto statusRequestDto) throws IOException {
+    public ResponseEntity<SendMessageDto> statusUpdate(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                       @RequestBody StatusRequestDto statusRequestDto) throws IOException {
         StatusResponseDto dto = statusService.statusUpdate(userDetails.getUser(), statusRequestDto);
         List<Long> workspaceList = statusService.getWorkspaceList(userDetails.getUser());
+
         for (Long id : workspaceList) {
             sseHandler.statusChanged(id, dto);
         }
+
         return SendMessageDto.toResponseEntity(SuccessCode.STATUS_CHANGED);
     }
 
@@ -41,7 +50,7 @@ public class StatusController {
         return statusService.myStatus(userDetails.getUser());
     }
 
-    @GetMapping("/{id}")//id워크스페이스에 속한 유저들의 상태를 전부 가져옴
+    @GetMapping("/{id}")
     public List getWorkspacePeople(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
         return statusService.getWorkspacePeople(userDetails.getUser(), id);
     }
