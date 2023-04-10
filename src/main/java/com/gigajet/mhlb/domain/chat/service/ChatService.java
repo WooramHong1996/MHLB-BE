@@ -42,12 +42,16 @@ public class ChatService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public void sendMsg(ChatRequestDto.Chat message, String email, String sessionId) {
+    public Long getMessageId() {
         MessageId messageId = messageIdRepository.findTopByKey(1);
         messageId.addMessageId();
 //        MessageId messageId = new MessageId(1L);
         messageIdRepository.save(messageId);
+        return messageId.getMessageId();
+    }
 
+    @Transactional
+    public void sendMsg(ChatRequestDto.Chat message, String email, String sessionId, Long messageId) {
         Long id = userRepository.findByEmail(email).get().getId();
 
         Chat chat = Chat.builder()
@@ -55,7 +59,7 @@ public class ChatService {
                 .inBoxId(message.getUuid())
                 .workspaceId(message.getWorkspaceId())
                 .message(message.getMessage())
-                .messageId(messageId.getMessageId())
+                .messageId(messageId)
                 .build();
         chat.setCreatedAt(LocalDateTime.now());
 
