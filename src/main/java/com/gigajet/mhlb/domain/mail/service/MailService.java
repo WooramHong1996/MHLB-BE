@@ -7,6 +7,7 @@ import com.gigajet.mhlb.domain.mail.dto.MailResponseDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
+import com.gigajet.mhlb.domain.user.social.SocialType;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
@@ -44,7 +45,10 @@ public class MailService {
 
     // 비밀번호 찾기 메일 발송
     public ResponseEntity<SendMessageDto> sendMail(String email) {
-        userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
+        if (user.getType() == SocialType.GOOGLE) {
+            throw new CustomException(ErrorCode.SOCIAL_USER);
+        }
 
         String uuid = UUID.randomUUID().toString().replaceAll("-", "");
         saveRandomNumberAndEmail(uuid, email);
