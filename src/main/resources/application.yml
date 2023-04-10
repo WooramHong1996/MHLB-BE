@@ -31,8 +31,8 @@ spring:
 
   # image upload limit
   servlet.multipart:
-    maxFileSize: 5MB
-    maxRequestSize: 5MB
+    maxFileSize: 10MB
+    maxRequestSize: 10MB
 
   # redis
   redis:

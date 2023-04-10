@@ -57,18 +57,18 @@ jobs:
           name: "pinme-task-definition.json"
           json: ${{ secrets.TASK_JSON }}
 
-      - name: Fill in the new image ID in the Amazon ECS task definition # ECS 작업 정의 생성
+      - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: pinme-task-definition.json # 작업 정의 템플릿 파일 이름
-          container-name: pinme-container # 컨테이너 이름
+          task-definition: pinme-task-definition.json
+          container-name: pinme-container-v2
           image: ${{ steps.build-image.outputs.image }}
 
-      - name: Deploy Amazon ECS task definition # 작업 정의 파일을 ECS 서비스에 반영
+      - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: pinme-service # 서비스 이름이 아닐까?
-          cluster: pinme-cluster # 클러스터 이름
+          service: pinme-service-v2
+          cluster: pinme-cluster
           wait-for-service-stability: true
