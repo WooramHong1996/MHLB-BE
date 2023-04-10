@@ -20,8 +20,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: {{ secrets.GOOGLE_ID }}
-    password: {{ secrets.GOOGLE_PW }}
+    username: ${ GOOGLE_ID }
+    password: ${ GOOGLE_PW }
     properties:
       debug: true
       mail.smtp:
@@ -36,7 +36,7 @@ spring:
 
   # redis
   redis:
-    host: {{ secrets.REDIS_HOST }}
+    host: ${ REDIS_HOST }
     port: 6379
 
 # s3
@@ -44,14 +44,14 @@ cloud.aws:
   stack.auto: false
   region.static: ap-northeast-2
   credentials:
-    access-key: {{ secrets.AWS_ACCESS_KEY }}
-    secret-key: {{ secrets.AWS_SECRET_KEY }}
+    access-key: ${ ACCESS_KEY }
+    secret-key: ${ SECRET_KEY }
     instance-profile: true
-  s3.bucket: {{ secrets.AWS_S3_BUCKET }}
+  s3.bucket: ${ S3_BUCKET }
 
 
 # 환경변수
 admin.token: {{ secrets.ADMIN_TOKEN }}
 
-jwt.secret.key: {{ secrets.JWT_SECRET_KEY }}
+jwt.secret.key: ${ JWT_SECRET_KEY }
 

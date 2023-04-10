@@ -69,6 +69,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: pinme-service-v2
+          service: pinme-service-v3
           cluster: pinme-cluster
           wait-for-service-stability: true
