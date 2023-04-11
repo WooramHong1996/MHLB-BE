@@ -7,8 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 
+@Schema(description = "응답 메세지 DTO")
 @Getter
-@Schema(description = "메세지 DTO")
 public class SendMessageDto {
 
     @Schema(description = "메세지")

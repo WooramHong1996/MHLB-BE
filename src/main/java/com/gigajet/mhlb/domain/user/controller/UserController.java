@@ -16,10 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.Map;
 
-@Tag(name = "user", description = "회원 관련 API")
+@Tag(name = "User", description = "회원 관련 API")
 @Slf4j
 @RestController
 @RequestMapping("/api/users")
@@ -74,6 +73,7 @@ public class UserController {
     /*
         소셜 로그인
      */
+    @Operation(summary = "구글 소셜 로그인", description = "구글 소셜 로그인 API")
     @GetMapping("/auth/google/callback")
     public ResponseEntity<SendMessageDto> callback(@RequestParam(name = "code") String code) {
         return oAuthService.oAuthLogin(code);
