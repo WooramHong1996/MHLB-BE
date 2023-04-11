@@ -74,7 +74,7 @@ public class UserController {
         소셜 로그인
      */
     @Operation(summary = "구글 소셜 로그인", description = "구글 소셜 로그인 API")
-    @GetMapping("/auth/google/callback")
+    @PostMapping("/auth/google/callback")
     public ResponseEntity<SendMessageDto> callback(@RequestParam(name = "code") String code) {
         return oAuthService.oAuthLogin(code);
     }
