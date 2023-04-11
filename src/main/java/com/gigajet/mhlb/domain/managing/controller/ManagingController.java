@@ -61,15 +61,15 @@ public class ManagingController {
     }
 
     @Operation(summary = "회원 추방", description = "관리자 페이지 워크스페이스에 속한 회원 추방 API")
-    @DeleteMapping("/{id}/people/{userid}")
-    public ResponseEntity<SendMessageDto> deletePeople(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @PathVariable Long userid) {
-        return managingService.exilePeople(userDetails.getUser(), id, userid);
+    @PatchMapping("/{id}/people/{userId}")
+    public ResponseEntity<SendMessageDto> patchPeople(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @PathVariable Long userId) {
+        return managingService.exilePeople(userDetails.getUser(), id, userId);
     }
 
     @Operation(summary = "회원 권한 수정", description = "관리자 페이지 워크스페이스에 속한 회원 권한 수정 API")
-    @PatchMapping("/{id}/people/{userid}")
-    public ManagingResponseDto.Role patchRole(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @PathVariable Long userid, @RequestBody ManagingRequestDto.Role roleRequestDto) {
-        return managingService.changeRole(userDetails.getUser(), id, userid, roleRequestDto);
+    @PatchMapping("/{id}/people/{userId}/role")
+    public ManagingResponseDto.Role patchRole(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @PathVariable Long userId, @RequestBody ManagingRequestDto.Role roleRequestDto) {
+        return managingService.changeRole(userDetails.getUser(), id, userId, roleRequestDto);
     }
 
     @Operation(summary = "워크스페이스 삭제", description = "관리자 페이지 워크스페이스 삭제(관리자만 가능) API")
@@ -95,8 +95,8 @@ public class ManagingController {
     }
 
     @Operation(summary = "워크스페이스 회원 초대 취소", description = "관리 페이지 워크스페이스 회원 초대 취소 API")
-    @PatchMapping("/{id}/invite/{inviteId}")
-    public ResponseEntity<SendMessageDto> patchInvite(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @PathVariable Long inviteId) {
+    @DeleteMapping("/{id}/invite/{inviteId}")
+    public ResponseEntity<SendMessageDto> deleteInvite(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id, @PathVariable Long inviteId) {
         return managingService.cancelInvite(userDetails.getUser(), id, inviteId);
     }
 }

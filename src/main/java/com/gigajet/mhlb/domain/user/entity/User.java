@@ -1,6 +1,5 @@
 package com.gigajet.mhlb.domain.user.entity;
 
-import com.gigajet.mhlb.domain.mypage.dto.MypageRequestDto;
 import com.gigajet.mhlb.domain.user.dto.GoogleOAuthRequestDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.social.SocialType;
@@ -53,22 +52,6 @@ public class User {
         this.username = googleUserDto.getName();
         this.type = SocialType.GOOGLE;
         this.isShow = 1;
-    }
-
-    public void updateName(MypageRequestDto.Name nameRequest) {
-        this.username = nameRequest.getUserName();
-    }
-
-    public void updateJob(MypageRequestDto.Job jobRequest) {
-        this.job = jobRequest.getUserJob();
-    }
-
-    public void updateDesc(MypageRequestDto.Description descRequest) {
-        this.description = descRequest.getUserDesc();
-    }
-
-    public void updateImage(String imageUrl) {
-        this.image = imageUrl;
     }
 
     public void resetPassword(String password) {

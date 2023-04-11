@@ -2,7 +2,6 @@ package com.gigajet.mhlb.domain.user.controller;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.domain.mail.service.MailService;
-import com.gigajet.mhlb.domain.mypage.dto.MypageResponseDto;
 import com.gigajet.mhlb.domain.status.service.StatusService;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.dto.UserResponseDto;

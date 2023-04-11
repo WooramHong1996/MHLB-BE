@@ -3,7 +3,6 @@ package com.gigajet.mhlb.domain.user.service;
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.common.util.AESUtil;
 import com.gigajet.mhlb.common.util.SuccessCode;
-import com.gigajet.mhlb.domain.mypage.dto.MypageResponseDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.dto.UserResponseDto;
 import com.gigajet.mhlb.domain.user.entity.User;
@@ -53,7 +52,6 @@ public class UserService {
 
     public ResponseEntity<SendMessageDto> validateEmail(String email) {
         userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
-
         return SendMessageDto.toResponseEntity(SuccessCode.VALID_EMAIL);
     }
 
@@ -65,7 +63,6 @@ public class UserService {
         }
 
         String password = aesUtil.encrypt(registerDto.getPassword());
-
         User user = new User(registerDto, password, defaultImage);
 
         userRepository.save(user);

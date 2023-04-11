@@ -5,18 +5,15 @@ import com.gigajet.mhlb.common.util.S3Handler;
 import com.gigajet.mhlb.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.alarm.Entity.Alarm;
 import com.gigajet.mhlb.domain.alarm.Repository.AlarmRepository;
-import com.gigajet.mhlb.domain.chat.repository.ChatRoomRepository;
 import com.gigajet.mhlb.domain.status.entity.SqlStatus;
 import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
-import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceRequestDto;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceResponseDto;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceOrder;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
-import com.gigajet.mhlb.domain.workspace.repository.WorkspaceInviteRepository;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceOrderRepository;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
@@ -36,13 +33,11 @@ import static com.gigajet.mhlb.domain.workspace.entity.WorkspaceUserRole.ADMIN;
 @Service
 @RequiredArgsConstructor
 public class WorkspaceService {
+
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
-    private final UserRepository userRepository;
-    private final WorkspaceInviteRepository workspaceInviteRepository;
     private final WorkspaceOrderRepository workspaceOrderRepository;
     private final SqlStatusRepository statusRepository;
-    private final ChatRoomRepository chatRoomRepository;
     private final AlarmRepository alarmRepository;
 
     private final S3Handler s3Handler;
@@ -51,27 +46,26 @@ public class WorkspaceService {
     private String defaultImage;
 
     @Transactional//(readOnly = true)
-    public List<WorkspaceResponseDto.AllList> workspaceAllList(User user) {
+    public List<WorkspaceResponseDto.AllList> findWorkspaceList(User user) {
         List<WorkspaceResponseDto.AllList> orderLists = new ArrayList<>();
         List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);
 
         for (WorkspaceOrder workspaceOrder : workspaceOrderList) {
-            Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user, workspaceOrder.getWorkspaceUser().getWorkspace().getId(),true);
-            if(alarm.isEmpty()){
+            Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user, workspaceOrder.getWorkspaceUser().getWorkspace().getId(), true);
+            if (alarm.isEmpty()) {
                 orderLists.add(new WorkspaceResponseDto.AllList(workspaceOrder.getWorkspaceUser().getWorkspace(), false));
-            }else{
-            orderLists.add(new WorkspaceResponseDto.AllList(workspaceOrder.getWorkspaceUser().getWorkspace(), alarm.get().getUnreadMessage()));
+            } else {
+                orderLists.add(new WorkspaceResponseDto.AllList(workspaceOrder.getWorkspaceUser().getWorkspace(), alarm.get().getUnreadMessage()));
             }
         }
+
         return orderLists;
     }
 
     //알림 가져오기 메소드 밑으로 빼둠
-    //
     @Transactional
-    public WorkspaceResponseDto.Response workspaceCreate(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
-        String imageUrl = "";
-
+    public WorkspaceResponseDto.Response createWorkspace(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
+        String imageUrl;
         if (image == null) {
             imageUrl = defaultImage;
         } else {
@@ -86,22 +80,16 @@ public class WorkspaceService {
         WorkspaceOrder workspaceOrder = new WorkspaceOrder(count, workspaceUser);
 
         workspaceRepository.save(workspace);
-
         workspaceUserRepository.save(workspaceUser);
-
         workspaceOrderRepository.save(workspaceOrder);
 
         return new WorkspaceResponseDto.Response(workspace);
     }
 
     @Transactional(readOnly = true)
-    public WorkspaceResponseDto.InfoAndRoll infoAndRoll(User user, Long id) {
-        Optional<WorkspaceUser> workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, id);
-        if (workspaceUser.isEmpty()) {
-            throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
-        }
-
-        return new WorkspaceResponseDto.InfoAndRoll(workspaceUser.get().getWorkspace(), workspaceUser.get().getRole());
+    public WorkspaceResponseDto.InfoAndRoll findWorkspaceInfoAndRoll(User user, Long id) {
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        return new WorkspaceResponseDto.InfoAndRoll(workspaceUser.getWorkspace(), workspaceUser.getRole());
     }
 
     @Transactional
@@ -110,7 +98,7 @@ public class WorkspaceService {
 
         HashMap<Long, Long> orderMap = new HashMap<>();//워크스페이스 id , 순서
         for (WorkspaceRequestDto.Order order : orders.getOrders()) {
-            orderMap.put(order.getWorkspaceId(), order.getOrdernum());
+            orderMap.put(order.getWorkspaceId(), order.getOrderNum());
         }
 
         for (WorkspaceOrder workspaceOrder : orderList) {
@@ -120,16 +108,8 @@ public class WorkspaceService {
         return SendMessageDto.toResponseEntity(SuccessCode.ORDER_CHANGE_SUCCESS);
     }
 
-    private WorkspaceUser getWorkspaceUser(User user, Long id) {
-        Optional<WorkspaceUser> workspace = workspaceUserRepository.findByUserAndWorkspaceId(user, id);//유저가 워크스페이스에 가입 되어있는지 확인
-        if (workspace.isEmpty()) {
-            throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
-        }
-        return workspace.get();
-    }
-
     @Transactional//(readOnly = true)
-    public List<WorkspaceResponseDto.OrderList> getOrder(User user) {
+    public List<WorkspaceResponseDto.OrderList> findOrder(User user) {
         List<WorkspaceResponseDto.OrderList> orderLists = new ArrayList<>();
         List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);
 
@@ -141,34 +121,39 @@ public class WorkspaceService {
     }
 
     @Transactional(readOnly = true)
-    public List<WorkspaceResponseDto.People> getPeople(User user, Long id) {
-        getWorkspaceUser(user, id);
+    public List<WorkspaceResponseDto.People> findPeople(User user, Long id) {
+        workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
         List<WorkspaceResponseDto.People> peopleList = new ArrayList<>();
         List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
 
         for (WorkspaceUser workspaceUser : workspaceUserList) {
-            if (workspaceUser.getUser().getId() == user.getId()) {
+            if (Objects.equals(workspaceUser.getUser().getId(), user.getId())) {
                 continue;
             }
             SqlStatus status = statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(workspaceUser.getUser());
             peopleList.add(new WorkspaceResponseDto.People(status));
         }
 
-        peopleList.sort(new StatusComparator());
+        peopleList.sort((o1, o2) -> {
+            if (Objects.equals(o1.getColor(), o2.getColor())) {
+                return o1.getUserName().toLowerCase().compareTo(o2.getUserName().toLowerCase());
+            }
+            return Integer.compare(o1.getColor(), o2.getColor());
+        });
 
         peopleList.add(0, new WorkspaceResponseDto.People(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user)));//본인이 가장 먼저 나오게 해야함
 
         return peopleList;
     }
 }
-
-class StatusComparator implements Comparator<WorkspaceResponseDto.People> {
-    @Override
-    public int compare(WorkspaceResponseDto.People o1, WorkspaceResponseDto.People o2) {
-        if (o1.getColor() == o2.getColor()) {
-            return o1.getUserName().toLowerCase().compareTo(o2.getUserName().toLowerCase());
-        }
-        return Integer.compare(o1.getColor(), o2.getColor());
-    }
-}
+//
+//class StatusComparator implements Comparator<WorkspaceResponseDto.People> {
+//    @Override
+//    public int compare(WorkspaceResponseDto.People o1, WorkspaceResponseDto.People o2) {
+//        if (Objects.equals(o1.getColor(), o2.getColor())) {
+//            return o1.getUserName().toLowerCase().compareTo(o2.getUserName().toLowerCase());
+//        }
+//        return Integer.compare(o1.getColor(), o2.getColor());
+//    }
+//}

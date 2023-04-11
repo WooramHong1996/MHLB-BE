@@ -157,7 +157,7 @@ public class ManagingService {
         for (WorkspaceUser workspaceUser : workspaceUsers) {
             workspaceUser.offIsShow();
 
-            workspaceOrderRepository.findByWorkspaceUserAndIsShow(workspaceUser, 1).get().offIsShow();
+            workspaceOrderRepository.findByWorkspaceUserAndIsShow(workspaceUser, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER)).offIsShow();
         }
 
         workspaceInviteRepository.deleteByWorkspace(manager.getWorkspace());
@@ -168,7 +168,7 @@ public class ManagingService {
     @Transactional
     public WorkspaceInvite invite(User user, Long id, String invitedUserEmail) {
         Workspace workspace = validateWorkspace(id);
-        WorkspaceUser managerUser = checkRole(user, id);
+        checkRole(user, id);
 
         Optional<WorkspaceInvite> checkInvite = workspaceInviteRepository.findByWorkspaceAndEmail(workspace, invitedUserEmail);
         // 기존에 초대 한 사람인지 확인

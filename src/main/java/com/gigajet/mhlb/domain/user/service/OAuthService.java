@@ -24,8 +24,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OAuthService {
 
-    private final GoogleOAuth googleOAuth;
     private final UserRepository userRepository;
+
+    private final GoogleOAuth googleOAuth;
     private final JwtUtil jwtUtil;
 
     private final HttpServletResponse response;
@@ -44,6 +45,7 @@ public class OAuthService {
     @Transactional
     void createOAuthUser(GoogleOAuthRequestDto.GoogleUser googleUserDto) {
         Optional<User> userOptional = userRepository.findByEmail(googleUserDto.getEmail());
+
         if (userOptional.isEmpty()) {
             userRepository.save(new User(googleUserDto));
         } else if (userOptional.get().getType() != SocialType.GOOGLE) {
