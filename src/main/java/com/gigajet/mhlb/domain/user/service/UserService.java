@@ -3,7 +3,9 @@ package com.gigajet.mhlb.domain.user.service;
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.common.util.AESUtil;
 import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.domain.mypage.dto.MypageResponseDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
+import com.gigajet.mhlb.domain.user.dto.UserResponseDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
@@ -111,4 +113,7 @@ public class UserService {
         return SendMessageDto.toResponseEntity(SuccessCode.LOGIN_SUCCESS);
     }
 
+    public UserResponseDto userInfo(User user) {
+        return new UserResponseDto(user.getImage(), user.getId());
+    }
 }

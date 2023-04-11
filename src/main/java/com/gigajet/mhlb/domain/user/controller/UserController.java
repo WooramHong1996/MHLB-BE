@@ -2,16 +2,20 @@ package com.gigajet.mhlb.domain.user.controller;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.domain.mail.service.MailService;
+import com.gigajet.mhlb.domain.mypage.dto.MypageResponseDto;
 import com.gigajet.mhlb.domain.status.service.StatusService;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
+import com.gigajet.mhlb.domain.user.dto.UserResponseDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.service.OAuthService;
 import com.gigajet.mhlb.domain.user.service.UserService;
+import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -70,6 +74,11 @@ public class UserController {
         return userService.login(loginDto, response);
     }
 
+    // 상시 프로필
+    @GetMapping("/user-info")
+    public UserResponseDto userInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return userService.userInfo(userDetails.getUser());
+    }
 
     /*
         소셜 로그인
