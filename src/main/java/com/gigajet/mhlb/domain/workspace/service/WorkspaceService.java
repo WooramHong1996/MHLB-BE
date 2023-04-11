@@ -115,76 +115,12 @@ public class WorkspaceService {
         return SendMessageDto.toResponseEntity(SuccessCode.ORDER_CHANGE_SUCCESS);
     }
 
-    @Transactional
-    public WorkspaceInvite invite(User user, Long id, String invitedUserEmail) {
-        WorkspaceUser managerUser = getWorkspaceUser(user, id);
-
-        Optional<WorkspaceInvite> checkInvite = workspaceInviteRepository.findByWorkspaceAndEmail(managerUser.getWorkspace(), invitedUserEmail);
-        // 기존에 초대 한 사람인지 확인
-        if (checkInvite.isPresent()) {
-            throw new CustomException(ErrorCode.ALREADY_INVITED);
-        } else {
-            // 해당 유저가 회원가입 되어있는지 먼저 확인
-            Optional<User> invitedUser = userRepository.findByEmail(invitedUserEmail);
-
-            if (invitedUser.isEmpty()) {
-                return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, managerUser.getWorkspace()));
-            } else {
-                Optional<WorkspaceUser> existUser = workspaceUserRepository.findByUserAndWorkspace(invitedUser.get(), managerUser.getWorkspace());
-
-                if (existUser.isEmpty() || existUser.get().getIsShow() == 0) { //최초 초대거나 재초대인 경우
-                    return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, invitedUser.get(), managerUser.getWorkspace()));
-                } else if (existUser.get().getIsShow() == 1) {//이미 있는 유저인 경우
-                    throw new CustomException(ErrorCode.ALREADY_INVITED);
-                }
-
-                return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, invitedUser.get(), managerUser.getWorkspace()));
-            }
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public List<WorkspaceResponseDto.Invite> getInvite(User user, Long id) {
-        WorkspaceUser workspaceUser = getWorkspaceUser(user, id);
-        checkRole(workspaceUser);
-
-        List<WorkspaceResponseDto.Invite> inviteList = new ArrayList<>();
-        List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByWorkspaceOrderByIdDesc(workspaceUser.getWorkspace());
-
-        for (WorkspaceInvite workspaceInvite : workspaceInviteList) {
-            inviteList.add(new WorkspaceResponseDto.Invite(workspaceInvite));
-        }
-
-        return inviteList;
-    }
-
-    @Transactional
-    public ResponseEntity<SendMessageDto> deleteInvite(User user, Long id, Long inviteId) {
-        WorkspaceUser workspaceUser = getWorkspaceUser(user, id);
-        checkRole(workspaceUser);
-
-        Optional<WorkspaceInvite> workspaceInvite = workspaceInviteRepository.findByWorkspace_IdAndId(id, inviteId);
-        if (workspaceInvite.isEmpty()) {
-            throw new CustomException(ErrorCode.WRONG_USER);
-        }
-
-        workspaceInviteRepository.deleteById(inviteId);
-
-        return SendMessageDto.toResponseEntity(SuccessCode.CANCLE_INVITE);
-    }
-
     private WorkspaceUser getWorkspaceUser(User user, Long id) {
         Optional<WorkspaceUser> workspace = workspaceUserRepository.findByUserAndWorkspaceId(user, id);//유저가 워크스페이스에 가입 되어있는지 확인
         if (workspace.isEmpty()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
         return workspace.get();
-    }
-
-    private void checkRole(WorkspaceUser workspaceUser) {
-        if (workspaceUser.getRole() == MEMBER) {
-            throw new CustomException(ErrorCode.WRONG_USER);
-        }
     }
 
     @Transactional//(readOnly = true)

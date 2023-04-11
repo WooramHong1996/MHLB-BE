@@ -26,16 +26,12 @@ public class User {
     @Column(nullable = false)
     private String username;
 
-    @Column
     private String description;
 
-    @Column(nullable = false)
     private String password;
 
-    @Column
     private String job;
 
-    @Column
     private SocialType type;
 
     @Column(nullable = false)
