@@ -8,10 +8,10 @@ import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.user.social.SocialType;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceInviteRepository;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceInvite;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceInviteRepository;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
@@ -32,6 +32,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final WorkspaceInviteRepository workspaceInviteRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
+
     private final AESUtil aesUtil;
     private final JwtUtil jwtUtil;
 

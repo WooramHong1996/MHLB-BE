@@ -1,4 +1,4 @@
-package com.gigajet.mhlb.domain.workspaceuser.entity;
+package com.gigajet.mhlb.domain.workspace.entity;
 
 public enum WorkspaceUserRole {
     MEMBER,

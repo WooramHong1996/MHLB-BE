@@ -8,7 +8,7 @@ import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.user.social.SocialType;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceInvite;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

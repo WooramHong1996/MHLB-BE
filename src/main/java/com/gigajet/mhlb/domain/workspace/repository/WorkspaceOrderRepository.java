@@ -1,8 +1,8 @@
-package com.gigajet.mhlb.domain.workspaceuser.repository;
+package com.gigajet.mhlb.domain.workspace.repository;
 
 import com.gigajet.mhlb.domain.user.entity.User;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceOrder;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceOrder;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;

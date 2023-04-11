@@ -1,6 +1,6 @@
 package com.gigajet.mhlb.domain.managing.dto;
 
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUserRole;
 import lombok.Getter;
 
 public class ManagingRequestDto {

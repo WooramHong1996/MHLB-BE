@@ -11,12 +11,11 @@ import com.gigajet.mhlb.domain.workspace.dto.WorkspaceRequestDto;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceResponseDto;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceOrder;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceInviteRepository;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceOrderRepository;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceOrder;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceInviteRepository;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceOrderRepository;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.*;
 
-import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.ADMIN;
-import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.MEMBER;
+import static com.gigajet.mhlb.domain.workspace.entity.WorkspaceUserRole.ADMIN;
 
 @Service
 @RequiredArgsConstructor
@@ -83,10 +81,6 @@ public class WorkspaceService {
         workspaceOrderRepository.save(workspaceOrder);
 
         return new WorkspaceResponseDto.Response(workspace);
-    }
-
-    public List inboxGet(User user, Long id, Integer size) {
-        return new ArrayList<>();
     }
 
     @Transactional(readOnly = true)

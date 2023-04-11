@@ -30,5 +30,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Transactional
     @Query("UPDATE users SET job = ?1 WHERE id = ?2 ")
     void updateJob(String job, Long id);
-
 }

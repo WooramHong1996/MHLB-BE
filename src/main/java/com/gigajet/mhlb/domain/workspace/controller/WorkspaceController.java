@@ -1,12 +1,9 @@
 package com.gigajet.mhlb.domain.workspace.controller;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.common.util.SuccessCode;
-import com.gigajet.mhlb.domain.mail.service.MailService;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceRequestDto;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceResponseDto;
 import com.gigajet.mhlb.domain.workspace.service.WorkspaceService;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,14 +36,6 @@ public class WorkspaceController {
                                                          @RequestPart(name = "image", required = false) MultipartFile image,
                                                          @RequestPart("data") WorkspaceRequestDto.Create workspaceDto) throws IOException {
         return workspaceService.workspaceCreate(userDetails.getUser(), image, workspaceDto);
-    }
-
-    @Operation(summary = "이거 안쓰는거임", description = "이거 안쓰는거임")
-    @GetMapping("/{id}/inbox")
-    public List inboxGet(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                         @PathVariable Long id,
-                         @RequestParam(defaultValue = "3") Integer size) {
-        return workspaceService.inboxGet(userDetails.getUser(), id, size);
     }
 
     @Operation(summary = "워크스페이스 정보, 회원 권한", description = "메인 페이지 워크스페이스 정보와 로그인한 회원 권한 조회 API")

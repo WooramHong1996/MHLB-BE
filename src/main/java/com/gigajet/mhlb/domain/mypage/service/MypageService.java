@@ -9,13 +9,13 @@ import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceOrder;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceInviteRepository;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceOrderRepository;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceInvite;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceOrder;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUserRole;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceInviteRepository;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceOrderRepository;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +30,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
-import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.ADMIN;
 
 @Service
 @RequiredArgsConstructor
@@ -116,7 +114,6 @@ public class MypageService {
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
         workspaceUser.offIsShow();
-//        workspaceUserRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
 
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.DELETE_SUCCESS));
     }

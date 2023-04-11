@@ -2,8 +2,8 @@ package com.gigajet.mhlb.domain.workspace.dto;
 
 import com.gigajet.mhlb.domain.status.entity.SqlStatus;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceInvite;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
