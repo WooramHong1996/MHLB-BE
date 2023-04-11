@@ -26,7 +26,7 @@ public class Alarm {
     private AlarmTypeEnum type;
 
     @Builder
-    public Alarm(Long workspaceId,String uuid,Boolean unreadMessage, AlarmTypeEnum type, User user) {
+    public Alarm(Long workspaceId, String uuid, Boolean unreadMessage, AlarmTypeEnum type, User user) {
         this.workspaceId = workspaceId;
         this.unreadMessage = unreadMessage;
         this.type = type;

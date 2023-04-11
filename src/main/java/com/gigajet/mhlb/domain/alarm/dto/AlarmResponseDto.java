@@ -4,17 +4,17 @@ import com.gigajet.mhlb.domain.alarm.Entity.Alarm;
 import com.gigajet.mhlb.domain.alarm.Entity.AlarmTypeEnum;
 import lombok.Getter;
 
-public class AlarmResponse {
+public class AlarmResponseDto {
     @Getter
     public static class AlarmChatResponse {
         private final Long workspaceId;
         private final AlarmTypeEnum type;
-        private final Integer isShow;
+        private final Boolean unreadMessage;
 
         public AlarmChatResponse(AlarmRequestDto alarm) {
             this.workspaceId = alarm.getWorkspaceId();
             this.type = alarm.getType();
-            this.isShow = 0;
+            this.unreadMessage = false;
         }
     }
 
@@ -32,21 +32,11 @@ public class AlarmResponse {
     @Getter
     public static class AlarmResponseVar {
         private final Long workspaceId;
-        private final Boolean isShow;
+        private final Boolean unreadMessage;
 
-        public AlarmResponseVar(Long workspaceId, Boolean isShow) {
+        public AlarmResponseVar(Long workspaceId, Boolean unreadMessage) {
             this.workspaceId = getWorkspaceId();
-            this.isShow = getIsShow();
+            this.unreadMessage = getUnreadMessage();
         }
     }
-//    @Getter
-//    public static class AllAlarm{
-//        private final List<AlarmChatResponse> alarmChatResponselist;
-//        private final List<AlarmInviteResponse> alarmInviteResponseList;
-//
-//        public AllAlarm(List<AlarmChatResponse> alarmChatResponselist, List<AlarmInviteResponse> alarmInviteResponseList) {
-//            this.alarmChatResponselist = alarmChatResponselist;
-//            this.alarmInviteResponseList = alarmInviteResponseList;
-//        }
-//    }
 }

@@ -110,14 +110,14 @@ public class ChatService {
 
         Collections.sort(chatList, (a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()));
 
-        List<Alarm> alarmList = alarmRepository.findAllByUserIdAndWorkspaceIdAndUuidAndUnreadMessage(user.getId(),workspaceId,chatRoom.getInBoxId(),true);
+        List<Alarm> alarmList = alarmRepository.findAllByUserIdAndWorkspaceIdAndUuidAndUnreadMessage(user.getId(), workspaceId, chatRoom.getInBoxId(), true);
         alarmRepository.saveAll(alarmList);
 
-        Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user,workspaceId,true);
-        if(alarm.isEmpty()){
+        Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user, workspaceId, true);
+        if (alarm.isEmpty()) {
             AlarmRequestDto socket = new AlarmRequestDto(Alarm.builder()
                     .unreadMessage(false)
-                    .type(AlarmTypeEnum.chat)
+                    .type(AlarmTypeEnum.CHAT)
                     .workspaceId(workspaceId)
                     .user(user).build());
             redisTemplate.convertAndSend("alarmMessageChannel", socket);
@@ -211,7 +211,7 @@ public class ChatService {
     public void checkRoom(StompHeaderAccessor accessor) {
         Long id = userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))).get().getId();
         String endpoint = accessor.getDestination();
-        if(!(endpoint.contains("/inbox/"))){
+        if (!(endpoint.contains("/inbox/"))) {
             return;
         }
         Map<Object, Object> room = redisTemplate.opsForHash().entries(endpoint);
@@ -271,8 +271,8 @@ public class ChatService {
         User user = userRepository.findById(id).orElseThrow();
 
         Alarm alarm = alarmRepository.save(Alarm.builder()
-                        .unreadMessage(true)
-                .type(AlarmTypeEnum.chat)
+                .unreadMessage(true)
+                .type(AlarmTypeEnum.CHAT)
                 .workspaceId(workspaceId)
                 .user(user).build());
         AlarmRequestDto alarmRequestDto = new AlarmRequestDto(alarm);
