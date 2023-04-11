@@ -1,5 +1,9 @@
 package com.gigajet.mhlb.domain.chat.service;
 
+import com.gigajet.mhlb.domain.alarm.Entity.Alarm;
+import com.gigajet.mhlb.domain.alarm.Entity.AlarmTypeEnum;
+import com.gigajet.mhlb.domain.alarm.Repository.AlarmRepository;
+import com.gigajet.mhlb.domain.alarm.dto.AlarmRequestDto;
 import com.gigajet.mhlb.domain.chat.dto.ChatRequestDto;
 import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
 import com.gigajet.mhlb.domain.chat.entity.Chat;
@@ -36,8 +40,9 @@ public class ChatService {
     private final UserRepository userRepository;
     private final SqlStatusRepository statusRepository;
     private final MessageIdRepository messageIdRepository;
+    private final AlarmRepository alarmRepository;
 
-    private final RedisTemplate<String, Object> redisTemplate;//private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     private final JwtUtil jwtUtil;
 
@@ -68,6 +73,7 @@ public class ChatService {
                     continue;
                 }
                 userAndMessage.addUnread();
+                messageIfExistsOtherUser(userAndMessage.getUserId(), message.getWorkspaceId());
             }
         }
 
@@ -103,6 +109,20 @@ public class ChatService {
         }
 
         Collections.sort(chatList, (a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()));
+
+        List<Alarm> alarmList = alarmRepository.findAllByUserIdAndWorkspaceIdAndUuidAndUnreadMessage(user.getId(),workspaceId,chatRoom.getInBoxId(),true);
+        alarmRepository.saveAll(alarmList);
+
+        Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user,workspaceId,true);
+        if(alarm.isEmpty()){
+            AlarmRequestDto socket = new AlarmRequestDto(Alarm.builder()
+                    .unreadMessage(false)
+                    .type(AlarmTypeEnum.chat)
+                    .workspaceId(workspaceId)
+                    .user(user).build());
+            redisTemplate.convertAndSend("alarmMessageChannel", socket);
+        }
+
         return chatList;
     }
 
@@ -189,29 +209,31 @@ public class ChatService {
      */
     @Transactional
     public void checkRoom(StompHeaderAccessor accessor) {
-        Map<Object, Object> room = redisTemplate.opsForHash().entries(accessor.getDestination());
+        Long id = userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))).get().getId();
+        String endpoint = accessor.getDestination();
+        if(!(endpoint.contains("/inbox/"))){
+            return;
+        }
+        Map<Object, Object> room = redisTemplate.opsForHash().entries(endpoint);
         if (room.size() == 0) {//해당 채팅방 최초 접속시
-            Map<String, String> userSessionInfo = new HashMap<>();
+            Map<String, Long> userSessionInfo = new HashMap<>();
 
-            userSessionInfo.put("sessionId", accessor.getSessionId());
+            userSessionInfo.put(accessor.getSessionId(), id);
 
             redisTemplate.opsForHash().putAll(accessor.getDestination(), userSessionInfo);
             redisTemplate.opsForValue().set(accessor.getSessionId(), accessor.getDestination());
 
         } else {//채팅방에 이미 유저가 존재 할 경우
-            Map<String, String> updatedData = new HashMap<>();
-//구현부
+            Map<String, Long> updatedData = new HashMap<>();
             for (Map.Entry<Object, Object> entry : room.entrySet()) {
                 String key = (String) entry.getKey();
-                String value = (String) entry.getValue();
+                Long value = (Long) entry.getValue();
                 updatedData.put(key, value);
             }
-            updatedData.put("sessionId1", accessor.getSessionId());
+            updatedData.put(accessor.getSessionId(), id);
             redisTemplate.opsForHash().putAll(accessor.getDestination(), updatedData);
 
             redisTemplate.opsForValue().set(accessor.getSessionId(), accessor.getDestination());
-            Map<Object, Object> test = redisTemplate.opsForHash().entries(accessor.getDestination());
-            System.out.println();
         }
     }
 
@@ -226,14 +248,14 @@ public class ChatService {
             redisTemplate.delete(sessionId);
             redisTemplate.delete(endpoint);
         } else {
-            Map<String, String> updatedData = new HashMap<>();
+            Map<String, Long> updatedData = new HashMap<>();
 
             for (Map.Entry<Object, Object> entry : room.entrySet()) {
                 if ((entry.getValue()).equals(sessionId)) {
                     continue;
                 }
                 String key = (String) entry.getKey();
-                String value = (String) entry.getValue();
+                Long value = (Long) entry.getValue();
                 updatedData.put(key, value);
                 System.out.println();
             }
@@ -242,5 +264,19 @@ public class ChatService {
             redisTemplate.opsForHash().putAll(endpoint, updatedData);//기존 값 제거 후 새 값 저장
             redisTemplate.delete(sessionId);
         }
+    }
+
+    private void messageIfExistsOtherUser(Long id, Long workspaceId) {
+        //user -> 메시지를 읽지 않은 사람
+        User user = userRepository.findById(id).orElseThrow();
+
+        Alarm alarm = alarmRepository.save(Alarm.builder()
+                        .unreadMessage(true)
+                .type(AlarmTypeEnum.chat)
+                .workspaceId(workspaceId)
+                .user(user).build());
+        AlarmRequestDto alarmRequestDto = new AlarmRequestDto(alarm);
+
+        redisTemplate.convertAndSend("alarmMessageChannel", alarmRequestDto);
     }
 }

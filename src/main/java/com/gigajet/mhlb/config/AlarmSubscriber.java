@@ -1,6 +1,8 @@
 package com.gigajet.mhlb.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gigajet.mhlb.domain.alarm.dto.AlarmRequestDto;
+import com.gigajet.mhlb.domain.alarm.dto.AlarmResponse;
 import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
@@ -24,8 +26,10 @@ public class AlarmSubscriber implements MessageListener {
             String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(message.getBody());
             System.out.println(publishMessage);
             //알람 기능 구현시 사용
+            AlarmRequestDto request = objectMapper.readValue(publishMessage, AlarmRequestDto.class);
+            AlarmResponse.AlarmChatResponse chat = new AlarmResponse.AlarmChatResponse(request);
 
-//            messagingTemplate.convertAndSend("/sub/" +상세엔드포인트, response);
+            messagingTemplate.convertAndSend("/sub/unread-message/" + request.getUserId(), chat);
 
         } catch (Exception e) {
             throw new CustomException(ErrorCode.UNDEFINED_REQUEST);
