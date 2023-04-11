@@ -77,11 +77,6 @@ public class MypageService {
         return new MypageResponseDto.AllList(inviteLists, workspaceLists);
     }
 
-    @Transactional(readOnly = true)
-    public MypageResponseDto.Image showImage(User user) {
-        return new MypageResponseDto.Image(user.getImage());
-    }
-
     public MypageResponseDto.Image updateImage(User user, MultipartFile userImage) throws IOException {
         String imageUrl = s3Handler.upload(userImage);
         if (!user.getImage().equals(defaultImage)) {
