@@ -47,6 +47,12 @@ public class ChatController {
         chatService.sendMsg(message, email, accessor.getSessionId());
     }
 
+    @GetMapping
+    public List<ChatResponseDto.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam Long id) {
+        return chatService.getInbox(userDetails.getUser(), id);
+    }
+
+
     @GetMapping("/{workspaceId}/{userId}")
     public List<ChatResponseDto.Chatting> getChat(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                   @PathVariable Long workspaceId, @PathVariable Long userId,
@@ -58,10 +64,5 @@ public class ChatController {
     @PostMapping("/{workspaceId}")
     public ChatResponseDto.GetUuid findChatRoom(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId, @RequestBody ChatRequestDto.UserId userId) {
         return chatService.getUuid(userDetails.getUser(), workspaceId, userId.getUserId());
-    }
-
-    @GetMapping("/{workspaceId}")
-    public List<ChatResponseDto.Inbox> getInbox(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long workspaceId) {
-        return chatService.getInbox(userDetails.getUser(), workspaceId);
     }
 }

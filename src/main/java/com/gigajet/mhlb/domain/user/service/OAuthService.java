@@ -11,6 +11,7 @@ import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OAuthService {
@@ -28,11 +30,6 @@ public class OAuthService {
     private final JwtUtil jwtUtil;
 
     private final HttpServletResponse response;
-
-    public void sendRedirect() throws IOException {
-        String redirectURL = googleOAuth.getOAuthRedirectURL();
-        response.sendRedirect(redirectURL);
-    }
 
     public ResponseEntity<SendMessageDto> oAuthLogin(String code) {
         GoogleOAuthRequestDto.Token tokenRequestDto = googleOAuth.getAccessToken(code);

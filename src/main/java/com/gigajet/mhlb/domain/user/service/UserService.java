@@ -8,6 +8,7 @@ import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.dto.UserResponseDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
+import com.gigajet.mhlb.domain.user.social.SocialType;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
@@ -103,6 +104,9 @@ public class UserService {
     @Transactional(readOnly = true)
     public ResponseEntity<SendMessageDto> login(UserRequestDto.Login loginDto, HttpServletResponse response) {
         User user = userRepository.findByEmail(loginDto.getEmail()).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
+        if (user.getType() == SocialType.GOOGLE) {
+            throw new CustomException(ErrorCode.SOCIAL_USER);
+        }
 
         if (!aesUtil.encrypt(loginDto.getPassword()).equals(user.getPassword())) {
             throw new CustomException(ErrorCode.WRONG_PASSWORD);

@@ -7,6 +7,7 @@ import com.gigajet.mhlb.domain.mail.dto.MailResponseDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
+import com.gigajet.mhlb.domain.user.social.SocialType;
 import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
@@ -37,6 +38,7 @@ public class MailService {
 
     private final JavaMailSender mailSender;
     private final RedisTemplate<String, String> redisTemplate;
+
     private final AESUtil aesUtil;
 
     @Value("${spring.mail.username}")
@@ -44,7 +46,10 @@ public class MailService {
 
     // 비밀번호 찾기 메일 발송
     public ResponseEntity<SendMessageDto> sendMail(String email) {
-        userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
+        if (user.getType() == SocialType.GOOGLE) {
+            throw new CustomException(ErrorCode.SOCIAL_USER);
+        }
 
         String uuid = UUID.randomUUID().toString().replaceAll("-", "");
         saveRandomNumberAndEmail(uuid, email);
@@ -68,13 +73,13 @@ public class MailService {
         return SendMessageDto.toResponseEntity(SuccessCode.VALID_EMAIL);
     }
 
-    // 캐시 저장 1
+    // 비밀번호 찾기 캐시 저장
     private void saveRandomNumberAndEmail(String randomNumber, String email) {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         valueOperations.set(randomNumber, email, Duration.ofMinutes(10));
     }
 
-    // 캐시 저장 2
+    // 워크스페이스 초대 캐시 저장
     private void saveRandomNumberAndEmail(String randomNumber, WorkspaceInvite workspaceInvite) {
         HashOperations<String, Object, Object> hashOperations = redisTemplate.opsForHash();
 
@@ -84,13 +89,11 @@ public class MailService {
 
         if (workspaceInvite.getUser() == null) {
             map.put("isUser", "N");
-            hashOperations.putAll(randomNumber, map);
-            hashOperations.getOperations().expire(randomNumber, Duration.ofMinutes(3));
         } else {
             map.put("isUser", "Y");
-            hashOperations.putAll(randomNumber, map);
-            hashOperations.getOperations().expire(randomNumber, Duration.ofMinutes(3));
         }
+        hashOperations.putAll(randomNumber, map);
+        hashOperations.getOperations().expire(randomNumber, Duration.ofMinutes(3));
     }
 
     // 비밀번호 찾기 인증 코드 유효 검사
