@@ -39,7 +39,7 @@ public class TimeCheckAop {
 //    @Around("execution(* com.gigajet.mhlb.domain..*Controller.*(..))")
 //    @Around("execution(* com.gigajet..*(..))")
     public Object timeChecker(ProceedingJoinPoint joinPoint) throws Throwable {
-        Long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         log.info("Start : " + joinPoint.toString());
         try {
             return joinPoint.proceed();

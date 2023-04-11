@@ -21,15 +21,15 @@ public class MailController {
     // 비밀번호 찾기 이메일 발송
     @Operation(summary = "이메일 발송 1", description = "비밀번호 찾기 이메일 발송 API")
     @PostMapping("/check/email")
-    public ResponseEntity<SendMessageDto> sendMail(@RequestBody UserRequestDto.CheckEmail emailDto) {
-        return mailService.sendMail(emailDto.getEmail());
+    public ResponseEntity<SendMessageDto> sendFindPasswordMail(@RequestBody UserRequestDto.CheckEmail emailDto) {
+        return mailService.sendFindPasswordMail(emailDto.getEmail());
     }
 
     // 비밀번호 찾기 인증 코드 유효 검사
     @Operation(summary = "인증 코드 유효 검사 1", description = "비밀번호 찾기 인증 코드 유효 검사 API")
     @PostMapping("/check/code/{uuid}")
-    public ResponseEntity<SendMessageDto> checkCode(@PathVariable String uuid) {
-        return mailService.checkCode(uuid);
+    public ResponseEntity<SendMessageDto> checkFindPasswordCode(@PathVariable String uuid) {
+        return mailService.checkFindPasswordCode(uuid);
     }
 
     // 비밀번호 변경
@@ -42,8 +42,8 @@ public class MailController {
     // 워크스페이스 초대 인증 코드 유효 검사 및 회원가입 유무 검사
     @Operation(summary = "워크스페이스 초대 인증 코드", description = "워크스페이스 초대 인증 코드 유효 검사 및 회원가입 유무 검사 API")
     @PostMapping("/check/invite/code/{uuid}")
-    public ResponseEntity<MailResponseDto.CheckInviteCode> checkInviteCode(@PathVariable String uuid) {
-        return mailService.checkInviteCode(uuid);
+    public ResponseEntity<MailResponseDto.CheckInviteCode> checkInviteWorkspaceCode(@PathVariable String uuid) {
+        return mailService.checkInviteWorkspaceCode(uuid);
     }
 
 }

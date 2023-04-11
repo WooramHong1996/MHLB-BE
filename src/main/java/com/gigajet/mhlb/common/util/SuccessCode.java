@@ -17,9 +17,10 @@ public enum SuccessCode {
     ORDER_CHANGE_SUCCESS(HttpStatus.OK, "order changed"),
     INVITE_SUCCESS(HttpStatus.OK, "invite success"),
     INVITE_REJECT(HttpStatus.OK, "invite reject success"),
-    CANCLE_INVITE(HttpStatus.OK, "invite cancled"),
+    CANCEL_INVITE(HttpStatus.OK, "invite canceled"),
     RESET_PASSWORD_SUCCESS(HttpStatus.OK, "reset password success"),
-    VALID_CODE(HttpStatus.OK, "valid code");
+    VALID_CODE(HttpStatus.OK, "valid code"),
+    EXILE_SUCCESS(HttpStatus.OK, "exile success");
 
     private final HttpStatus httpStatus;
     private final String message;

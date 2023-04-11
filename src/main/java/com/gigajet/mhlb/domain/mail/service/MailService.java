@@ -45,7 +45,7 @@ public class MailService {
     private String myAddress;
 
     // 비밀번호 찾기 메일 발송
-    public ResponseEntity<SendMessageDto> sendMail(String email) {
+    public ResponseEntity<SendMessageDto> sendFindPasswordMail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
         if (user.getType() == SocialType.GOOGLE) {
             throw new CustomException(ErrorCode.SOCIAL_USER);
@@ -97,7 +97,7 @@ public class MailService {
     }
 
     // 비밀번호 찾기 인증 코드 유효 검사
-    public ResponseEntity<SendMessageDto> checkCode(String uuid) {
+    public ResponseEntity<SendMessageDto> checkFindPasswordCode(String uuid) {
         String email = redisTemplate.opsForValue().get(uuid);
         if (email == null) {
             throw new CustomException(ErrorCode.INVALID_CODE);
@@ -121,7 +121,7 @@ public class MailService {
     }
 
     // 워크스페이스 초대 메일 발송
-    public void inviteMail(WorkspaceInvite workspaceInvite) {
+    public void sendInviteMail(WorkspaceInvite workspaceInvite) {
         String uuid = UUID.randomUUID().toString().replaceAll("-", "");
         saveRandomNumberAndEmail(uuid, workspaceInvite);
 
@@ -142,7 +142,7 @@ public class MailService {
     }
 
     // 워크스페이스 초대 인증 코드 유효 검사 및 회원가입 유무 검사
-    public ResponseEntity<MailResponseDto.CheckInviteCode> checkInviteCode(String uuid) {
+    public ResponseEntity<MailResponseDto.CheckInviteCode> checkInviteWorkspaceCode(String uuid) {
         if (Boolean.FALSE.equals(redisTemplate.hasKey(uuid))) {
             throw new CustomException(ErrorCode.INVALID_CODE);
         }

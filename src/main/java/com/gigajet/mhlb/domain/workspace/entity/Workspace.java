@@ -37,15 +37,15 @@ public class Workspace {
         this.isShow = 1;
     }
 
-    public void imageChange(String image) {
+    public void changeImage(String image) {
         this.image = image;
     }
 
-    public void titleChange(String title) {
+    public void changeTitle(String title) {
         this.title = title;
     }
 
-    public void descChange(String workspaceDesc) {
+    public void changeDesc(String workspaceDesc) {
         this.description = workspaceDesc;
     }
 
