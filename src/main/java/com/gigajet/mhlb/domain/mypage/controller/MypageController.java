@@ -34,12 +34,6 @@ public class MypageController {
         return mypageService.workspaceInfo(userDetails.getUser());
     }
 
-    @Operation(summary = "헤더의 로그인한 회원 이미지", description = "헤더의 로그인한 회원 이미지 조회 API")
-    @GetMapping("/image")
-    public MypageResponseDto.Image getImage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return mypageService.showImage(userDetails.getUser());
-    }
-
     @Operation(summary = "프로필 이미지 변경", description = "회원 프로필 이미지 변경 API")
     @PostMapping("/image")
     public MypageResponseDto.Image updateImage(@AuthenticationPrincipal UserDetailsImpl userDetails,

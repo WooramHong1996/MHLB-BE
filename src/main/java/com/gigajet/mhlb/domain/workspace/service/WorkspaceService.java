@@ -3,6 +3,9 @@ package com.gigajet.mhlb.domain.workspace.service;
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.common.util.S3Handler;
 import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.domain.alarm.Entity.Alarm;
+import com.gigajet.mhlb.domain.alarm.Repository.AlarmRepository;
+import com.gigajet.mhlb.domain.chat.repository.ChatRoomRepository;
 import com.gigajet.mhlb.domain.status.entity.SqlStatus;
 import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
@@ -39,6 +42,8 @@ public class WorkspaceService {
     private final WorkspaceInviteRepository workspaceInviteRepository;
     private final WorkspaceOrderRepository workspaceOrderRepository;
     private final SqlStatusRepository statusRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final AlarmRepository alarmRepository;
 
     private final S3Handler s3Handler;
 
@@ -46,17 +51,23 @@ public class WorkspaceService {
     private String defaultImage;
 
     @Transactional//(readOnly = true)
-    public List<WorkspaceResponseDto.Response> workspaceAllList(User user) {
-        List<WorkspaceResponseDto.Response> orderLists = new ArrayList<>();
+    public List<WorkspaceResponseDto.AllList> workspaceAllList(User user) {
+        List<WorkspaceResponseDto.AllList> orderLists = new ArrayList<>();
         List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);
 
         for (WorkspaceOrder workspaceOrder : workspaceOrderList) {
-            orderLists.add(new WorkspaceResponseDto.Response(workspaceOrder.getWorkspaceUser().getWorkspace()));
+            Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user, workspaceOrder.getWorkspaceUser().getWorkspace().getId(),true);
+            if(alarm.isEmpty()){
+                orderLists.add(new WorkspaceResponseDto.AllList(workspaceOrder.getWorkspaceUser().getWorkspace(), false));
+            }else{
+            orderLists.add(new WorkspaceResponseDto.AllList(workspaceOrder.getWorkspaceUser().getWorkspace(), alarm.get().getUnreadMessage()));
+            }
         }
-
         return orderLists;
     }
 
+    //알림 가져오기 메소드 밑으로 빼둠
+    //
     @Transactional
     public WorkspaceResponseDto.Response workspaceCreate(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
         String imageUrl = "";

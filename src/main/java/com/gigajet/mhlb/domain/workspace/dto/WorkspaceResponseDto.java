@@ -31,6 +31,33 @@ public class WorkspaceResponseDto {
         }
     }
 
+    @Schema(description = "메인 페이지 워크스페이스 정보 DTO")
+    @Getter
+    public static class AllList {
+        @Schema(description = "워크스페이스 id")
+        private Long workspaceId;
+        @Schema(description = "워크스페이스 이미지")
+        private String workspaceImage;
+        @Schema(description = "워크스페이스 타이틀")
+        private String workspaceTitle;
+        @Schema(description = "워크스페이스 상세정보")
+        private String workspaceDesc;
+        @Schema(description = "안읽은 메시지")
+        private Boolean unreadMessege;
+
+        public AllList(Workspace workspace, Boolean unreadMessege) {
+            this.workspaceId = workspace.getId();
+
+            this.workspaceImage = workspace.getImage();
+
+            this.workspaceTitle = workspace.getTitle();
+
+            this.workspaceDesc = workspace.getDescription();
+
+            this.unreadMessege = getUnreadMessege();
+        }
+    }
+
     @Schema(description = "메인 페이지 워크스페이스 정보, 회원 권한 DTO")
     @Getter
     public static class InfoAndRoll {
