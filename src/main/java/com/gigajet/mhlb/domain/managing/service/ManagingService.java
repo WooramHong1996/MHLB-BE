@@ -93,7 +93,7 @@ public class ManagingService {
         validateWorkspace(id);
         checkRole(user, id);
 
-        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
+        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, true);
 
         List<ManagingResponseDto.People> responses = new ArrayList<>();
 
@@ -110,10 +110,10 @@ public class ManagingService {
         checkRole(user, id);
 
         // 조인이 먼저 되는지 조건을 먼저 거는지 확인해야 함
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(userid, id, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(userid, id, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
         workspaceUser.offIsShow();
 
-        WorkspaceOrder workspaceOrder = workspaceOrderRepository.findByWorkspaceUserAndIsShow(workspaceUser, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        WorkspaceOrder workspaceOrder = workspaceOrderRepository.findByWorkspaceUserAndIsShow(workspaceUser, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
         workspaceOrder.offIsShow();
 
         return SendMessageDto.toResponseEntity(SuccessCode.EXILE_SUCCESS);
@@ -153,11 +153,11 @@ public class ManagingService {
 
         workspace.updateIsShow();
 
-        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
+        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, true);
         for (WorkspaceUser workspaceUser : workspaceUsers) {
             workspaceUser.offIsShow();
 
-            workspaceOrderRepository.findByWorkspaceUserAndIsShow(workspaceUser, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER)).offIsShow();
+            workspaceOrderRepository.findByWorkspaceUserAndIsShow(workspaceUser, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER)).offIsShow();
         }
 
         workspaceInviteRepository.deleteByWorkspace(manager.getWorkspace());
@@ -184,13 +184,11 @@ public class ManagingService {
                 User inviteUser = OptionalInviteUser.get();
                 Optional<WorkspaceUser> existUser = workspaceUserRepository.findByUserAndWorkspace(inviteUser, workspace);
 
-                if (existUser.isEmpty() || existUser.get().getIsShow() == 0) { //최초 초대거나 재초대인 경우
+                if (existUser.isEmpty() || !existUser.get().getIsShow()) { //최초 초대거나 재초대인 경우
                     return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, inviteUser, workspace));
-                } else if (existUser.get().getIsShow() == 1) {//이미 있는 유저인 경우
+                } else {
                     throw new CustomException(ErrorCode.ALREADY_INVITED);
                 }
-
-                return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, inviteUser, workspace));
             }
         }
     }
@@ -222,14 +220,14 @@ public class ManagingService {
     }
 
     private Workspace validateWorkspace(Long id) {
-        return workspaceRepository.findByIdAndIsShow(id, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        return workspaceRepository.findByIdAndIsShow(id, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
     }
 
     private WorkspaceUser checkRole(User user, Long id) {
         // 이 부분도 수정해야함. 쿼리 확인.
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.PERMISSION_DINED));
 
-        if (workspaceUser.getIsShow() == 1 && workspaceUser.getRole() == WorkspaceUserRole.MEMBER) {
+        if (workspaceUser.getIsShow() && workspaceUser.getRole() == WorkspaceUserRole.MEMBER) {
             throw new CustomException(ErrorCode.PERMISSION_DINED);
         }
 

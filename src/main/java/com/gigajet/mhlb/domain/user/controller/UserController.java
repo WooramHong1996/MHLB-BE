@@ -72,7 +72,8 @@ public class UserController {
         return userService.login(loginDto, response);
     }
 
-    // 상시 프로필
+    // 헤더 프로필
+    @Operation(summary = "헤더 프로필", description = "헤더 프로필 조회 API")
     @GetMapping("/user-info")
     public UserResponseDto userInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return userService.userInfo(userDetails.getUser());

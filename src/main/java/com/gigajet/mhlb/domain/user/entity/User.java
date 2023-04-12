@@ -34,7 +34,7 @@ public class User {
     private SocialType type;
 
     @Column(nullable = false)
-    private Integer isShow;
+    private Boolean isShow;
 
     public User(UserRequestDto.Register registerDto, String password, String image) {
         this.image = image;
@@ -43,7 +43,7 @@ public class User {
         this.description = registerDto.getUserDesc();
         this.password = password;
         this.job = registerDto.getUserJob();
-        this.isShow = 1;
+        this.isShow = true;
     }
 
     public User(GoogleOAuthRequestDto.GoogleUser googleUserDto) {
@@ -51,7 +51,7 @@ public class User {
         this.email = googleUserDto.getEmail();
         this.username = googleUserDto.getName();
         this.type = SocialType.GOOGLE;
-        this.isShow = 1;
+        this.isShow = true;
     }
 
     public void resetPassword(String password) {

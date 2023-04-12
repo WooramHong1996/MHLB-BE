@@ -53,7 +53,7 @@ public class StatusService {
 
         workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
-        List<WorkspaceUser> byWorkspaceId = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
+        List<WorkspaceUser> byWorkspaceId = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, true);
 
         for (WorkspaceUser workspaceUser : byWorkspaceId) {
             responseDto.add(new StatusResponseDto(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(workspaceUser.getUser())));
@@ -78,7 +78,7 @@ public class StatusService {
 
     @Transactional(readOnly = true)
     public List<Long> getWorkspaceList(User user) {
-        List<WorkspaceUser> list = workspaceUserRepository.findByUserAndIsShow(user, 1);
+        List<WorkspaceUser> list = workspaceUserRepository.findByUserAndIsShow(user, true);
         List<Long> longList = new ArrayList<>();
         for (WorkspaceUser workspaceUser : list) {
             longList.add(workspaceUser.getWorkspace().getId());
@@ -101,7 +101,7 @@ public class StatusService {
 
         statusRepository.save(status);
 
-        List<WorkspaceUser> workspaces = workspaceUserRepository.findByUserAndIsShow(user.get(), 1);
+        List<WorkspaceUser> workspaces = workspaceUserRepository.findByUserAndIsShow(user.get(), true);
 
         StatusResponseDto.Convert convert = new StatusResponseDto.Convert(status, workspaces);
 

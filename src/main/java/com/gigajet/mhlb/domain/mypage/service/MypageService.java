@@ -57,7 +57,7 @@ public class MypageService {
         List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByUser(user);
 
         List<MypageResponseDto.WorkspaceList> workspaceLists = new ArrayList<>();
-        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShowOrderByRoleDesc(user, 1);
+        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShowOrderByRoleDesc(user, true);
 
         for (WorkspaceInvite workspaceInvite : workspaceInviteList) {
             inviteLists.add(new MypageResponseDto.InviteList(workspaceInvite.getWorkspace()));
@@ -116,14 +116,14 @@ public class MypageService {
         workspaceInviteRepository.findByWorkspace_IdAndUserId(workspaceId, user.getId()).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
         Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
-        Optional<WorkspaceUser> alreadyExist = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 0);
+        Optional<WorkspaceUser> alreadyExist = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, false);
 
         if (alreadyExist.isPresent()) {
             alreadyExist.get().onIsShow();
-            workspaceOrderRepository.findByWorkspaceUserAndIsShow(alreadyExist.get(), 0).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER)).onIsShow();
+            workspaceOrderRepository.findByWorkspaceUserAndIsShow(alreadyExist.get(), false).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER)).onIsShow();
         } else {
             WorkspaceUser workspaceUser = new WorkspaceUser(user, workspace);
-            Long count = workspaceUserRepository.countByUserAndIsShow(user, 1);
+            Long count = workspaceUserRepository.countByUserAndIsShow(user, true);
 
             WorkspaceOrder workspaceOrder = new WorkspaceOrder(count, workspaceUser);
 

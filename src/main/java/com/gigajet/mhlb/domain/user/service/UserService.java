@@ -84,7 +84,7 @@ public class UserService {
         }
 
         Workspace workspace = workspaceInvite.getWorkspace();
-        if (workspace.getIsShow() == 0) {
+        if (!workspace.getIsShow()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
 

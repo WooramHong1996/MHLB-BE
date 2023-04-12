@@ -14,11 +14,11 @@ import java.util.Optional;
 
 public interface WorkspaceOrderRepository extends JpaRepository<WorkspaceOrder, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    List<WorkspaceOrder> findByWorkspaceUser_UserAndIsShowOrderByOrders(User user, Integer isShow);
+    List<WorkspaceOrder> findByWorkspaceUser_UserAndIsShowOrderByOrders(User user, Boolean isShow);
 
     @Modifying
     @Query("UPDATE WorkspaceOrder SET orders = :orders WHERE workspaceUser.id = :id")
     void orderUpdate(Long orders, Long id);
 
-    Optional<WorkspaceOrder> findByWorkspaceUserAndIsShow(WorkspaceUser workspaceUser, Integer isShow);
+    Optional<WorkspaceOrder> findByWorkspaceUserAndIsShow(WorkspaceUser workspaceUser, Boolean isShow);
 }
