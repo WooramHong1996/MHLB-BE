@@ -50,10 +50,11 @@ public class ChatService {
     @Transactional
     public Long getMessageId() {
         MessageId messageId = messageIdRepository.findTopByKey(1);
-        if(messageId == null){
-            messageId = new MessageId(1L);
-        }
-
+        messageId.addMessageId();
+//        MessageId messageId = new MessageId(1L);
+        messageIdRepository.save(messageId);
+        return messageId.getMessageId();
+    }
 
     @Transactional
     public void sendMsg(ChatRequestDto.Chat message, String email, String sessionId, Long messageId) {
@@ -67,7 +68,6 @@ public class ChatService {
                 .messageId(messageId)
                 .build();
         chat.setCreatedAt(LocalDateTime.now());
-        messageId.addMessageId();
 
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
 
@@ -84,7 +84,6 @@ public class ChatService {
 
         chatRoom.update(chat);
         chatRoomRepository.save(chatRoom);
-        messageIdRepository.save(messageId);
 
         chatRepository.save(chat);
 
