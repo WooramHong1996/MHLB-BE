@@ -92,19 +92,17 @@ public class StatusService {
 
     @Transactional
     public void SocketStatusUpdate(StatusRequestDto statusRequestDto, String authorization) {
-        Optional<User> user = userRepository.findByEmail(jwtUtil.getUserEmail(authorization.substring(7)));
-        if (statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user.get()).getStatus().equals(statusRequestDto.textOf())) {
+        User user = userRepository.findByEmail(jwtUtil.getUserEmail(authorization.substring(7))).orElseThrow(()->new CustomException(ErrorCode.WRONG_USER));
+
+        if (statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user).getStatus().equals(statusRequestDto.textOf())) {
             throw new CustomException(ErrorCode.STATUS_NOT_CHANGED);
         }
 
-        Status status = new Status(user.get(), statusRequestDto);
+        Status status = new Status(user, statusRequestDto);
 
         statusRepository.save(status);
 
-        List<WorkspaceUser> workspaces = workspaceUserRepository.findByUserAndIsShow(user.get(), true);
-
-        StatusResponseDto.Convert convert = new StatusResponseDto.Convert(status, workspaces);
-
+        StatusResponseDto.Convert convert = new StatusResponseDto.Convert(status);
 
         redisTemplate.convertAndSend("statusMessageChannel", convert);
     }

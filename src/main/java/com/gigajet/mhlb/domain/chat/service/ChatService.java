@@ -233,6 +233,9 @@ public class ChatService {
      */
     @Transactional
     public void checkRoom(StompHeaderAccessor accessor) {
+        if (!(accessor.getDestination().split("/")[2].equals("inbox"))) {
+            return;
+        }
         Long id = userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))).get().getId();
         String endpoint = accessor.getDestination();
         if (!(endpoint.contains("/inbox/"))) {
