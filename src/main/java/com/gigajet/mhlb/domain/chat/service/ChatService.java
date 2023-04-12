@@ -50,8 +50,10 @@ public class ChatService {
     @Transactional
     public Long getMessageId() {
         MessageId messageId = messageIdRepository.findTopByKey(1);
+        if(messageId == null){
+            messageId = new MessageId(1L);
+        }
         messageId.addMessageId();
-//        MessageId messageId = new MessageId(1L);
         messageIdRepository.save(messageId);
         return messageId.getMessageId();
     }
