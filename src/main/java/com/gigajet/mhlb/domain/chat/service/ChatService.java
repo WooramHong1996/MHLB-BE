@@ -50,10 +50,14 @@ public class ChatService {
     @Transactional
     public Long getMessageId() {
         MessageId messageId = messageIdRepository.findTopByKey(1);
-        if(messageId == null){
+        if (messageId == null) {
             messageId = new MessageId(1L);
+        } else {
+            messageId.addMessageId();
         }
-
+        messageIdRepository.save(messageId);
+        return messageId.getMessageId();
+    }
 
     @Transactional
     public void sendMsg(ChatRequestDto.Chat message, String email, String sessionId, Long messageId) {
@@ -67,7 +71,6 @@ public class ChatService {
                 .messageId(messageId)
                 .build();
         chat.setCreatedAt(LocalDateTime.now());
-        messageId.addMessageId();
 
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
 
@@ -84,7 +87,6 @@ public class ChatService {
 
         chatRoom.update(chat);
         chatRoomRepository.save(chatRoom);
-        messageIdRepository.save(messageId);
 
         chatRepository.save(chat);
 
@@ -215,13 +217,13 @@ public class ChatService {
         }
         chatRoomRepository.save(chatRoom);
         List<Alarm> alarms = alarmRepository.findAllByUserIdAndWorkspaceIdAndUuidAndUnreadMessage(user.getId(), chatRoom.getWorkspaceId(), uuid, true);
-        if(!alarms.isEmpty()) {
+        if (!alarms.isEmpty()) {
             for (Alarm alarm : alarms) {
                 alarmRepository.update(false, alarm.getId());
             }
         }
         Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user, chatRoom.getWorkspaceId(), true);
-        if (!alarm.isEmpty()){
+        if (!alarm.isEmpty()) {
             checkReadMessage(user, chatRoom.getWorkspaceId());
         }
     }
