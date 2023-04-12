@@ -48,7 +48,7 @@ public class WorkspaceService {
     @Transactional//(readOnly = true)
     public List<WorkspaceResponseDto.AllList> findWorkspaceList(User user) {
         List<WorkspaceResponseDto.AllList> orderLists = new ArrayList<>();
-        List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);
+        List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, true);
 
         for (WorkspaceOrder workspaceOrder : workspaceOrderList) {
             Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user, workspaceOrder.getWorkspaceUser().getWorkspace().getId(), true);
@@ -74,7 +74,7 @@ public class WorkspaceService {
 
         Workspace workspace = new Workspace(workspaceDto, imageUrl);
 
-        Long count = workspaceUserRepository.countByUserAndIsShow(user, 1);
+        Long count = workspaceUserRepository.countByUserAndIsShow(user, true);
 
         WorkspaceUser workspaceUser = new WorkspaceUser(user, workspace, ADMIN);
         WorkspaceOrder workspaceOrder = new WorkspaceOrder(count, workspaceUser);
@@ -94,7 +94,7 @@ public class WorkspaceService {
 
     @Transactional
     public ResponseEntity<SendMessageDto> changeOrder(User user, WorkspaceRequestDto.Orders orders) {
-        List<WorkspaceOrder> orderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);
+        List<WorkspaceOrder> orderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, true);
 
         HashMap<Long, Long> orderMap = new HashMap<>();//워크스페이스 id , 순서
         for (WorkspaceRequestDto.Order order : orders.getOrders()) {
@@ -111,7 +111,7 @@ public class WorkspaceService {
     @Transactional//(readOnly = true)
     public List<WorkspaceResponseDto.OrderList> findOrder(User user) {
         List<WorkspaceResponseDto.OrderList> orderLists = new ArrayList<>();
-        List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, 1);
+        List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, true);
 
         for (WorkspaceOrder workspaceOrder : workspaceOrderList) {
             orderLists.add(new WorkspaceResponseDto.OrderList(workspaceOrder.getWorkspaceUser().getWorkspace(), workspaceOrder.getOrders()));
@@ -125,7 +125,7 @@ public class WorkspaceService {
         workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
         List<WorkspaceResponseDto.People> peopleList = new ArrayList<>();
-        List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
+        List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, true);
 
         for (WorkspaceUser workspaceUser : workspaceUserList) {
             if (Objects.equals(workspaceUser.getUser().getId(), user.getId())) {

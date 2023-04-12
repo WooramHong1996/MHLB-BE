@@ -28,13 +28,13 @@ public class Workspace {
     private List<WorkspaceUser> workspaceUsers;
 
     @Column(nullable = false)
-    private Integer isShow;
+    private Boolean isShow;
 
     public Workspace(WorkspaceRequestDto.Create workspaceDto, String image) {
         this.title = workspaceDto.getWorkspaceTitle();
         this.description = workspaceDto.getWorkspaceDesc();
         this.image = image;
-        this.isShow = 1;
+        this.isShow = true;
     }
 
     public void changeImage(String image) {
@@ -50,6 +50,6 @@ public class Workspace {
     }
 
     public void updateIsShow() {
-        this.isShow = 0;
+        this.isShow = false;
     }
 }
