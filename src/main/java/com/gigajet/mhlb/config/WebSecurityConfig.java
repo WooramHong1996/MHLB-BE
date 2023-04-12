@@ -47,7 +47,6 @@ public class WebSecurityConfig {
                 .antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .antMatchers("/actuator/**").permitAll()
                 .anyRequest().authenticated();
-//                .anyRequest().permitAll();
 
         http.cors();
 
@@ -82,7 +81,6 @@ public class WebSecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-//        source.registerCorsConfiguration("/stomp/chat", config);
 
         return source;
     }

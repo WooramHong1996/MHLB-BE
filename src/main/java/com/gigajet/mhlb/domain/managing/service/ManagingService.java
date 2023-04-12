@@ -10,13 +10,13 @@ import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceResponseDto;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceOrder;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceInviteRepository;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceOrderRepository;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceInvite;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceOrder;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUserRole;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceInviteRepository;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceOrderRepository;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +30,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole.MEMBER;
 
 @Service
 @RequiredArgsConstructor
@@ -48,16 +46,16 @@ public class ManagingService {
     private String defaultImage;
 
     @Transactional(readOnly = true)
-    public ManagingResponseDto.Management management(User user, Long id) {
+    public ManagingResponseDto.Management findWorkspaceInfo(User user, Long id) {
+        Workspace workspace = validateWorkspace(id);
         WorkspaceUser manager = checkRole(user, id);
-        return new ManagingResponseDto.Management(manager.getWorkspace(), manager.getRole());
+        return new ManagingResponseDto.Management(workspace, manager.getRole());
     }
 
     @Transactional
-    public ManagingResponseDto.Image imagePost(User user, Long id, MultipartFile workspaceImage) throws IOException {
+    public ManagingResponseDto.Image changeImage(User user, Long id, MultipartFile workspaceImage) throws IOException {
+        Workspace workspace = validateWorkspace(id);
         checkRole(user, id);
-
-        Workspace workspace = workspaceRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
         String newImage = s3Handler.upload(workspaceImage);
 
@@ -65,31 +63,34 @@ public class ManagingService {
             s3Handler.delete(workspace.getImage());
         }
 
-        workspace.imageChange(newImage);
+        workspace.changeImage(newImage);
 
         return new ManagingResponseDto.Image(newImage);
     }
 
     @Transactional
-    public ManagingResponseDto.Title titlePatch(User user, Long id, String workspaceTitle) {
-        Workspace workspace = checkRole(user, id).getWorkspace();
+    public ManagingResponseDto.Title changeTitle(User user, Long id, String workspaceTitle) {
+        Workspace workspace = validateWorkspace(id);
+        checkRole(user, id);
 
-        workspace.titleChange(workspaceTitle);
+        workspace.changeTitle(workspaceTitle);
 
         return new ManagingResponseDto.Title(workspaceTitle);
     }
 
     @Transactional
-    public ManagingResponseDto.Description descPatch(User user, Long id, String workspaceDesc) {
-        Workspace workspace = checkRole(user, id).getWorkspace();
+    public ManagingResponseDto.Description changeDesc(User user, Long id, String workspaceDesc) {
+        Workspace workspace = validateWorkspace(id);
+        checkRole(user, id);
 
-        workspace.descChange(workspaceDesc);
+        workspace.changeDesc(workspaceDesc);
 
         return new ManagingResponseDto.Description(workspaceDesc);
     }
 
     @Transactional
-    public List<ManagingResponseDto.People> getPeople(User user, Long id) {
+    public List<ManagingResponseDto.People> findPeople(User user, Long id) {
+        validateWorkspace(id);
         checkRole(user, id);
 
         List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
@@ -104,32 +105,33 @@ public class ManagingService {
     }
 
     @Transactional
-    public ResponseEntity<SendMessageDto> deletePeople(User user, Long id, Long userid) {
+    public ResponseEntity<SendMessageDto> exilePeople(User user, Long id, Long userid) {
+        validateWorkspace(id);
         checkRole(user, id);
 
-        Optional<WorkspaceUser> delete = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(userid, id, 1);
-        if (delete.isEmpty()) {
-            throw new CustomException(ErrorCode.WRONG_USER);
-        }
-        delete.get().offIsShow();
+        // 조인이 먼저 되는지 조건을 먼저 거는지 확인해야 함
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(userid, id, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUser.offIsShow();
 
-        Optional<WorkspaceOrder> order = workspaceOrderRepository.findByWorkspaceUserAndIsShow(delete.get(), 1);
-        order.get().offIsShow();
+        WorkspaceOrder workspaceOrder = workspaceOrderRepository.findByWorkspaceUserAndIsShow(workspaceUser, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceOrder.offIsShow();
 
-        return ResponseEntity.ok(SendMessageDto.builder().message("ok").build());
+        return SendMessageDto.toResponseEntity(SuccessCode.EXILE_SUCCESS);
     }
 
     @Transactional
     public ManagingResponseDto.Role changeRole(User user, Long id, Long userid, ManagingRequestDto.Role role) {
+        validateWorkspace(id);
+
         if (role.getUserRole() == WorkspaceUserRole.ADMIN) {
             throw new CustomException(ErrorCode.PERMISSION_DINED);
         }
 
         checkRole(user, id);
 
-        User changeUser = userRepository.findById(userid).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        User changeRoleUser = userRepository.findById(userid).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
-        WorkspaceUser changeUserWorkspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(changeUser, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        WorkspaceUser changeUserWorkspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(changeRoleUser, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
         if (role.getUserRole() == changeUserWorkspaceUser.getRole()) {
             throw new CustomException(ErrorCode.SAME_PERMISSION);
@@ -141,21 +143,21 @@ public class ManagingService {
     }
 
     @Transactional
-    public ResponseEntity<SendMessageDto> deleteWorkspace(User user, Long id) {
+    public ResponseEntity<SendMessageDto> offWorkspaceIsShow(User user, Long id) {
+        Workspace workspace = validateWorkspace(id);
         WorkspaceUser manager = checkRole(user, id);
 
         if (manager.getRole() != WorkspaceUserRole.ADMIN) {
             throw new CustomException(ErrorCode.PERMISSION_DINED);
         }
 
-        Optional<Workspace> workspace = workspaceRepository.findByIdAndIsShow(id, 1);
-        workspace.get().updateIsShow();
+        workspace.updateIsShow();
 
         List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, 1);
         for (WorkspaceUser workspaceUser : workspaceUsers) {
             workspaceUser.offIsShow();
 
-            workspaceOrderRepository.findByWorkspaceUserAndIsShow(workspaceUser, 1).get().offIsShow();
+            workspaceOrderRepository.findByWorkspaceUserAndIsShow(workspaceUser, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER)).offIsShow();
         }
 
         workspaceInviteRepository.deleteByWorkspace(manager.getWorkspace());
@@ -163,51 +165,43 @@ public class ManagingService {
         return ResponseEntity.ok(SendMessageDto.builder().message("ok").build());
     }
 
-    private WorkspaceUser checkRole(User user, Long id) {
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.PERMISSION_DINED));
-
-        if (workspaceUser.getRole() == WorkspaceUserRole.MEMBER) {
-            throw new CustomException(ErrorCode.PERMISSION_DINED);
-        }
-
-        return workspaceUser;
-    }
-
     @Transactional
     public WorkspaceInvite invite(User user, Long id, String invitedUserEmail) {
-        WorkspaceUser managerUser = getWorkspaceUser(user, id);
+        Workspace workspace = validateWorkspace(id);
+        checkRole(user, id);
 
-        Optional<WorkspaceInvite> checkInvite = workspaceInviteRepository.findByWorkspaceAndEmail(managerUser.getWorkspace(), invitedUserEmail);
+        Optional<WorkspaceInvite> checkInvite = workspaceInviteRepository.findByWorkspaceAndEmail(workspace, invitedUserEmail);
         // 기존에 초대 한 사람인지 확인
         if (checkInvite.isPresent()) {
             throw new CustomException(ErrorCode.ALREADY_INVITED);
         } else {
             // 해당 유저가 회원가입 되어있는지 먼저 확인
-            Optional<User> invitedUser = userRepository.findByEmail(invitedUserEmail);
+            Optional<User> OptionalInviteUser = userRepository.findByEmail(invitedUserEmail);
 
-            if (invitedUser.isEmpty()) {
-                return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, managerUser.getWorkspace()));
+            if (OptionalInviteUser.isEmpty()) {
+                return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, workspace));
             } else {
-                Optional<WorkspaceUser> existUser = workspaceUserRepository.findByUserAndWorkspace(invitedUser.get(), managerUser.getWorkspace());
+                User inviteUser = OptionalInviteUser.get();
+                Optional<WorkspaceUser> existUser = workspaceUserRepository.findByUserAndWorkspace(inviteUser, workspace);
 
                 if (existUser.isEmpty() || existUser.get().getIsShow() == 0) { //최초 초대거나 재초대인 경우
-                    return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, invitedUser.get(), managerUser.getWorkspace()));
+                    return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, inviteUser, workspace));
                 } else if (existUser.get().getIsShow() == 1) {//이미 있는 유저인 경우
                     throw new CustomException(ErrorCode.ALREADY_INVITED);
                 }
 
-                return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, invitedUser.get(), managerUser.getWorkspace()));
+                return workspaceInviteRepository.save(new WorkspaceInvite(invitedUserEmail, inviteUser, workspace));
             }
         }
     }
 
     @Transactional(readOnly = true)
     public List<WorkspaceResponseDto.Invite> getInvite(User user, Long id) {
-        WorkspaceUser workspaceUser = getWorkspaceUser(user, id);
-        checkRole(workspaceUser);
+        Workspace workspace = validateWorkspace(id);
+        checkRole(user, id);
 
         List<WorkspaceResponseDto.Invite> inviteList = new ArrayList<>();
-        List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByWorkspaceOrderByIdDesc(workspaceUser.getWorkspace());
+        List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByWorkspaceOrderByIdDesc(workspace);
 
         for (WorkspaceInvite workspaceInvite : workspaceInviteList) {
             inviteList.add(new WorkspaceResponseDto.Invite(workspaceInvite));
@@ -217,31 +211,28 @@ public class ManagingService {
     }
 
     @Transactional
-    public ResponseEntity<SendMessageDto> deleteInvite(User user, Long id, Long inviteId) {
-        WorkspaceUser workspaceUser = getWorkspaceUser(user, id);
-        checkRole(workspaceUser);
+    public ResponseEntity<SendMessageDto> cancelInvite(User user, Long id, Long inviteId) {
+        validateWorkspace(id);
+        checkRole(user, id);
 
-        Optional<WorkspaceInvite> workspaceInvite = workspaceInviteRepository.findByWorkspace_IdAndId(id, inviteId);
-        if (workspaceInvite.isEmpty()) {
-            throw new CustomException(ErrorCode.WRONG_USER);
-        }
-
+        workspaceInviteRepository.findByWorkspace_IdAndId(id, inviteId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
         workspaceInviteRepository.deleteById(inviteId);
 
-        return SendMessageDto.toResponseEntity(SuccessCode.CANCLE_INVITE);
+        return SendMessageDto.toResponseEntity(SuccessCode.CANCEL_INVITE);
     }
 
-    private WorkspaceUser getWorkspaceUser(User user, Long id) {
-        Optional<WorkspaceUser> workspace = workspaceUserRepository.findByUserAndWorkspaceId(user, id);//유저가 워크스페이스에 가입 되어있는지 확인
-        if (workspace.isEmpty()) {
-            throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
-        }
-        return workspace.get();
+    private Workspace validateWorkspace(Long id) {
+        return workspaceRepository.findByIdAndIsShow(id, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
     }
 
-    private void checkRole(WorkspaceUser workspaceUser) {
-        if (workspaceUser.getRole() == MEMBER) {
-            throw new CustomException(ErrorCode.WRONG_USER);
+    private WorkspaceUser checkRole(User user, Long id) {
+        // 이 부분도 수정해야함. 쿼리 확인.
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.PERMISSION_DINED));
+
+        if (workspaceUser.getIsShow() == 1 && workspaceUser.getRole() == WorkspaceUserRole.MEMBER) {
+            throw new CustomException(ErrorCode.PERMISSION_DINED);
         }
+
+        return workspaceUser;
     }
 }

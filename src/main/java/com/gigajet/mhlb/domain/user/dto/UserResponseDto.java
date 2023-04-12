@@ -1,6 +1,7 @@
 package com.gigajet.mhlb.domain.user.dto;
 
 import lombok.Getter;
+
 @Getter
 public class UserResponseDto {
     private final String userImage;

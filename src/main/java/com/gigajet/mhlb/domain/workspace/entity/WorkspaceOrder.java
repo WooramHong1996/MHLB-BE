@@ -1,4 +1,4 @@
-package com.gigajet.mhlb.domain.workspaceuser.entity;
+package com.gigajet.mhlb.domain.workspace.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

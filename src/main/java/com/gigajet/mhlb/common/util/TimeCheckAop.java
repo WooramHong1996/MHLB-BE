@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -40,7 +39,7 @@ public class TimeCheckAop {
 //    @Around("execution(* com.gigajet.mhlb.domain..*Controller.*(..))")
 //    @Around("execution(* com.gigajet..*(..))")
     public Object timeChecker(ProceedingJoinPoint joinPoint) throws Throwable {
-        Long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         log.info("Start : " + joinPoint.toString());
         try {
             return joinPoint.proceed();

@@ -3,6 +3,7 @@ package com.gigajet.mhlb.domain.mypage.dto;
 import lombok.Getter;
 
 public class MypageRequestDto {
+
     @Getter
     public static class Name {
         private String userName;
@@ -17,4 +18,5 @@ public class MypageRequestDto {
     public static class Job {
         private String userJob;
     }
+
 }

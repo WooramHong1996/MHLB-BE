@@ -2,8 +2,8 @@ package com.gigajet.mhlb.domain.mypage.dto;
 
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUserRole;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,13 +29,9 @@ public class MypageResponseDto {
         @Builder
         public Info(User user) {
             this.userName = user.getUsername();
-
             this.id = user.getId();
-
             this.userDesc = user.getDescription();
-
             this.userImage = user.getImage();
-
             this.userJob = user.getJob();
         }
     }
@@ -44,9 +40,9 @@ public class MypageResponseDto {
     @Getter
     public static class AllList {
         @Schema(description = "가입되어있는 워크스페이스 리스트")
-        private List<WorkspaceList> workspaceList;
+        private final List<WorkspaceList> workspaceList;
         @Schema(description = "초대받은 워크스페이스 리스트")
-        private List<InviteList> inviteList;
+        private final List<InviteList> inviteList;
 
         @Builder
         public AllList(List<InviteList> inviteLists, List<WorkspaceList> workspaceList) {
@@ -59,26 +55,22 @@ public class MypageResponseDto {
     @Getter
     public static class WorkspaceList {
         @Schema(description = "워크스페이스 id")
-        private Long workspaceId;
+        private final Long workspaceId;
         @Schema(description = "워크스페이스 이미지")
-        private String workspaceImage;
+        private final String workspaceImage;
         @Schema(description = "워크스페이스 타이틀")
-        private String workspaceTitle;
+        private final String workspaceTitle;
         @Schema(description = "워크스페이스 상세정보")
-        private String workspaceDesc;
+        private final String workspaceDesc;
         @Schema(description = "워크스페이스에서의 유저 권한")
-        private WorkspaceUserRole userRole;
+        private final WorkspaceUserRole userRole;
 
         @Builder
         public WorkspaceList(Workspace workspace, WorkspaceUser workspaceUser) {
             this.workspaceId = workspace.getId();
-
             this.workspaceImage = workspace.getImage();
-
             this.workspaceTitle = workspace.getTitle();
-
             this.workspaceDesc = workspace.getDescription();
-
             this.userRole = workspaceUser.getRole();
         }
     }
@@ -87,22 +79,19 @@ public class MypageResponseDto {
     @Getter
     public static class InviteList {
         @Schema(description = "워크스페이스 id")
-        private Long workspaceId;
+        private final Long workspaceId;
         @Schema(description = "워크스페이스 이미지")
-        private String workspaceImage;
+        private final String workspaceImage;
         @Schema(description = "워크스페이스 타이틀")
-        private String workspaceTitle;
+        private final String workspaceTitle;
         @Schema(description = "워크스페이스 상세정보")
-        private String workspaceDesc;
+        private final String workspaceDesc;
 
         @Builder
         public InviteList(Workspace workspace) {
             this.workspaceId = workspace.getId();
-
             this.workspaceImage = workspace.getImage();
-
             this.workspaceTitle = workspace.getTitle();
-
             this.workspaceDesc = workspace.getDescription();
         }
     }
@@ -111,7 +100,7 @@ public class MypageResponseDto {
     @Getter
     public static class Name {
         @Schema(description = "회원 이름")
-        private String userName;
+        private final String userName;
 
         public Name(String userName) {
             this.userName = userName;
@@ -122,7 +111,8 @@ public class MypageResponseDto {
     @Getter
     public static class Description {
         @Schema(description = "회원 상태 메세지")
-        private String userDesc;
+        private final String userDesc;
+
         public Description(String userDesc) {
             this.userDesc = userDesc;
         }
@@ -132,7 +122,7 @@ public class MypageResponseDto {
     @Getter
     public static class Job {
         @Schema(description = "회원 직업")
-        private String userJob;
+        private final String userJob;
 
         public Job(String userJob) {
             this.userJob = userJob;
@@ -143,10 +133,11 @@ public class MypageResponseDto {
     @Getter
     public static class Image {
         @Schema(description = "회원 프로필 이미지")
-        private String userImage;
+        private final String userImage;
 
         public Image(String userImage) {
             this.userImage = userImage;
         }
     }
+
 }

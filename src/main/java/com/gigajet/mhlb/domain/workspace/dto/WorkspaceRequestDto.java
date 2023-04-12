@@ -1,8 +1,8 @@
 package com.gigajet.mhlb.domain.workspace.dto;
 
-import com.sun.istack.NotNull;
 import lombok.Getter;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public class WorkspaceRequestDto {
@@ -31,6 +31,6 @@ public class WorkspaceRequestDto {
     @Getter
     public static class Order {
         private Long workspaceId;
-        private Long ordernum;
+        private Long orderNum;
     }
 }

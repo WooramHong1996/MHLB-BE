@@ -2,7 +2,7 @@ package com.gigajet.mhlb.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gigajet.mhlb.domain.status.dto.StatusResponseDto;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
