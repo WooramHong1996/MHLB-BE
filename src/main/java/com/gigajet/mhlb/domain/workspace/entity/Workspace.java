@@ -1,8 +1,6 @@
 package com.gigajet.mhlb.domain.workspace.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceRequestDto;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,28 +28,28 @@ public class Workspace {
     private List<WorkspaceUser> workspaceUsers;
 
     @Column(nullable = false)
-    private Integer isShow;
+    private Boolean isShow;
 
     public Workspace(WorkspaceRequestDto.Create workspaceDto, String image) {
         this.title = workspaceDto.getWorkspaceTitle();
         this.description = workspaceDto.getWorkspaceDesc();
         this.image = image;
-        this.isShow = 1;
+        this.isShow = true;
     }
 
-    public void imageChange(String image) {
+    public void changeImage(String image) {
         this.image = image;
     }
 
-    public void titleChange(String title) {
+    public void changeTitle(String title) {
         this.title = title;
     }
 
-    public void descChange(String workspaceDesc) {
+    public void changeDesc(String workspaceDesc) {
         this.description = workspaceDesc;
     }
 
     public void updateIsShow() {
-        this.isShow = 0;
+        this.isShow = false;
     }
 }

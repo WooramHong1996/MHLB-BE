@@ -1,7 +1,7 @@
 package com.gigajet.mhlb.domain.status.dto;
 
 import com.gigajet.mhlb.domain.status.entity.SqlStatus;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,7 +1,6 @@
-package com.gigajet.mhlb.domain.workspaceuser.entity;
+package com.gigajet.mhlb.domain.workspace.entity;
 
 import com.gigajet.mhlb.domain.user.entity.User;
-import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,7 +26,7 @@ public class WorkspaceUser {
     private WorkspaceUserRole role;
 
     @Column(nullable = false)
-    private Integer isShow;
+    private Boolean isShow;
 
     @OneToOne(mappedBy = "workspaceUser")
     private WorkspaceOrder workspaceOrder;
@@ -36,14 +35,14 @@ public class WorkspaceUser {
         this.user = user;
         this.workspace = workspace;
         this.role = role;
-        this.isShow = 1;
+        this.isShow = true;
     }
 
     public WorkspaceUser(User user, Workspace workspace) {
         this.user = user;
         this.workspace = workspace;
         this.role = WorkspaceUserRole.MEMBER;
-        this.isShow = 1;
+        this.isShow = true;
     }
 
     public void updateRole(WorkspaceUserRole role) {
@@ -51,10 +50,10 @@ public class WorkspaceUser {
     }
 
     public void offIsShow() {
-        this.isShow = 0;
+        this.isShow = false;
     }
 
     public void onIsShow() {
-        this.isShow = 1;
+        this.isShow = true;
     }
 }

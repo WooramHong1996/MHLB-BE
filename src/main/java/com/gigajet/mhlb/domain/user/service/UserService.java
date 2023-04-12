@@ -3,17 +3,16 @@ package com.gigajet.mhlb.domain.user.service;
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.common.util.AESUtil;
 import com.gigajet.mhlb.common.util.SuccessCode;
-import com.gigajet.mhlb.domain.mypage.dto.MypageResponseDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.dto.UserResponseDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.user.social.SocialType;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceInvite;
-import com.gigajet.mhlb.domain.workspaceuser.entity.WorkspaceUser;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceInviteRepository;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceInvite;
+import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceInviteRepository;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
@@ -34,6 +33,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final WorkspaceInviteRepository workspaceInviteRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
+
     private final AESUtil aesUtil;
     private final JwtUtil jwtUtil;
 
@@ -52,7 +52,6 @@ public class UserService {
 
     public ResponseEntity<SendMessageDto> validateEmail(String email) {
         userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
-
         return SendMessageDto.toResponseEntity(SuccessCode.VALID_EMAIL);
     }
 
@@ -64,7 +63,6 @@ public class UserService {
         }
 
         String password = aesUtil.encrypt(registerDto.getPassword());
-
         User user = new User(registerDto, password, defaultImage);
 
         userRepository.save(user);
@@ -86,7 +84,7 @@ public class UserService {
         }
 
         Workspace workspace = workspaceInvite.getWorkspace();
-        if (workspace.getIsShow() == 0) {
+        if (!workspace.getIsShow()) {
             throw new CustomException(ErrorCode.WRONG_WORKSPACE_ID);
         }
 

@@ -1,4 +1,4 @@
-package com.gigajet.mhlb.domain.workspaceuser.entity;
+package com.gigajet.mhlb.domain.workspace.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,12 +18,12 @@ public class WorkspaceOrder {
     @Column
     private Long orders;
     @Column
-    private Integer isShow;
+    private Boolean isShow;
 
     public WorkspaceOrder(Long orders, WorkspaceUser workspaceUser) {
         this.orders = orders;
         this.workspaceUser = workspaceUser;
-        isShow = 1;
+        isShow = true;
     }
 
     public void updateOrder(Long orders) {
@@ -31,10 +31,10 @@ public class WorkspaceOrder {
     }
 
     public void offIsShow() {
-        this.isShow = 0;
+        this.isShow = false;
     }
 
     public void onIsShow() {
-        this.isShow = 1;
+        this.isShow = true;
     }
 }

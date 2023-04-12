@@ -2,7 +2,6 @@ package com.gigajet.mhlb.domain.user.controller;
 
 import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.domain.mail.service.MailService;
-import com.gigajet.mhlb.domain.mypage.dto.MypageResponseDto;
 import com.gigajet.mhlb.domain.status.service.StatusService;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.dto.UserResponseDto;
@@ -73,7 +72,8 @@ public class UserController {
         return userService.login(loginDto, response);
     }
 
-    // 상시 프로필
+    // 헤더 프로필
+    @Operation(summary = "헤더 프로필", description = "헤더 프로필 조회 API")
     @GetMapping("/user-info")
     public UserResponseDto userInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return userService.userInfo(userDetails.getUser());
@@ -83,7 +83,7 @@ public class UserController {
         소셜 로그인
      */
     @Operation(summary = "구글 소셜 로그인", description = "구글 소셜 로그인 API")
-    @GetMapping("/auth/google/callback")
+    @PostMapping("/auth/google/callback")
     public ResponseEntity<SendMessageDto> callback(@RequestParam(name = "code") String code) {
         return oAuthService.oAuthLogin(code);
     }

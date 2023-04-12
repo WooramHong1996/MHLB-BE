@@ -16,7 +16,7 @@ import com.gigajet.mhlb.domain.chat.repository.MessageIdRepository;
 import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
-import com.gigajet.mhlb.domain.workspaceuser.repository.WorkspaceUserRepository;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
@@ -91,8 +91,8 @@ public class ChatService {
 
     @Transactional
     public List<ChatResponseDto.Chatting> getChat(User user, Long workspaceId, Long opponentsId, Pageable pageable) {
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
         userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
@@ -135,8 +135,8 @@ public class ChatService {
         if (user.getId() == opponentsId) {
             throw new CustomException(ErrorCode.WRONG_USER);
         }
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
         List<UserAndMessage> userIdList = new ArrayList<>();
         userIdList.add(new UserAndMessage(user.getId()));
@@ -165,7 +165,7 @@ public class ChatService {
 
     @Transactional
     public List<ChatResponseDto.Inbox> getInbox(User user, Long workspaceId) {
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, 1).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
         List<ChatResponseDto.Inbox> response = new ArrayList<>();
         List<ChatRoom> list = chatRoomRepository.findByWorkspaceIdAndUserSetInOrderByLastChatDesc(workspaceId, user.getId());
