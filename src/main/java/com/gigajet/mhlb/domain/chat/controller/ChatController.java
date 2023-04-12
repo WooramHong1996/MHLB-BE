@@ -44,7 +44,7 @@ public class ChatController {
     public void sendMsg(ChatRequestDto.Chat message, StompHeaderAccessor accessor) {
         String authorization = accessor.getFirstNativeHeader("Authorization");
         String email = chatService.resolveToken(authorization);
-        chatService.sendMsg(message, email, accessor.getSessionId());
+        chatService.sendMsg(message, email, accessor.getSessionId(), chatService.getMessageId());
     }
 
     @GetMapping
