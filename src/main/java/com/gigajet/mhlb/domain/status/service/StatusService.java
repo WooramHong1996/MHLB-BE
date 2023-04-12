@@ -4,8 +4,8 @@ import com.gigajet.mhlb.common.dto.SendMessageDto;
 import com.gigajet.mhlb.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.status.dto.StatusRequestDto;
 import com.gigajet.mhlb.domain.status.dto.StatusResponseDto;
-import com.gigajet.mhlb.domain.status.entity.SqlStatus;
-import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
+import com.gigajet.mhlb.domain.status.entity.Status;
+import com.gigajet.mhlb.domain.status.repository.StatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
@@ -26,7 +26,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class StatusService {
-    private final SqlStatusRepository statusRepository;
+    private final StatusRepository statusRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
 
@@ -40,7 +40,7 @@ public class StatusService {
             throw new CustomException(ErrorCode.STATUS_NOT_CHANGED);
         }
 
-        SqlStatus status = new SqlStatus(user, statusRequestDto);
+        Status status = new Status(user, statusRequestDto);
 
         statusRepository.save(status);
 
@@ -64,7 +64,7 @@ public class StatusService {
 
     @Transactional
     public ResponseEntity<SendMessageDto> register(User user) {
-        SqlStatus status = new SqlStatus(user);
+        Status status = new Status(user);
 
         statusRepository.save(status);
 
@@ -97,7 +97,7 @@ public class StatusService {
             throw new CustomException(ErrorCode.STATUS_NOT_CHANGED);
         }
 
-        SqlStatus status = new SqlStatus(user.get(), statusRequestDto);
+        Status status = new Status(user.get(), statusRequestDto);
 
         statusRepository.save(status);
 

@@ -1,6 +1,6 @@
 package com.gigajet.mhlb.domain.workspace.dto;
 
-import com.gigajet.mhlb.domain.status.entity.SqlStatus;
+import com.gigajet.mhlb.domain.status.entity.Status;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceInvite;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUserRole;
@@ -131,7 +131,7 @@ public class WorkspaceResponseDto {
         @Schema(description = "회원 상태 색깔")
         private final Integer color;
 
-        public People(SqlStatus status) {
+        public People(Status status) {
             this.userId = status.getUser().getId();
             this.userImage = status.getUser().getImage();
             this.userName = status.getUser().getUsername();
