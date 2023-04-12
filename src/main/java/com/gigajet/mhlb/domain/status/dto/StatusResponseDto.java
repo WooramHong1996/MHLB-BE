@@ -1,6 +1,6 @@
 package com.gigajet.mhlb.domain.status.dto;
 
-import com.gigajet.mhlb.domain.status.entity.SqlStatus;
+import com.gigajet.mhlb.domain.status.entity.Status;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,13 +10,12 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Getter
-@NoArgsConstructor
 public class StatusResponseDto {
-    private Long userId;
-    private String status;
-    private Integer color;
+    private final Long userId;
+    private final String status;
+    private final Integer color;
 
-    public StatusResponseDto(SqlStatus status) {
+    public StatusResponseDto(Status status) {
         this.userId = status.getUser().getId();
         this.status = status.getStatus().getStatus();
         this.color = status.getStatus().getColor();
@@ -30,15 +29,14 @@ public class StatusResponseDto {
 
     @Getter
     @Builder
-    @NoArgsConstructor//웹소켓 테스트 후 삭제 예정
     @AllArgsConstructor
     public static class Convert {
-        private Long userId;
-        private String status;
-        private Integer color;
-        private List<WorkspaceUser> workspaces;
+        private final Long userId;
+        private final String status;
+        private final Integer color;
+        private final List<WorkspaceUser> workspaces;
 
-        public Convert(SqlStatus status, List<WorkspaceUser> workspaces) {
+        public Convert(Status status, List<WorkspaceUser> workspaces) {
             this.userId = status.getUser().getId();
             this.status = status.getStatus().getStatus();
             this.color = status.getStatus().getColor();

@@ -13,7 +13,7 @@ import com.gigajet.mhlb.domain.chat.entity.UserAndMessage;
 import com.gigajet.mhlb.domain.chat.repository.ChatRepository;
 import com.gigajet.mhlb.domain.chat.repository.ChatRoomRepository;
 import com.gigajet.mhlb.domain.chat.repository.MessageIdRepository;
-import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
+import com.gigajet.mhlb.domain.status.repository.StatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
@@ -38,7 +38,7 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
-    private final SqlStatusRepository statusRepository;
+    private final StatusRepository statusRepository;
     private final MessageIdRepository messageIdRepository;
     private final AlarmRepository alarmRepository;
 
