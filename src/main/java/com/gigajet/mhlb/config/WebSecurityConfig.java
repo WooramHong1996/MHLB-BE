@@ -48,7 +48,8 @@ public class WebSecurityConfig {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests()
-                .antMatchers("/api/auth/**").permitAll()
+                .antMatchers("/index.html").permitAll()
+                .antMatchers("/api/users/**").permitAll()
 //                .antMatchers("/stomp/chat/**").permitAll()
                 .anyRequest().authenticated();
 
