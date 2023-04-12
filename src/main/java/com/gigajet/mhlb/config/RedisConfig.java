@@ -1,5 +1,6 @@
 package com.gigajet.mhlb.config;
 
+import com.gigajet.mhlb.common.service.AlarmSubscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,8 +26,8 @@ public class RedisConfig {
     private int port;
 
     /**
-    redis의 pub/sub 기능을 이용하기 위해 MessageListener 설정 추가
-    메시지 발행이 오면 Listener가 처리함
+     * redis의 pub/sub 기능을 이용하기 위해 MessageListener 설정 추가
+     * 메시지 발행이 오면 Listener가 처리함
      */
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(
