@@ -15,10 +15,12 @@ public class AlarmRequestDto {
     @NotNull
     private Long workspaceId;
     private Long userId;
+    private Boolean unreadMessage;
 
     public AlarmRequestDto(Alarm alarm) {
         this.type = alarm.getType();
         this.workspaceId = alarm.getWorkspaceId();
         this.userId = alarm.getUser().getId();
+        this.unreadMessage = alarm.getUnreadMessage();
     }
 }
