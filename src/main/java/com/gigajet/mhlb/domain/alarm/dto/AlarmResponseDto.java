@@ -14,7 +14,7 @@ public class AlarmResponseDto {
         public AlarmChatResponse(AlarmRequestDto alarm) {
             this.workspaceId = alarm.getWorkspaceId();
             this.type = alarm.getType();
-            this.unreadMessage = false;
+            this.unreadMessage = alarm.getUnreadMessage();
         }
     }
 

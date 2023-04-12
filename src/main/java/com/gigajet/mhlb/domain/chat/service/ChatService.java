@@ -46,12 +46,13 @@ public class ChatService {
 
     private final JwtUtil jwtUtil;
 
+    //메시지 보내기
     @Transactional
     public void sendMsg(ChatRequestDto.Chat message, String email, String sessionId) {
         MessageId messageId = messageIdRepository.findTopByKey(1);
-        messageId.addMessageId();
-//        MessageId messageId = new MessageId(1L);
-        messageIdRepository.save(messageId);
+        if(messageId == null){
+            messageId = new MessageId(1L);
+        }
 
         Long id = userRepository.findByEmail(email).get().getId();
 
@@ -63,6 +64,7 @@ public class ChatService {
                 .messageId(messageId.getMessageId())
                 .build();
         chat.setCreatedAt(LocalDateTime.now());
+        messageId.addMessageId();
 
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
 
@@ -73,18 +75,20 @@ public class ChatService {
                     continue;
                 }
                 userAndMessage.addUnread();
-                messageIfExistsOtherUser(userAndMessage.getUserId(), message.getWorkspaceId());
+                checkUnreadMessage(userAndMessage.getUserId(), message.getWorkspaceId());
             }
         }
 
         chatRoom.update(chat);
         chatRoomRepository.save(chatRoom);
+        messageIdRepository.save(messageId);
 
         chatRepository.save(chat);
 
         redisTemplate.convertAndSend("chatMessageChannel", new ChatResponseDto.Convert(chat));
     }
 
+    //이전 채팅목록 불러오기
     @Transactional
     public List<ChatResponseDto.Chatting> getChat(User user, Long workspaceId, Long opponentsId, Pageable pageable) {
         workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
@@ -126,6 +130,7 @@ public class ChatService {
         return chatList;
     }
 
+    //uuid 불러오기
     @Transactional
     public ChatResponseDto.GetUuid getUuid(User user, Long workspaceId, Long opponentsId) {
         if (user.getId() == opponentsId) {
@@ -159,6 +164,7 @@ public class ChatService {
         return new ChatResponseDto.GetUuid(chatRoom.getInBoxId());
     }
 
+    //인박스 불러오기
     @Transactional
     public List<ChatResponseDto.Inbox> getInbox(User user, Long workspaceId) {
         workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
@@ -183,25 +189,38 @@ public class ChatService {
         return response;
     }
 
+    //토큰 값 추출
     public String resolveToken(String authorization) {
         return jwtUtil.getUserEmail(authorization.substring(7));
     }
 
+    //메시지 읽음 처리
     @Transactional
     public void readMessages(StompHeaderAccessor accessor) {
-        Long id = userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))).get().getId();
+        String email = String.valueOf(userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))));
+        User user = userRepository.findByEmail(email).get();
 
         String uuid = accessor.getFirstNativeHeader("uuid");
 
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(uuid);
 
         for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
-            if (id != userAndMessage.getUserId()) {
+            if (user.getId() != userAndMessage.getUserId()) {
                 continue;
             }
             userAndMessage.resetUnread();
         }
         chatRoomRepository.save(chatRoom);
+        List<Alarm> alarms = alarmRepository.findAllByUserIdAndWorkspaceIdAndUuidAndUnreadMessage(user.getId(), chatRoom.getWorkspaceId(), uuid, true);
+        if(!alarms.isEmpty()) {
+            for (Alarm alarm : alarms) {
+                alarmRepository.update(false, alarm.getId());
+            }
+        }
+        Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user, chatRoom.getWorkspaceId(), true);
+        if (!alarm.isEmpty()){
+            checkReadMessage(user, chatRoom.getWorkspaceId());
+        }
     }
 
     /**
@@ -266,12 +285,24 @@ public class ChatService {
         }
     }
 
-    private void messageIfExistsOtherUser(Long id, Long workspaceId) {
+    private void checkUnreadMessage(Long id, Long workspaceId) {
         //user -> 메시지를 읽지 않은 사람
         User user = userRepository.findById(id).orElseThrow();
 
         Alarm alarm = alarmRepository.save(Alarm.builder()
                 .unreadMessage(true)
+                .type(AlarmTypeEnum.CHAT)
+                .workspaceId(workspaceId)
+                .user(user).build());
+        AlarmRequestDto alarmRequestDto = new AlarmRequestDto(alarm);
+
+        redisTemplate.convertAndSend("alarmMessageChannel", alarmRequestDto);
+    }
+
+    private void checkReadMessage(User user, Long workspaceId) {
+
+        Alarm alarm = alarmRepository.save(Alarm.builder()
+                .unreadMessage(false)
                 .type(AlarmTypeEnum.CHAT)
                 .workspaceId(workspaceId)
                 .user(user).build());
