@@ -72,6 +72,7 @@ public class ChatResponseDto {
 
     @Builder
     @Getter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class Convert {
         private Long messageId;

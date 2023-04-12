@@ -21,6 +21,7 @@ import com.gigajet.mhlb.exception.CustomException;
 import com.gigajet.mhlb.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
@@ -74,6 +76,7 @@ public class ChatService {
 
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
 
+        log.info("여기1");
         Map<Object, Object> room = redisTemplate.opsForHash().entries("/sub/inbox/" + message.getUuid());
         if (room.size() == 1) { //방에 혼자일 경우 상대의 안읽은 메시지를 +1
             for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
@@ -84,11 +87,11 @@ public class ChatService {
                 checkUnreadMessage(userAndMessage.getUserId(), message.getWorkspaceId());
             }
         }
-
         chatRoom.update(chat);
         chatRoomRepository.save(chatRoom);
 
         chatRepository.save(chat);
+        log.info("chat 저장 완료");
 
         redisTemplate.convertAndSend("chatMessageChannel", new ChatResponseDto.Convert(chat));
     }
@@ -202,12 +205,15 @@ public class ChatService {
     //메시지 읽음 처리
     @Transactional
     public void readMessages(StompHeaderAccessor accessor) {
-        String email = String.valueOf(userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))));
-        User user = userRepository.findByEmail(email).get();
+        User user = userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
         String uuid = accessor.getFirstNativeHeader("uuid");
 
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(uuid);
+
+        if (chatRoom == null) {
+            return;
+        }
 
         for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
             if (user.getId() != userAndMessage.getUserId()) {
