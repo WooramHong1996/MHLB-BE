@@ -132,7 +132,7 @@ public class MailService {
             mimeMessageHelper.setTo(workspaceInvite.getEmail());
             mimeMessageHelper.setFrom(myAddress);
             mimeMessageHelper.setSubject("PIN ME :: 이메일 인증");
-            mimeMessageHelper.setText("<a href='http://localhost:8080/invite-workspace/" + uuid + "'>Workspace 참여</a>", true);
+            mimeMessageHelper.setText("<a href='http://localhost:3000/invite-workspace/" + uuid + "'>Workspace 참여</a>", true);
 
             mailSender.send(mimeMessage);
 

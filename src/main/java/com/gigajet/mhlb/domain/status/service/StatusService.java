@@ -16,6 +16,7 @@ import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,8 +92,8 @@ public class StatusService {
     }
 
     @Transactional
-    public void SocketStatusUpdate(StatusRequestDto statusRequestDto, String authorization) {
-        User user = userRepository.findByEmail(jwtUtil.getUserEmail(authorization.substring(7))).orElseThrow(()->new CustomException(ErrorCode.WRONG_USER));
+    public void SocketStatusUpdate(StatusRequestDto statusRequestDto, StompHeaderAccessor accessor) {
+        User user = userRepository.findByEmail(jwtUtil.getUserEmail(accessor)).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
         if (statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user).getStatus().equals(statusRequestDto.textOf())) {
             throw new CustomException(ErrorCode.STATUS_NOT_CHANGED);

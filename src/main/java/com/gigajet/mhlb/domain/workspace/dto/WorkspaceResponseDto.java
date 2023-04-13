@@ -39,7 +39,7 @@ public class WorkspaceResponseDto {
         private final String workspaceTitle;
         @Schema(description = "워크스페이스 상세정보")
         private final String workspaceDesc;
-        @Schema(description = "안읽은 메시지")
+        @Schema(description = "안 읽은 메시지")
         private final Boolean unreadMessage;
 
         public AllList(Workspace workspace, Boolean unreadMessage) {

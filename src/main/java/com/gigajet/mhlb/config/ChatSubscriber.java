@@ -31,7 +31,7 @@ public class ChatSubscriber implements MessageListener {
 
             log.info(chat.getInboxId() + "의 " + chat.getUserId() + "로 부터 " + chat.getMessage());
             messagingTemplate.convertAndSend("/sub/inbox/" + chat.getInboxId(), response);
-            log.info("보내기 성공!");
+            log.info("message 보내기 성공!");
         } catch (Exception e) {
             log.error(e.getMessage());
 //            throw new CustomException(ErrorCode.UNDEFINED_REQUEST);

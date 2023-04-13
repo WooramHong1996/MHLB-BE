@@ -40,7 +40,7 @@ public class ImageUtil {
 
     public boolean checkMimeType(File file) throws IOException {
         try {
-            List<String> mimeTypeList = Arrays.asList("image/jpeg,", "image/png", "image/jpg", "image/gif");
+            List<String> mimeTypeList = Arrays.asList("image/jpeg", "image/png", "image/jpg", "image/gif");
 
             String fileMimeType = tika.detect(file);
             log.info("mime type : {}", fileMimeType);

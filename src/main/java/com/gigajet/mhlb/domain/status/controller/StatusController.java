@@ -23,13 +23,14 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/status")
 public class StatusController {
+
     private final StatusService statusService;
+
     private final StatusSseHandler sseHandler;
 
     @MessageMapping("/status")
     public void changeStatus(StatusRequestDto statusRequestDto, StompHeaderAccessor accessor) {
-        String authorization = accessor.getFirstNativeHeader("Authorization");
-        statusService.SocketStatusUpdate(statusRequestDto, authorization);
+        statusService.SocketStatusUpdate(statusRequestDto, accessor);
     }
 
     @PostMapping

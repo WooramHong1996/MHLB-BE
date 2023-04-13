@@ -33,9 +33,10 @@ public class AlarmSubscriber implements MessageListener {
             AlarmResponseDto.AlarmChatResponse chat = new AlarmResponseDto.AlarmChatResponse(request);
 
             messagingTemplate.convertAndSend("/sub/unread-message/" + request.getUserId(), chat);
-
+            log.info("alarm 보내기 성공!");
         } catch (Exception e) {
-            throw new CustomException(ErrorCode.UNDEFINED_REQUEST);
+            log.error(e.getMessage());
+//            throw new CustomException(ErrorCode.UNDEFINED_REQUEST);
         }
     }
 }

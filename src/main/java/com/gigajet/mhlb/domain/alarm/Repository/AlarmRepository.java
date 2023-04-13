@@ -13,13 +13,15 @@ import java.util.Optional;
 public interface AlarmRepository extends JpaRepository<Alarm, Long> {
     Optional<Alarm> findTopByUserAndWorkspaceIdAndUnreadMessage(User user, Long workspaceId, Boolean unreadMessage);
 
+    Optional<Alarm> findAllByUserIdAndWorkspaceIdAndUuid(Long id, Long workspaceId, String uuid);
+
     List<Alarm> findAllByUserIdAndWorkspaceIdAndUnreadMessage(Long userId, Long workspaceId, Boolean unreadMessage);
 
-    List<Alarm> findAllByUserIdAndWorkspaceIdAndUuidAndUnreadMessage(Long userId, Long workspaceId, String uuid, Boolean unreadMessage);
+    Optional<Alarm> findByUserIdAndWorkspaceIdAndUuidAndUnreadMessage(Long userId, Long workspaceId, String uuid, Boolean unreadMessage);
 
     @Modifying
     @Transactional
     @Query("UPDATE Alarm SET unreadMessage = ?1 WHERE id = ?2 ")
-    Alarm update(Boolean unreadMessage, Long id);
+    void update(Boolean unreadMessage, Long id);
 
 }
