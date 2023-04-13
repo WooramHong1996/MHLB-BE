@@ -50,7 +50,7 @@ public class ChatService {
     @Transactional
     public void sendMsg(ChatRequestDto.Chat message, String email, String sessionId) {
         MessageId messageId = messageIdRepository.findTopByKey(1);
-        if(messageId == null){
+        if (messageId == null) {
             messageId = new MessageId(1L);
         }
 
@@ -67,16 +67,22 @@ public class ChatService {
         messageId.addMessageId();
 
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
+        Long otherId = 0L;
+        UserAndMessage unmessage = new UserAndMessage(otherId);
+
+        for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
+            if (id == userAndMessage.getUserId()) {
+                continue;
+            }
+            otherId = userAndMessage.getUserId();
+            unmessage = userAndMessage;
+        }
 
         Map<Object, Object> room = redisTemplate.opsForHash().entries("/sub/inbox/" + message.getUuid());
-        if (room.size() == 1) { //방에 혼자일 경우 상대의 안읽은 메시지를 +1
-            for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
-                if (id == userAndMessage.getUserId()) {
-                    continue;
-                }
-                userAndMessage.addUnread();
-                checkUnreadMessage(userAndMessage.getUserId(), message.getWorkspaceId());
-            }
+        if (!room.containsValue(otherId)) { //방에 혼자일 경우 상대의 안읽은 메시지를 +1
+            unmessage.addUnread();
+//                userAndMessage.addUnread();
+            checkUnreadMessage(unmessage.getUserId(), message.getWorkspaceId(), message.getUuid());
         }
 
         chatRoom.update(chat);
@@ -197,8 +203,9 @@ public class ChatService {
     //메시지 읽음 처리
     @Transactional
     public void readMessages(StompHeaderAccessor accessor) {
-        String email = String.valueOf(userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))));
-        User user = userRepository.findByEmail(email).get();
+//        String email = String.valueOf(userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))));
+        Long id = userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))).get().getId();
+        User user = userRepository.findById(id).get();
 
         String uuid = accessor.getFirstNativeHeader("uuid");
 
@@ -211,14 +218,14 @@ public class ChatService {
             userAndMessage.resetUnread();
         }
         chatRoomRepository.save(chatRoom);
-        List<Alarm> alarms = alarmRepository.findAllByUserIdAndWorkspaceIdAndUuidAndUnreadMessage(user.getId(), chatRoom.getWorkspaceId(), uuid, true);
-        if(!alarms.isEmpty()) {
+        List<Alarm> alarms = alarmRepository.findByUser_IdAndWorkspaceIdAndUuidAndUnreadMessage(user.getId(), chatRoom.getWorkspaceId(), uuid, true);
+        if (!alarms.isEmpty()) {
             for (Alarm alarm : alarms) {
-                alarmRepository.update(false, alarm.getId());
+                alarm.change();
             }
         }
         Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user, chatRoom.getWorkspaceId(), true);
-        if (!alarm.isEmpty()){
+        if (alarm.isEmpty()) {
             checkReadMessage(user, chatRoom.getWorkspaceId());
         }
     }
@@ -285,7 +292,7 @@ public class ChatService {
         }
     }
 
-    private void checkUnreadMessage(Long id, Long workspaceId) {
+    private void checkUnreadMessage(Long id, Long workspaceId, String uuid) {
         //user -> 메시지를 읽지 않은 사람
         User user = userRepository.findById(id).orElseThrow();
 
@@ -293,6 +300,7 @@ public class ChatService {
                 .unreadMessage(true)
                 .type(AlarmTypeEnum.CHAT)
                 .workspaceId(workspaceId)
+                .uuid(uuid)
                 .user(user).build());
         AlarmRequestDto alarmRequestDto = new AlarmRequestDto(alarm);
 

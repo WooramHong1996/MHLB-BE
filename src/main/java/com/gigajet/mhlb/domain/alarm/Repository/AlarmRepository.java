@@ -17,9 +17,12 @@ public interface AlarmRepository extends JpaRepository<Alarm, Long> {
 
     List<Alarm> findAllByUserIdAndWorkspaceIdAndUuidAndUnreadMessage(Long userId, Long workspaceId, String uuid, Boolean unreadMessage);
 
+    List<Alarm> findByUser_IdAndWorkspaceIdAndUuidAndUnreadMessage(Long userId, Long workspaceId, String uuid, Boolean unreadMessage);
+
+
     @Modifying
     @Transactional
-    @Query("UPDATE Alarm SET unreadMessage = ?1 WHERE id = ?2 ")
+    @Query("UPDATE Alarm SET unreadMessage = :unreadMessage WHERE id = :id ")
     Alarm update(Boolean unreadMessage, Long id);
 
 }

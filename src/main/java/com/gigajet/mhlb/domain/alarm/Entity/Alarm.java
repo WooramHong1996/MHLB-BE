@@ -33,4 +33,7 @@ public class Alarm {
         this.uuid = uuid;
         this.user = user;
     }
+    public void change(){
+        this.unreadMessage = false;
+    }
 }
