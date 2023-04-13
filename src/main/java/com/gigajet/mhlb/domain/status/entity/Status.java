@@ -12,7 +12,7 @@ import java.time.LocalTime;
 @Getter
 @Entity
 @NoArgsConstructor
-public class SqlStatus {
+public class Status {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,14 +22,14 @@ public class SqlStatus {
     private LocalDate updateDay;
     private LocalTime updateTime;
 
-    public SqlStatus(User user) {
+    public Status(User user) {
         this.user = user;
         this.status = StatusEnum.COB;
         this.updateDay = LocalDate.now();
         this.updateTime = LocalTime.now();
     }
 
-    public SqlStatus(User user, StatusRequestDto status) {
+    public Status(User user, StatusRequestDto status) {
         this.user = user;
         this.updateDay = LocalDate.now();
         this.updateTime = LocalTime.now();

@@ -13,7 +13,7 @@ import com.gigajet.mhlb.domain.chat.entity.UserAndMessage;
 import com.gigajet.mhlb.domain.chat.repository.ChatRepository;
 import com.gigajet.mhlb.domain.chat.repository.ChatRoomRepository;
 import com.gigajet.mhlb.domain.chat.repository.MessageIdRepository;
-import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
+import com.gigajet.mhlb.domain.status.repository.StatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
@@ -38,7 +38,7 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
-    private final SqlStatusRepository statusRepository;
+    private final StatusRepository statusRepository;
     private final MessageIdRepository messageIdRepository;
     private final AlarmRepository alarmRepository;
 
@@ -48,12 +48,15 @@ public class ChatService {
 
     //메시지 보내기
     @Transactional
-    public void sendMsg(ChatRequestDto.Chat message, String email, String sessionId) {
+    public Long getMessageId() {
         MessageId messageId = messageIdRepository.findTopByKey(1);
         if (messageId == null) {
             messageId = new MessageId(1L);
         }
 
+
+    @Transactional
+    public void sendMsg(ChatRequestDto.Chat message, String email, String sessionId, Long messageId) {
         Long id = userRepository.findByEmail(email).get().getId();
 
         Chat chat = Chat.builder()
@@ -61,7 +64,7 @@ public class ChatService {
                 .inBoxId(message.getUuid())
                 .workspaceId(message.getWorkspaceId())
                 .message(message.getMessage())
-                .messageId(messageId.getMessageId())
+                .messageId(messageId)
                 .build();
         chat.setCreatedAt(LocalDateTime.now());
         messageId.addMessageId();

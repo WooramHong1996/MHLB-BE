@@ -5,8 +5,8 @@ import com.gigajet.mhlb.common.util.S3Handler;
 import com.gigajet.mhlb.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.alarm.Entity.Alarm;
 import com.gigajet.mhlb.domain.alarm.Repository.AlarmRepository;
-import com.gigajet.mhlb.domain.status.entity.SqlStatus;
-import com.gigajet.mhlb.domain.status.repository.SqlStatusRepository;
+import com.gigajet.mhlb.domain.status.entity.Status;
+import com.gigajet.mhlb.domain.status.repository.StatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceRequestDto;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceResponseDto;
@@ -37,7 +37,7 @@ public class WorkspaceService {
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final WorkspaceOrderRepository workspaceOrderRepository;
-    private final SqlStatusRepository statusRepository;
+    private final StatusRepository statusRepository;
     private final AlarmRepository alarmRepository;
 
     private final S3Handler s3Handler;
@@ -131,7 +131,7 @@ public class WorkspaceService {
             if (Objects.equals(workspaceUser.getUser().getId(), user.getId())) {
                 continue;
             }
-            SqlStatus status = statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(workspaceUser.getUser());
+            Status status = statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(workspaceUser.getUser());
             peopleList.add(new WorkspaceResponseDto.People(status));
         }
 
