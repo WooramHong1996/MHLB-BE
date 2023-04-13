@@ -1,7 +1,8 @@
 package com.gigajet.mhlb.domain.status.service;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.domain.status.entity.StatusEnum;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.status.dto.StatusRequestDto;
 import com.gigajet.mhlb.domain.status.dto.StatusResponseDto;
 import com.gigajet.mhlb.domain.status.entity.Status;
@@ -10,10 +11,11 @@ import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.global.exception.CustomException;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -22,8 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StatusService {
@@ -93,9 +95,11 @@ public class StatusService {
 
     @Transactional
     public void SocketStatusUpdate(StatusRequestDto statusRequestDto, StompHeaderAccessor accessor) {
-        User user = userRepository.findByEmail(jwtUtil.getUserEmail(accessor)).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        User user = userRepository.findById(Long.valueOf(accessor.getFirstNativeHeader("userId"))).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
-        if (statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user).getStatus().equals(statusRequestDto.textOf())) {
+        StatusEnum statusEnum = statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user).getStatus();
+        log.info(statusEnum.getStatus());
+        if (statusEnum.equals(statusRequestDto.textOf())) {
             throw new CustomException(ErrorCode.STATUS_NOT_CHANGED);
         }
 

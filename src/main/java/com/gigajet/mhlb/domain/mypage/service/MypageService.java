@@ -1,8 +1,8 @@
 package com.gigajet.mhlb.domain.mypage.service;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.common.util.S3Handler;
-import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.util.S3Handler;
+import com.gigajet.mhlb.global.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.mypage.dto.MypageResponseDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
@@ -15,8 +15,8 @@ import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUserRole;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceInviteRepository;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceOrderRepository;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.global.exception.CustomException;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;

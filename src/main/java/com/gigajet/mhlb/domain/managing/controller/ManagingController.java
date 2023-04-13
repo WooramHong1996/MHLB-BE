@@ -1,7 +1,7 @@
 package com.gigajet.mhlb.domain.managing.controller;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.mail.service.MailService;
 import com.gigajet.mhlb.domain.managing.dto.ManagingRequestDto;
 import com.gigajet.mhlb.domain.managing.dto.ManagingResponseDto;

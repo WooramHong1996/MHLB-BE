@@ -1,6 +1,6 @@
 package com.gigajet.mhlb.domain.mypage.controller;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
 import com.gigajet.mhlb.domain.mypage.dto.MypageRequestDto;
 import com.gigajet.mhlb.domain.mypage.dto.MypageResponseDto;
 import com.gigajet.mhlb.domain.mypage.service.MypageService;

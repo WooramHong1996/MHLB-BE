@@ -1,4 +1,4 @@
-package com.gigajet.mhlb.exception;
+package com.gigajet.mhlb.global.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

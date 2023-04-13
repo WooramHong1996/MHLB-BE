@@ -1,9 +1,9 @@
 package com.gigajet.mhlb.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.exception.CustomException;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;

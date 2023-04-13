@@ -5,8 +5,6 @@ import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
 import com.gigajet.mhlb.domain.chat.service.ChatService;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;

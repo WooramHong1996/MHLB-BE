@@ -18,7 +18,6 @@ public class ChatMessageController {
 
     @MessageMapping("/inbox")
     public void sendMsg(ChatRequestDto.Chat message, StompHeaderAccessor accessor) {
-        String email = jwtUtil.getUserEmail(accessor);
-        chatMessageService.sendMsg(message, email, accessor.getSessionId(), chatMessageService.getMessageId());
+        chatMessageService.sendMsg(message, accessor, chatMessageService.getMessageId());
     }
 }

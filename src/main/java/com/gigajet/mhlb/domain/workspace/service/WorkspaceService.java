@@ -1,8 +1,8 @@
 package com.gigajet.mhlb.domain.workspace.service;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.common.util.S3Handler;
-import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.util.S3Handler;
+import com.gigajet.mhlb.global.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.alarm.Entity.Alarm;
 import com.gigajet.mhlb.domain.alarm.Repository.AlarmRepository;
 import com.gigajet.mhlb.domain.status.entity.Status;
@@ -16,8 +16,8 @@ import com.gigajet.mhlb.domain.workspace.entity.WorkspaceOrder;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceOrderRepository;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.global.exception.CustomException;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -51,11 +51,11 @@ public class WorkspaceService {
         List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, true);
 
         for (WorkspaceOrder workspaceOrder : workspaceOrderList) {
-            Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user, workspaceOrder.getWorkspaceUser().getWorkspace().getId(), true);
-            if (alarm.isEmpty()) {
+            List<Alarm> alarmList = alarmRepository.findAllByUserAndWorkspaceIdAndUnreadMessage(user, workspaceOrder.getWorkspaceUser().getWorkspace().getId(), true);
+            if (alarmList.size() == 0) {
                 orderLists.add(new WorkspaceResponseDto.AllList(workspaceOrder.getWorkspaceUser().getWorkspace(), false));
             } else {
-                orderLists.add(new WorkspaceResponseDto.AllList(workspaceOrder.getWorkspaceUser().getWorkspace(), alarm.get().getUnreadMessage()));
+                orderLists.add(new WorkspaceResponseDto.AllList(workspaceOrder.getWorkspaceUser().getWorkspace(), true));
             }
         }
 

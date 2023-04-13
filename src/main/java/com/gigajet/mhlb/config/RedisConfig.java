@@ -1,6 +1,8 @@
 package com.gigajet.mhlb.config;
 
-import com.gigajet.mhlb.common.service.AlarmSubscriber;
+import com.gigajet.mhlb.global.subscriber.ChatAlarmSubscriber;
+import com.gigajet.mhlb.global.subscriber.ChatSubscriber;
+import com.gigajet.mhlb.global.subscriber.StatusSubscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,14 +36,14 @@ public class RedisConfig {
             RedisConnectionFactory connectionFactory,
             @Qualifier("chatMessageListenerAdapter") MessageListenerAdapter chatMessageListenerAdapter,
             @Qualifier("statusMessageListenerAdapter") MessageListenerAdapter handleMessageListenerAdapter,
-            @Qualifier("alarmMessageListenerAdapter") MessageListenerAdapter alarmMessageListenerAdapter
+            @Qualifier("chatAlarmMessageListenerAdapter") MessageListenerAdapter chatAlarmMessageListenerAdapter
     ) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // RedisMessageListenerContainer 에 Bean 으로 등록한 listenerAdapter, channelTopic 추가
         container.addMessageListener(chatMessageListenerAdapter, new ChannelTopic("chatMessageChannel"));
         container.addMessageListener(handleMessageListenerAdapter, new ChannelTopic("statusMessageChannel"));
-        container.addMessageListener(alarmMessageListenerAdapter, new ChannelTopic("alarmMessageChannel"));
+        container.addMessageListener(chatAlarmMessageListenerAdapter, new ChannelTopic("chatAlarmMessageChannel"));
         return container;
     }
 
@@ -56,7 +58,7 @@ public class RedisConfig {
     }
 
     @Bean
-    public MessageListenerAdapter alarmMessageListenerAdapter(AlarmSubscriber subscriber) {
+    public MessageListenerAdapter chatAlarmMessageListenerAdapter(ChatAlarmSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber);
     }
 

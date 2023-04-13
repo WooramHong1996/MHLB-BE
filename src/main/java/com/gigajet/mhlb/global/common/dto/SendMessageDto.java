@@ -1,7 +1,7 @@
-package com.gigajet.mhlb.common.dto;
+package com.gigajet.mhlb.global.common.dto;
 
-import com.gigajet.mhlb.common.util.SuccessCode;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.global.common.util.SuccessCode;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;

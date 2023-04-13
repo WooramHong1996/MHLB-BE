@@ -1,11 +1,11 @@
-package com.gigajet.mhlb.config;
+package com.gigajet.mhlb.global.subscriber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gigajet.mhlb.domain.status.dto.StatusResponseDto;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.global.exception.CustomException;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;

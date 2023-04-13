@@ -1,6 +1,5 @@
 package com.gigajet.mhlb.config;
 
-import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;

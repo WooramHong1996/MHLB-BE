@@ -1,12 +1,7 @@
-package com.gigajet.mhlb.common.service;
+package com.gigajet.mhlb.global.subscriber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gigajet.mhlb.domain.alarm.dto.AlarmRequestDto;
-import com.gigajet.mhlb.domain.alarm.dto.AlarmResponseDto;
-import com.gigajet.mhlb.domain.alarm.dto.AlarmResponseDto;
-import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.domain.alarm.dto.ChatAlarmResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
@@ -18,7 +13,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class AlarmSubscriber implements MessageListener {
+public class ChatAlarmSubscriber implements MessageListener {
     private final ObjectMapper objectMapper;
     private final RedisTemplate redisTemplate;
     private final SimpMessageSendingOperations messagingTemplate;
@@ -29,13 +24,12 @@ public class AlarmSubscriber implements MessageListener {
             String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(message.getBody());
             log.info(publishMessage);
 
-            AlarmRequestDto request = objectMapper.readValue(publishMessage, AlarmRequestDto.class);
-            AlarmResponseDto.AlarmChatResponse chat = new AlarmResponseDto.AlarmChatResponse(request);
-
-            messagingTemplate.convertAndSend("/sub/unread-message/" + request.getUserId(), chat);
+            ChatAlarmResponseDto.ConvertChatAlarm convertChatAlarm = objectMapper.readValue(publishMessage, ChatAlarmResponseDto.ConvertChatAlarm.class);
+            messagingTemplate.convertAndSend("/sub/unread-message/" + convertChatAlarm.getReceiverId(), convertChatAlarm.getT());
             log.info("alarm 보내기 성공!");
-        } catch (Exception e) {
-            log.error(e.getMessage());
+
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
 //            throw new CustomException(ErrorCode.UNDEFINED_REQUEST);
         }
     }

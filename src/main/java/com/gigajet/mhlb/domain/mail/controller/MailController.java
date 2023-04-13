@@ -1,6 +1,6 @@
 package com.gigajet.mhlb.domain.mail.controller;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
 import com.gigajet.mhlb.domain.mail.dto.MailResponseDto;
 import com.gigajet.mhlb.domain.mail.service.MailService;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;

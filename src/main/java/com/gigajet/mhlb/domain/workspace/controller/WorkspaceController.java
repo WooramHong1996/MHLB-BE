@@ -1,6 +1,6 @@
 package com.gigajet.mhlb.domain.workspace.controller;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceRequestDto;
 import com.gigajet.mhlb.domain.workspace.dto.WorkspaceResponseDto;
 import com.gigajet.mhlb.domain.workspace.service.WorkspaceService;

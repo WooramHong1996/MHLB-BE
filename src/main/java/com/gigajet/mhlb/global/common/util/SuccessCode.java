@@ -1,4 +1,4 @@
-package com.gigajet.mhlb.common.util;
+package com.gigajet.mhlb.global.common.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

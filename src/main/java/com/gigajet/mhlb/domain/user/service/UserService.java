@@ -1,8 +1,8 @@
 package com.gigajet.mhlb.domain.user.service;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.common.util.AESUtil;
-import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.util.AESUtil;
+import com.gigajet.mhlb.global.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.dto.UserResponseDto;
 import com.gigajet.mhlb.domain.user.entity.User;
@@ -13,8 +13,8 @@ import com.gigajet.mhlb.domain.workspace.entity.WorkspaceInvite;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceInviteRepository;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.global.exception.CustomException;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +50,7 @@ public class UserService {
         return SendMessageDto.toResponseEntity(SuccessCode.CHECKUP_EMAIL);
     }
 
+    @Transactional(readOnly = true)
     public ResponseEntity<SendMessageDto> validateEmail(String email) {
         userRepository.findByEmail(email).orElseThrow(() -> new CustomException(ErrorCode.UNREGISTER_USER));
         return SendMessageDto.toResponseEntity(SuccessCode.VALID_EMAIL);

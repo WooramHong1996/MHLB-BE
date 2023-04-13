@@ -28,5 +28,6 @@ public class Chat {
         this.senderId = senderId;
         this.inBoxId = inBoxId;
         this.messageId = messageId;
+        createdAt = LocalDateTime.now();
     }
 }

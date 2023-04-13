@@ -4,16 +4,16 @@ import lombok.Getter;
 
 @Getter
 public class UserAndMessage {
-    private Long userId;
+    private final Long userId;
     private Long unread;
 
     public UserAndMessage(Long userId) {
         this.userId = userId;
-        this.unread = 0l;
+        this.unread = 0L;
     }
 
     public void resetUnread() {
-        this.unread = 0l;
+        this.unread = 0L;
     }
 
     public void addUnread() {

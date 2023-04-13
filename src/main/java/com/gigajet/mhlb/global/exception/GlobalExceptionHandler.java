@@ -1,6 +1,6 @@
-package com.gigajet.mhlb.exception;
+package com.gigajet.mhlb.global.exception;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

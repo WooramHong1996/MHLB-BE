@@ -1,4 +1,4 @@
-package com.gigajet.mhlb.common.entity;
+package com.gigajet.mhlb.global.common.entity;
 
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;

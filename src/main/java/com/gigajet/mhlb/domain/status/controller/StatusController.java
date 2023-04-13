@@ -1,7 +1,7 @@
 package com.gigajet.mhlb.domain.status.controller;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.status.dto.StatusRequestDto;
 import com.gigajet.mhlb.domain.status.dto.StatusResponseDto;
 import com.gigajet.mhlb.domain.status.service.StatusService;

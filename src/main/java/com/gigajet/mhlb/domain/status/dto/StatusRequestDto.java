@@ -1,8 +1,8 @@
 package com.gigajet.mhlb.domain.status.dto;
 
 import com.gigajet.mhlb.domain.status.entity.StatusEnum;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.global.exception.CustomException;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import lombok.Getter;
 
 @Getter
