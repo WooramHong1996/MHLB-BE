@@ -102,7 +102,6 @@ public class ChatService {
 
         List<ChatResponseDto.Inbox> response = new ArrayList<>();
         List<ChatRoom> list = chatRoomRepository.findByWorkspaceIdAndUserSetInOrderByLastChatDesc(workspaceId, user.getId());
-        //user 요청자
 
         for (ChatRoom chatRoom : list) {
             ChatResponseDto.Inbox inbox = new ChatResponseDto.Inbox();

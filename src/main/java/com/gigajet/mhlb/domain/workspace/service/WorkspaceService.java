@@ -101,9 +101,9 @@ public class WorkspaceService {
             orderMap.put(order.getWorkspaceId(), order.getOrderNum());
         }
 
-//        for (WorkspaceOrder workspaceOrder : orderList) {
-//            workspaceOrderRepository.orderUpdate(orderMap.get(workspaceOrder.getWorkspaceUser().getWorkspace().getId()), workspaceOrder.getWorkspaceUser().getId());
-//        }
+        for (WorkspaceOrder workspaceOrder : orderList) {
+            workspaceOrderRepository.orderUpdate(orderMap.get(workspaceOrder.getWorkspaceUser().getWorkspace().getId()), workspaceOrder.getWorkspaceUser().getId());
+        }
 
         return SendMessageDto.toResponseEntity(SuccessCode.ORDER_CHANGE_SUCCESS);
     }
