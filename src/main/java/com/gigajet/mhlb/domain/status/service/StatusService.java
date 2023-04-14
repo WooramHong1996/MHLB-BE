@@ -3,7 +3,6 @@ package com.gigajet.mhlb.domain.status.service;
 import com.gigajet.mhlb.domain.status.entity.StatusEnum;
 import com.gigajet.mhlb.global.common.dto.SendMessageDto;
 import com.gigajet.mhlb.global.common.util.SuccessCode;
-import com.gigajet.mhlb.domain.status.dto.StatusRequestDto;
 import com.gigajet.mhlb.domain.status.dto.StatusResponseDto;
 import com.gigajet.mhlb.domain.status.entity.Status;
 import com.gigajet.mhlb.domain.status.repository.StatusRepository;
@@ -13,7 +12,6 @@ import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.global.exception.CustomException;
 import com.gigajet.mhlb.global.exception.ErrorCode;
-import com.gigajet.mhlb.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -29,37 +27,23 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class StatusService {
+
     private final StatusRepository statusRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
 
-    private final JwtUtil jwtUtil;
-
     private final RedisTemplate redisTemplate;
 
-    @Transactional
-    public StatusResponseDto statusUpdate(User user, StatusRequestDto statusRequestDto) {
-        if (statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user).getStatus().equals(statusRequestDto.textOf())) {
-            throw new CustomException(ErrorCode.STATUS_NOT_CHANGED);
-        }
-
-        Status status = new Status(user, statusRequestDto);
-
-        statusRepository.save(status);
-
-        return new StatusResponseDto(status);
-    }
-
     @Transactional(readOnly = true)
-    public List<StatusResponseDto> getWorkspacePeople(User user, Long id) {
-        List<StatusResponseDto> responseDto = new ArrayList<>();
+    public List<StatusResponseDto.StatusInfo> getWorkspacePeople(User user, Long id) {
+        List<StatusResponseDto.StatusInfo> responseDto = new ArrayList<>();
 
         workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
         List<WorkspaceUser> byWorkspaceId = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, true);
 
         for (WorkspaceUser workspaceUser : byWorkspaceId) {
-            responseDto.add(new StatusResponseDto(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(workspaceUser.getUser())));
+            responseDto.add(new StatusResponseDto.StatusInfo(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(workspaceUser.getUser())));
         }
 
         return responseDto;
@@ -75,39 +59,28 @@ public class StatusService {
     }
 
     @Transactional(readOnly = true)
-    public StatusResponseDto myStatus(User user) {
-        return new StatusResponseDto(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user));
-    }
-
-    @Transactional(readOnly = true)
-    public List<Long> getWorkspaceList(User user) {
-        List<WorkspaceUser> list = workspaceUserRepository.findByUserAndIsShow(user, true);
-        List<Long> longList = new ArrayList<>();
-        for (WorkspaceUser workspaceUser : list) {
-            longList.add(workspaceUser.getWorkspace().getId());
-        }
-        return longList;
-    }
-
-    public void checkUser(User user, Long id) {
-        workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+    public StatusResponseDto.StatusInfo myStatus(User user) {
+        return new StatusResponseDto.StatusInfo(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user));
     }
 
     @Transactional
-    public void SocketStatusUpdate(StatusRequestDto statusRequestDto, StompHeaderAccessor accessor) {
-        User user = userRepository.findById(Long.valueOf(accessor.getFirstNativeHeader("userId"))).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+    public void SocketStatusUpdate(String statusName, StompHeaderAccessor accessor) {
+        User user = userRepository.findById(Long.valueOf(accessor.getFirstNativeHeader("userId"))).orElseThrow();
 
-        StatusEnum statusEnum = statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user).getStatus();
-        log.info(statusEnum.getStatus());
-        if (statusEnum.equals(statusRequestDto.textOf())) {
+        StatusEnum beforeStatusEnum = statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(user).getStatus();
+        log.info(beforeStatusEnum.getStatus());
+
+        StatusEnum changeStatusEnum = StatusEnum.valueOfStatus(statusName).orElseThrow();
+        log.info(changeStatusEnum.getStatus());
+        if (beforeStatusEnum == changeStatusEnum) {
             throw new CustomException(ErrorCode.STATUS_NOT_CHANGED);
         }
 
-        Status status = new Status(user, statusRequestDto);
+        Status status = new Status(user, changeStatusEnum);
 
         statusRepository.save(status);
 
-        StatusResponseDto.Convert convert = new StatusResponseDto.Convert(status);
+        StatusResponseDto.StatusInfo convert = new StatusResponseDto.StatusInfo(status);
 
         redisTemplate.convertAndSend("statusMessageChannel", convert);
     }

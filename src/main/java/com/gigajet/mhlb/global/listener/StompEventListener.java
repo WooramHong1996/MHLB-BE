@@ -12,8 +12,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.*;
 
-import java.util.UUID;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor

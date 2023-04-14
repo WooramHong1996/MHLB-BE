@@ -1,6 +1,5 @@
 package com.gigajet.mhlb.domain.status.entity;
 
-import com.gigajet.mhlb.domain.status.dto.StatusRequestDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,10 +28,10 @@ public class Status {
         this.updateTime = LocalTime.now();
     }
 
-    public Status(User user, StatusRequestDto status) {
+    public Status(User user, StatusEnum status) {
         this.user = user;
         this.updateDay = LocalDate.now();
         this.updateTime = LocalTime.now();
-        this.status = status.textOf();
+        this.status = status;
     }
 }
