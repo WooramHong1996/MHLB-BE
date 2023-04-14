@@ -3,7 +3,6 @@ package com.gigajet.mhlb.global.subscriber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gigajet.mhlb.domain.status.dto.StatusResponseDto;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
-import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.global.exception.CustomException;
 import com.gigajet.mhlb.global.exception.ErrorCode;
@@ -34,7 +33,7 @@ public class StatusSubscriber implements MessageListener {
             String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(message.getBody());
 
             StatusResponseDto.StatusInfo statusInfo = objectMapper.readValue(publishMessage, StatusResponseDto.StatusInfo.class);
-            List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByUser_IdAndIsShowTrue(statusInfo.getUserId());
+            List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findAllByUser_IdAndIsShowTrue(statusInfo.getUserId());
 
             log.info("status changed user : " + statusInfo.getUserId());
             for (WorkspaceUser workspaceUser : workspaceUserList) {
@@ -43,7 +42,8 @@ public class StatusSubscriber implements MessageListener {
                 messagingTemplate.convertAndSend("/sub/status/" + workspaceId, statusInfo);
             }
         } catch (Exception e) {
-            throw new CustomException(ErrorCode.UNDEFINED_REQUEST);
+            log.error(e.getMessage());
+//            throw new CustomException(ErrorCode.UNDEFINED_REQUEST);
         }
     }
 }

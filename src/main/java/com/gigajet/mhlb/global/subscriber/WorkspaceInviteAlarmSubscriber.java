@@ -1,7 +1,7 @@
 package com.gigajet.mhlb.global.subscriber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
+import com.gigajet.mhlb.domain.alarm.dto.WorkspaceInviteAlarmResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ChatSubscriber implements MessageListener {
+public class WorkspaceInviteAlarmSubscriber implements MessageListener {
     private final ObjectMapper objectMapper;
     private final RedisTemplate redisTemplate;
     private final SimpMessageSendingOperations messagingTemplate;
@@ -23,10 +23,9 @@ public class ChatSubscriber implements MessageListener {
         try {
             String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(message.getBody());
 
-            ChatResponseDto.Convert chat = objectMapper.readValue(publishMessage, ChatResponseDto.Convert.class);
-            ChatResponseDto.ChatData response = new ChatResponseDto.ChatData(chat);
-
-            messagingTemplate.convertAndSend("/sub/inbox/" + chat.getInboxId(), response);
+            WorkspaceInviteAlarmResponseDto.ConvertWorkspaceInviteAlarm convertWorkspaceInviteAlarm = objectMapper.readValue(publishMessage, WorkspaceInviteAlarmResponseDto.ConvertWorkspaceInviteAlarm.class);
+            messagingTemplate.convertAndSend("/sub/workspace-invite/" + convertWorkspaceInviteAlarm.getUserId(), new WorkspaceInviteAlarmResponseDto.workspaceInviteAlarm(convertWorkspaceInviteAlarm.isInvitedWorkspace()));
+            log.info("초대 슝슝");
         } catch (Exception e) {
             log.error(e.getMessage());
 //            throw new CustomException(ErrorCode.UNDEFINED_REQUEST);

@@ -36,8 +36,8 @@ public class StompEventListener {
             userService.validateEmail(userEmail);
 
         } catch (Exception exception) {
-            event.getMessage().getHeaders().put("stompCommand", StompCommand.ERROR);
-            event.getMessage().getHeaders().put("simpErrorMessage", "Invalid user email");
+//            event.getMessage().getHeaders().put("stompCommand", StompCommand.ERROR);
+//            event.getMessage().getHeaders().put("simpErrorMessage", "Invalid user email");
             log.error(exception.getMessage());
         }
     }
@@ -54,11 +54,12 @@ public class StompEventListener {
             StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
 
             if (accessor.getDestination() == null || accessor.getSessionId() == null) {
-                throw new MessagingException("socket info null");
+                throw new MessagingException("subscribe socket info null");
             } else if (accessor.getDestination().contains("/inbox")) {
                 chatMessageService.checkRoom(accessor);
                 chatMessageService.readMessages(accessor);
-            } else if (accessor.getDestination().contains("/status")) {
+            } else if (accessor.getDestination().contains("/workspace-invite")) {
+                log.info("subscribe workspace-invite");
             }
         } catch (Exception exception) {
 //            event.getMessage().getHeaders().put("stompCommand", StompCommand.ERROR);
@@ -74,10 +75,9 @@ public class StompEventListener {
             String destination = accessor.getFirstNativeHeader("destination");
 
             if (destination == null) {
-                throw new MessagingException("socket info null");
+                log.info("destination null");
             } else if (destination.contains("/inbox")) {
                 chatMessageService.exitRoom(accessor);
-            } else if (destination.contains("/status")) {
             }
         } catch (Exception exception) {
 //            event.getMessage().getHeaders().put("stompCommand", StompCommand.ERROR);

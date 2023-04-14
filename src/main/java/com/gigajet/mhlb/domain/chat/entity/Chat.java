@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Id;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Data
 @Document(collection = "chat")
@@ -28,6 +29,6 @@ public class Chat {
         this.senderId = senderId;
         this.inBoxId = inBoxId;
         this.messageId = messageId;
-        createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(ZoneOffset.of("+09:00"));
     }
 }

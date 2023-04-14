@@ -9,6 +9,8 @@ import com.gigajet.mhlb.domain.chat.repository.ChatRoomRepository;
 import com.gigajet.mhlb.domain.status.repository.StatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
+import com.gigajet.mhlb.domain.workspace.entity.Workspace;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
 import com.gigajet.mhlb.global.exception.CustomException;
 import com.gigajet.mhlb.global.exception.ErrorCode;
@@ -28,6 +30,7 @@ public class ChatService {
 
     private final ChatRepository chatRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final WorkspaceRepository workspaceRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
     private final StatusRepository statusRepository;
@@ -35,10 +38,12 @@ public class ChatService {
     //이전 채팅목록 불러오기
     @Transactional
     public List<ChatResponseDto.Chatting> getChat(User user, Long workspaceId, Long opponentsId, Pageable pageable) {
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        User opponents = userRepository.findById(opponentsId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        Workspace workspace = validateWorkspace(workspaceId);
 
-        userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUserAndWorkspace(opponents, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+
 
         List<ChatResponseDto.Chatting> chatList = new ArrayList<>();
 
@@ -67,8 +72,12 @@ public class ChatService {
         if (user.getId() == opponentsId) {
             throw new CustomException(ErrorCode.WRONG_USER);
         }
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+
+        User opponents = userRepository.findById(opponentsId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        Workspace workspace = validateWorkspace(workspaceId);
+
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(opponents, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
         List<UserAndMessage> userIdList = new ArrayList<>();
         userIdList.add(new UserAndMessage(user.getId()));
@@ -98,7 +107,9 @@ public class ChatService {
     //인박스 불러오기
     @Transactional
     public List<ChatResponseDto.Inbox> getInbox(User user, Long workspaceId) {
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        Workspace workspace = validateWorkspace(workspaceId);
+
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
         List<ChatResponseDto.Inbox> response = new ArrayList<>();
         List<ChatRoom> list = chatRoomRepository.findByWorkspaceIdAndUserSetInOrderByLastChatDesc(workspaceId, user.getId());
@@ -117,5 +128,9 @@ public class ChatService {
             response.add(inbox);
         }
         return response;
+    }
+
+    private Workspace validateWorkspace(Long id) {
+        return workspaceRepository.findByIdAndIsShowTrue(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
     }
 }

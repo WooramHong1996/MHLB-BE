@@ -1,6 +1,8 @@
 package com.gigajet.mhlb.domain.status.service;
 
 import com.gigajet.mhlb.domain.status.entity.StatusEnum;
+import com.gigajet.mhlb.domain.workspace.entity.Workspace;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
 import com.gigajet.mhlb.global.common.dto.SendMessageDto;
 import com.gigajet.mhlb.global.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.status.dto.StatusResponseDto;
@@ -29,6 +31,7 @@ import java.util.List;
 public class StatusService {
 
     private final StatusRepository statusRepository;
+    private final WorkspaceRepository workspaceRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
 
@@ -36,11 +39,12 @@ public class StatusService {
 
     @Transactional(readOnly = true)
     public List<StatusResponseDto.StatusInfo> getWorkspacePeople(User user, Long id) {
+        Workspace workspace = workspaceRepository.findByIdAndIsShowTrue(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+
         List<StatusResponseDto.StatusInfo> responseDto = new ArrayList<>();
 
-        workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
-
-        List<WorkspaceUser> byWorkspaceId = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, true);
+        List<WorkspaceUser> byWorkspaceId = workspaceUserRepository.findByWorkspaceAndIsShow(workspace, true);
 
         for (WorkspaceUser workspaceUser : byWorkspaceId) {
             responseDto.add(new StatusResponseDto.StatusInfo(statusRepository.findTopByUserOrderByUpdateDayDescUpdateTimeDesc(workspaceUser.getUser())));

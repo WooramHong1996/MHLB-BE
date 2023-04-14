@@ -62,7 +62,6 @@ public class WorkspaceService {
         return orderLists;
     }
 
-    //알림 가져오기 메소드 밑으로 빼둠
     @Transactional
     public WorkspaceResponseDto.Response createWorkspace(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
         String imageUrl;
@@ -88,7 +87,8 @@ public class WorkspaceService {
 
     @Transactional(readOnly = true)
     public WorkspaceResponseDto.InfoAndRoll findWorkspaceInfoAndRoll(User user, Long id) {
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        Workspace workspace = validateWorkspace(id);
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.PERMISSION_DINED));
         return new WorkspaceResponseDto.InfoAndRoll(workspaceUser.getWorkspace(), workspaceUser.getRole());
     }
 
@@ -122,10 +122,11 @@ public class WorkspaceService {
 
     @Transactional(readOnly = true)
     public List<WorkspaceResponseDto.People> findPeople(User user, Long id) {
-        workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        Workspace workspace = validateWorkspace(id);
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.PERMISSION_DINED));
 
         List<WorkspaceResponseDto.People> peopleList = new ArrayList<>();
-        List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, true);
+        List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspaceAndIsShow(workspace, true);
 
         for (WorkspaceUser workspaceUser : workspaceUserList) {
             if (Objects.equals(workspaceUser.getUser().getId(), user.getId())) {
@@ -146,14 +147,8 @@ public class WorkspaceService {
 
         return peopleList;
     }
+
+    private Workspace validateWorkspace(Long id) {
+        return workspaceRepository.findByIdAndIsShowTrue(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+    }
 }
-//
-//class StatusComparator implements Comparator<WorkspaceResponseDto.People> {
-//    @Override
-//    public int compare(WorkspaceResponseDto.People o1, WorkspaceResponseDto.People o2) {
-//        if (Objects.equals(o1.getColor(), o2.getColor())) {
-//            return o1.getUserName().toLowerCase().compareTo(o2.getUserName().toLowerCase());
-//        }
-//        return Integer.compare(o1.getColor(), o2.getColor());
-//    }
-//}

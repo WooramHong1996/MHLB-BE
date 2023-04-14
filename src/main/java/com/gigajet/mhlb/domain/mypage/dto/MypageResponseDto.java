@@ -26,7 +26,6 @@ public class MypageResponseDto {
         @Schema(description = "회원 직업")
         private final String userJob;
 
-        @Builder
         public Info(User user) {
             this.userName = user.getUsername();
             this.id = user.getId();
@@ -87,7 +86,6 @@ public class MypageResponseDto {
         @Schema(description = "워크스페이스 상세정보")
         private final String workspaceDesc;
 
-        @Builder
         public InviteList(Workspace workspace) {
             this.workspaceId = workspace.getId();
             this.workspaceImage = workspace.getImage();

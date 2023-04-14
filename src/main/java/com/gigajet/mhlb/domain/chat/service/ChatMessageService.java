@@ -64,7 +64,6 @@ public class ChatMessageService {
                 .message(message.getMessage())
                 .messageId(messageId)
                 .build();
-        chat.setCreatedAt(LocalDateTime.now());
 
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
 
@@ -197,7 +196,8 @@ public class ChatMessageService {
                     .type(AlarmTypeEnum.CHAT)
                     .uuid(message.getUuid())
                     .workspaceId(workspaceId)
-                    .user(receiver).build());
+                    .user(receiver)
+                    .build());
         }
 
         ChatAlarmResponseDto.NewMessageAlarm newMessageAlarm = new ChatAlarmResponseDto.NewMessageAlarm(true, workspaceId, message.getUuid(), senderId, sender.getUsername(), sender.getImage(), message.getMessage());

@@ -1,5 +1,6 @@
 package com.gigajet.mhlb.domain.mypage.service;
 
+import com.gigajet.mhlb.domain.alarm.dto.WorkspaceInviteAlarmResponseDto;
 import com.gigajet.mhlb.global.common.dto.SendMessageDto;
 import com.gigajet.mhlb.global.common.util.S3Handler;
 import com.gigajet.mhlb.global.common.util.SuccessCode;
@@ -19,6 +20,7 @@ import com.gigajet.mhlb.global.exception.CustomException;
 import com.gigajet.mhlb.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,14 +43,14 @@ public class MypageService {
 
     private final S3Handler s3Handler;
 
+    private final RedisTemplate<String, Object> redisTemplate;
+
     @Value("${user.default.image}")
     private String defaultImage;
 
     @Transactional(readOnly = true)
     public MypageResponseDto.Info findUserInfo(User user) {
-        return MypageResponseDto.Info.builder()
-                .user(user)
-                .build();
+        return new MypageResponseDto.Info(user);
     }
 
     @Transactional(readOnly = true)
@@ -57,7 +59,7 @@ public class MypageService {
         List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByUser(user);
 
         List<MypageResponseDto.WorkspaceList> workspaceLists = new ArrayList<>();
-        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShowOrderByRoleDesc(user, true);
+        List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShowTrueOrderByRoleDesc(user);
 
         for (WorkspaceInvite workspaceInvite : workspaceInviteList) {
             inviteLists.add(new MypageResponseDto.InviteList(workspaceInvite.getWorkspace()));
@@ -105,7 +107,8 @@ public class MypageService {
 
     @Transactional
     public ResponseEntity<SendMessageDto> leaveWorkspace(User user, long workspaceId) {
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        Workspace workspace = validateWorkspace(workspaceId);
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
         workspaceUser.offIsShow();
 
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.DELETE_SUCCESS));
@@ -113,10 +116,10 @@ public class MypageService {
 
     @Transactional
     public ResponseEntity<SendMessageDto> acceptWorkspaceInvite(User user, long workspaceId) {
+        Workspace workspace = validateWorkspace(workspaceId);
         workspaceInviteRepository.findByWorkspace_IdAndUserId(workspaceId, user.getId()).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
-        Workspace workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
-        Optional<WorkspaceUser> alreadyExist = workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, false);
+        Optional<WorkspaceUser> alreadyExist = workspaceUserRepository.findByUserAndWorkspaceAndIsShow(user, workspace, false);
 
         if (alreadyExist.isPresent()) {
             alreadyExist.get().onIsShow();
@@ -129,32 +132,34 @@ public class MypageService {
 
             workspaceUserRepository.save(workspaceUser);
             workspaceOrderRepository.save(workspaceOrder);
-            workspaceInviteRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
 
             return ResponseEntity.ok(SendMessageDto.of(SuccessCode.INVITE_SUCCESS));
         }
 
         workspaceInviteRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
 
+        if (workspaceInviteRepository.findByUser(user).isEmpty()) {
+            redisTemplate.convertAndSend("workspaceInviteAlarmMessageChannel", new WorkspaceInviteAlarmResponseDto.ConvertWorkspaceInviteAlarm(false, user.getId()));
+        }
+
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.INVITE_SUCCESS));
     }
 
     @Transactional
     public ResponseEntity<SendMessageDto> rejectWorkspaceInvite(User user, long workspaceId) {
+        Workspace workspace = validateWorkspace(workspaceId);
+
         workspaceInviteRepository.findByWorkspace_IdAndUserId(workspaceId, user.getId()).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
         workspaceInviteRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
+
+        if (workspaceInviteRepository.findByUser(user).isEmpty()) {
+            redisTemplate.convertAndSend("workspaceInviteAlarmMessageChannel", new WorkspaceInviteAlarmResponseDto.ConvertWorkspaceInviteAlarm(false, user.getId()));
+        }
 
         return ResponseEntity.ok(SendMessageDto.of(SuccessCode.INVITE_REJECT));
     }
 
+    private Workspace validateWorkspace(Long id) {
+        return workspaceRepository.findByIdAndIsShowTrue(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+    }
 }
-//
-//class WorkspaceComparator implements Comparator<MypageResponseDto.WorkspaceList> {
-//    @Override
-//    public int compare(MypageResponseDto.WorkspaceList o1, MypageResponseDto.WorkspaceList o2) {
-//        if (o1.getUserRole() == o2.getUserRole() || o1.getUserRole() != WorkspaceUserRole.ADMIN && o2.getUserRole() != WorkspaceUserRole.ADMIN) {
-//            return o1.getWorkspaceTitle().toLowerCase().compareTo(o2.getWorkspaceTitle().toLowerCase());
-//        }
-//        return Integer.compare(o2.getUserRole().ordinal(), o1.getUserRole().ordinal());
-//    }
-//}
