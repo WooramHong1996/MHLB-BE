@@ -10,6 +10,10 @@ import com.gigajet.mhlb.domain.user.service.OAuthService;
 import com.gigajet.mhlb.domain.user.service.UserService;
 import com.gigajet.mhlb.security.user.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Map;
 
-@Tag(name = "User", description = "회원 관련 API")
+@Tag(name = "User", description = "회원 API")
 @Slf4j
 @RestController
 @RequestMapping("/api/users")
@@ -34,21 +38,33 @@ public class UserController {
     private final MailService mailService;
 
     // 중복 체크
-    @Operation(summary = "중복 이메일 체크", description = "이메일 중복 확인 API")
+    @Operation(summary = "이메일 중복 확인 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "사용 가능한 이메일"),
+            @ApiResponse(responseCode = "400", description = "U-01", content = @Content(schema = @Schema(implementation = SendMessageDto.class))),
+    })
     @PostMapping("/duplicate-email")
     public ResponseEntity<SendMessageDto> duplicateEmail(@Valid @RequestBody UserRequestDto.CheckEmail emailDto) {
         return userService.duplicateEmail(emailDto.getEmail());
     }
 
     // 유효 체크
-    @Operation(summary = "유효 이메일 체크", description = "이메일 유효 확인 API")
+    @Operation(summary = "이메일 유효 확인 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "유효한 사용자의 이메일"),
+            @ApiResponse(responseCode = "400", description = "U-02", content = @Content(schema = @Schema(implementation = SendMessageDto.class)))
+    })
     @PostMapping("/validate-email")
     public ResponseEntity<SendMessageDto> validateEmail(@Valid @RequestBody UserRequestDto.CheckEmail emailDto) {
         return userService.validateEmail(emailDto.getEmail());
     }
 
     // 회원가입
-    @Operation(summary = "회원가입", description = "회원가입 API")
+    @Operation(summary = "회원가입 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원가입 성공"),
+            @ApiResponse(responseCode = "400", description = "U-01", content = @Content(schema = @Schema(implementation = SendMessageDto.class)))
+    })
     @PostMapping("/register")
     public ResponseEntity<SendMessageDto> register(@Valid @RequestBody UserRequestDto.Register registerDto) {
         User user = userService.register(registerDto);
@@ -56,7 +72,11 @@ public class UserController {
     }
 
     // 초대 메일로 회원가입
-    @Operation(summary = "메일 회원가입", description = "메일 회원가입 API")
+    @Operation(summary = "메일 회원가입 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원가입 성공"),
+            @ApiResponse(responseCode = "400", description = "U-01, U-03, U-05, W-01", content = @Content(schema = @Schema(implementation = SendMessageDto.class)))
+    })
     @PostMapping("/register/{uuid}")
     public ResponseEntity<SendMessageDto> register(@PathVariable String uuid, @RequestBody UserRequestDto.Register registerDto) {
         Map<Object, Object> userInfo = mailService.getUserInfo(uuid);
@@ -66,14 +86,21 @@ public class UserController {
     }
 
     // 로그인
-    @Operation(summary = "로그인", description = "로그인 API")
+    @Operation(summary = "로그인 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @ApiResponse(responseCode = "400", description = "U-02, U-04", content = @Content(schema = @Schema(implementation = SendMessageDto.class)))
+    })
     @PostMapping("/login")
     public ResponseEntity<SendMessageDto> login(@Valid @RequestBody UserRequestDto.Login loginDto, HttpServletResponse response) {
         return userService.login(loginDto, response);
     }
 
     // 헤더 프로필
-    @Operation(summary = "헤더 프로필", description = "헤더 프로필 조회 API")
+    @Operation(summary = "헤더 프로필 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "프로필 조회 성공")
+    })
     @GetMapping("/user-info")
     public UserResponseDto userInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return userService.userInfo(userDetails.getUser());
@@ -82,7 +109,11 @@ public class UserController {
     /*
         소셜 로그인
      */
-    @Operation(summary = "구글 소셜 로그인", description = "구글 소셜 로그인 API")
+    @Operation(summary = "구글 소셜 로그인 API")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "소셜 로그인 성공"),
+            @ApiResponse(responseCode = "400", description = "U-07", content = @Content(schema = @Schema(implementation = SendMessageDto.class)))
+    })
     @PostMapping("/auth/google/callback")
     public ResponseEntity<SendMessageDto> callback(@RequestParam(name = "code") String code) {
         return oAuthService.oAuthLogin(code);

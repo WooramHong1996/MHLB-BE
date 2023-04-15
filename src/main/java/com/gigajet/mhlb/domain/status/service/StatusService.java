@@ -38,9 +38,9 @@ public class StatusService {
     private final RedisTemplate redisTemplate;
 
     @Transactional(readOnly = true)
-    public List<StatusResponseDto.StatusInfo> getWorkspacePeople(User user, Long id) {
-        Workspace workspace = workspaceRepository.findByIdAndIsShowTrue(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
-        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+    public List<StatusResponseDto.StatusInfo> getWorkspacePeople(User user, Long workspaceId) {
+        Workspace workspace = workspaceRepository.findByIdAndIsShowTrue(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
 
         List<StatusResponseDto.StatusInfo> responseDto = new ArrayList<>();
 

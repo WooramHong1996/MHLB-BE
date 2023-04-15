@@ -62,7 +62,7 @@ public class MailService {
             mimeMessageHelper.setTo(email);
             mimeMessageHelper.setFrom(myAddress);
             mimeMessageHelper.setSubject("PIN ME :: 이메일 인증");
-            mimeMessageHelper.setText("<a href='http://localhost:3000/reset-password/" + uuid + "'>비밀번호 변경</a>", true);
+            mimeMessageHelper.setText("<h1><a href='http://localhost:3000/reset-password/" + uuid + "'>비밀번호 변경</a></h1>", true);
 
             mailSender.send(mimeMessage);
 
@@ -132,7 +132,7 @@ public class MailService {
             mimeMessageHelper.setTo(workspaceInvite.getEmail());
             mimeMessageHelper.setFrom(myAddress);
             mimeMessageHelper.setSubject("PIN ME :: 이메일 인증");
-            mimeMessageHelper.setText("<a href='http://localhost:3000/invite-workspace/" + uuid + "'>Workspace 참여</a>", true);
+            mimeMessageHelper.setText("<h1><a href='http://localhost:3000/invite-workspace/" + uuid + "'>Workspace 참여</a></h1>", true);
 
             mailSender.send(mimeMessage);
 

@@ -11,9 +11,9 @@ import org.springframework.http.ResponseEntity;
 @Getter
 public class SendMessageDto {
 
-    @Schema(description = "메세지")
+    @Schema(description = "메세지", example = "message")
     private final String message;
-    @Schema(description = "상태코드")
+    @Schema(description = "상태코드", example = "")
     private final String code;
 
     @Builder

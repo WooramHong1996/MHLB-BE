@@ -86,8 +86,8 @@ public class WorkspaceService {
     }
 
     @Transactional(readOnly = true)
-    public WorkspaceResponseDto.InfoAndRoll findWorkspaceInfoAndRoll(User user, Long id) {
-        Workspace workspace = validateWorkspace(id);
+    public WorkspaceResponseDto.InfoAndRoll findWorkspaceInfoAndRoll(User user, Long workspaceId) {
+        Workspace workspace = validateWorkspace(workspaceId);
         WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
         return new WorkspaceResponseDto.InfoAndRoll(workspaceUser.getWorkspace(), workspaceUser.getRole());
     }
@@ -121,8 +121,8 @@ public class WorkspaceService {
     }
 
     @Transactional(readOnly = true)
-    public List<WorkspaceResponseDto.People> findPeople(User user, Long id) {
-        Workspace workspace = validateWorkspace(id);
+    public List<WorkspaceResponseDto.People> findPeople(User user, Long workspaceId) {
+        Workspace workspace = validateWorkspace(workspaceId);
         workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
 
         List<WorkspaceResponseDto.People> peopleList = new ArrayList<>();
@@ -148,7 +148,7 @@ public class WorkspaceService {
         return peopleList;
     }
 
-    private Workspace validateWorkspace(Long id) {
-        return workspaceRepository.findByIdAndIsShowTrue(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+    private Workspace validateWorkspace(Long workspaceId) {
+        return workspaceRepository.findByIdAndIsShowTrue(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
     }
 }
