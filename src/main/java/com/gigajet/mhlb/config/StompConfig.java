@@ -25,7 +25,6 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
 //                .setAllowedOriginPatterns("*")
 //                .setHandshakeHandler(new UserHandshakeHandler)
                 .setAllowedOriginPatterns("http://localhost:3000")
-                .setAllowedOrigins("chrome-extension://ggnhohnkfcpcanfekomdkjffnfcjnjam")
                 .withSockJS();
     }
 
