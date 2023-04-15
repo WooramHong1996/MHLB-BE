@@ -68,6 +68,10 @@ dependencies {
 	// mail send service
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
+	// System Manager & Parameter Store
+	implementation ('org.springframework.cloud:spring-cloud starter:2.2.6.RELEASE')
+	implementation ('org.springframework.cloud:spring-cloud-starter-aws-parameter-store-config:2.2.6.RELEASE')
+
 	// s3
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 	// image resizing

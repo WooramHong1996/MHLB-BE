@@ -50,15 +50,23 @@ spring:
       matching-strategy: ant_path_matcher
 
 
+# paramter store
+aws:
+  paramstore:
+    name: pinme
+    enabled: true
+
+
 # s3
-cloud.aws:
-  stack.auto: false
-  region.static: ap-northeast-2
-  credentials:
-    access-key: ${ ACCESS_KEY }
-    secret-key: ${ SECRET_KEY }
-    instance-profile: true
-  s3.bucket: ${ S3_BUCKET }
+cloud:
+  aws:
+    stack.auto: false
+    region.static: ap-northeast-2
+    credentials:
+      access-key: ${ ACCESS_KEY }
+      secret-key: ${ SECRET_KEY }
+      instance-profile: true
+    s3.bucket: ${ S3_BUCKET }
 
 
 # OAuth
