@@ -1,4 +1,4 @@
-package com.gigajet.mhlb.common.controller;
+package com.gigajet.mhlb.global.common.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
