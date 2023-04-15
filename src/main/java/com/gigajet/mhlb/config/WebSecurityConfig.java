@@ -63,8 +63,8 @@ public class WebSecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.addAllowedOriginPattern("https://pinme.site/**");
-        config.addAllowedOriginPattern("http://localhost:3000/**");
+        config.addAllowedOriginPattern("https://pinme.site");
+        config.addAllowedOriginPattern("http://localhost:3000");
 
         config.addExposedHeader(JwtUtil.AUTHORIZATION_HEADER);
 
