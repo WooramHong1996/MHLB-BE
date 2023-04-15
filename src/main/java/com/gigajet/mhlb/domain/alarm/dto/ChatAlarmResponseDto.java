@@ -34,10 +34,12 @@ public class ChatAlarmResponseDto {
     public static class ReadAllMessageAlarm {
         private Boolean unreadMessage;
         private Long workspaceId;
+        private String uuid;
 
-        public ReadAllMessageAlarm(Boolean unreadMessage, Long workspaceId) {
+        public ReadAllMessageAlarm(Boolean unreadMessage, Long workspaceId, String uuid) {
             this.unreadMessage = unreadMessage;
             this.workspaceId = workspaceId;
+            this.uuid = uuid;
         }
     }
 

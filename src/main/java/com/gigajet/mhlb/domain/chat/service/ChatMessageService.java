@@ -146,7 +146,7 @@ public class ChatMessageService {
         if (optionalAlarm.isPresent()) {
             Alarm alarm = optionalAlarm.get();
             alarm.toggleUnreadMessage();
-            checkReadMessage(userId, chatRoom.getWorkspaceId());
+            checkReadMessage(userId, chatRoom.getWorkspaceId(), uuid);
         }
 
         for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
@@ -204,11 +204,13 @@ public class ChatMessageService {
         redisTemplate.convertAndSend("chatAlarmMessageChannel", new ChatAlarmResponseDto.ConvertChatAlarm<>(newMessageAlarm, receiverId));
     }
 
-    private void checkReadMessage(Long userId, Long workspaceId) {
+    private void checkReadMessage(Long userId, Long workspaceId, String uuid) {
         List<Alarm> alarmList = alarmRepository.findAllByUserIdAndWorkspaceIdAndUnreadMessage(userId, workspaceId, true);
 
         if (alarmList.size() == 0) {
-            redisTemplate.convertAndSend("chatAlarmMessageChannel", new ChatAlarmResponseDto.ConvertChatAlarm<>(new ChatAlarmResponseDto.ReadAllMessageAlarm(false, workspaceId), userId));
+            redisTemplate.convertAndSend("chatAlarmMessageChannel", new ChatAlarmResponseDto.ConvertChatAlarm<>(new ChatAlarmResponseDto.ReadAllMessageAlarm(false, workspaceId, uuid), userId));
+        } else {
+            redisTemplate.convertAndSend("chatAlarmMessageChannel", new ChatAlarmResponseDto.ConvertChatAlarm<>(new ChatAlarmResponseDto.ReadAllMessageAlarm(true, workspaceId, uuid), userId));
         }
     }
 }
