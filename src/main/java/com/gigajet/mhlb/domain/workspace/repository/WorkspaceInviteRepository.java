@@ -1,6 +1,5 @@
 package com.gigajet.mhlb.domain.workspace.repository;
 
-import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.workspace.entity.Workspace;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceInvite;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,15 +12,13 @@ public interface WorkspaceInviteRepository extends JpaRepository<WorkspaceInvite
 
     Optional<WorkspaceInvite> findByWorkspace_IdAndId(Long workspaceId, Long inviteId);
 
-    Optional<WorkspaceInvite> findByWorkspace_IdAndUserId(Long workspaceId, Long userId);
+    Optional<WorkspaceInvite> findByEmailAndWorkspace(String email, Workspace workspace);
 
-    Optional<WorkspaceInvite> findByWorkspaceAndEmail(Workspace workspace, String email);
+    List<WorkspaceInvite>findAllByEmail(String email);
 
-    List<WorkspaceInvite>findByUser(User user);
+    int countByEmail(String email);
 
-    int countByUser(User user);
-
-    void deleteByUser_IdAndWorkspace_Id(Long userId, Long workspaceId);
+    void deleteByEmailAndWorkspace(String email, Workspace workspace);
 
     void deleteByWorkspace(Workspace workspace);
 }

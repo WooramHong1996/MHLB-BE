@@ -88,7 +88,7 @@ public class WorkspaceService {
     @Transactional(readOnly = true)
     public WorkspaceResponseDto.InfoAndRoll findWorkspaceInfoAndRoll(User user, Long id) {
         Workspace workspace = validateWorkspace(id);
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.PERMISSION_DINED));
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
         return new WorkspaceResponseDto.InfoAndRoll(workspaceUser.getWorkspace(), workspaceUser.getRole());
     }
 
@@ -123,7 +123,7 @@ public class WorkspaceService {
     @Transactional(readOnly = true)
     public List<WorkspaceResponseDto.People> findPeople(User user, Long id) {
         Workspace workspace = validateWorkspace(id);
-        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.PERMISSION_DINED));
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
 
         List<WorkspaceResponseDto.People> peopleList = new ArrayList<>();
         List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspaceAndIsShow(workspace, true);

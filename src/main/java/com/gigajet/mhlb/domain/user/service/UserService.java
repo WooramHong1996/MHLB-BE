@@ -117,7 +117,7 @@ public class UserService {
     }
 
     public UserResponseDto userInfo(User user) {
-        int count = workspaceInviteRepository.countByUser(user);
+        int count = workspaceInviteRepository.countByEmail(user.getEmail());
         return new UserResponseDto(user.getImage(), user.getId(), count != 0);
     }
 }

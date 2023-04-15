@@ -128,12 +128,11 @@ public class ManagingService {
     @Transactional
     public ManagingResponseDto.Role changeRole(User user, Long id, Long userid, ManagingRequestDto.Role role) {
         Workspace workspace = validateWorkspace(id);
+        checkRole(user, workspace);
 
         if (role.getUserRole() == WorkspaceUserRole.ADMIN) {
             throw new CustomException(ErrorCode.PERMISSION_DINED);
         }
-
-        checkRole(user, workspace);
 
         User changeRoleUser = userRepository.findById(userid).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
@@ -176,7 +175,7 @@ public class ManagingService {
         Workspace workspace = validateWorkspace(id);
         checkRole(user, workspace);
 
-        Optional<WorkspaceInvite> checkInvite = workspaceInviteRepository.findByWorkspaceAndEmail(workspace, invitedUserEmail);
+        Optional<WorkspaceInvite> checkInvite = workspaceInviteRepository.findByEmailAndWorkspace(invitedUserEmail, workspace);
         // 기존에 초대 한 사람인지 확인
         if (checkInvite.isPresent()) {
             throw new CustomException(ErrorCode.ALREADY_INVITED);
@@ -220,11 +219,12 @@ public class ManagingService {
         Workspace workspace = validateWorkspace(id);
         checkRole(user, workspace);
 
-        workspaceInviteRepository.findByWorkspace_IdAndId(id, inviteId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        WorkspaceInvite workspaceInvite = workspaceInviteRepository.findByWorkspace_IdAndId(id, inviteId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        User inviteUser = workspaceInvite.getUser();
         workspaceInviteRepository.deleteById(inviteId);
 
-        if (workspaceInviteRepository.findByUser(user).isEmpty()) {
-            redisTemplate.convertAndSend("workspaceInviteAlarmMessageChannel", new WorkspaceInviteAlarmResponseDto.ConvertWorkspaceInviteAlarm(false, user.getId()));
+        if (inviteUser != null && workspaceInviteRepository.countByEmail(user.getEmail()) == 0) {
+            redisTemplate.convertAndSend("workspaceInviteAlarmMessageChannel", new WorkspaceInviteAlarmResponseDto.ConvertWorkspaceInviteAlarm(false, inviteUser.getId()));
         }
 
         return SendMessageDto.toResponseEntity(SuccessCode.CANCEL_INVITE);
@@ -235,8 +235,7 @@ public class ManagingService {
     }
 
     private WorkspaceUser checkRole(User user, Workspace workspace) {
-        // 이 부분도 수정해야함. 쿼리 확인.
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.PERMISSION_DINED));
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
 
         if (workspaceUser.getIsShow() && workspaceUser.getRole() == WorkspaceUserRole.MEMBER) {
             throw new CustomException(ErrorCode.PERMISSION_DINED);

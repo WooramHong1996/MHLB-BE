@@ -56,7 +56,7 @@ public class MypageService {
     @Transactional(readOnly = true)
     public MypageResponseDto.AllList findWorkspaceInfo(User user) {
         List<MypageResponseDto.InviteList> inviteLists = new ArrayList<>();
-        List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findByUser(user);
+        List<WorkspaceInvite> workspaceInviteList = workspaceInviteRepository.findAllByEmail(user.getEmail());
 
         List<MypageResponseDto.WorkspaceList> workspaceLists = new ArrayList<>();
         List<WorkspaceUser> workspaceUsers = workspaceUserRepository.findByUserAndIsShowTrueOrderByRoleDesc(user);
@@ -117,13 +117,24 @@ public class MypageService {
     @Transactional
     public ResponseEntity<SendMessageDto> acceptWorkspaceInvite(User user, long workspaceId) {
         Workspace workspace = validateWorkspace(workspaceId);
-        workspaceInviteRepository.findByWorkspace_IdAndUserId(workspaceId, user.getId()).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        workspaceInviteRepository.findByEmailAndWorkspace(user.getEmail(), workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
 
-        Optional<WorkspaceUser> alreadyExist = workspaceUserRepository.findByUserAndWorkspaceAndIsShow(user, workspace, false);
+        Optional<WorkspaceUser> alreadyExist = workspaceUserRepository.findByUserAndWorkspaceAndIsShow(user, workspace, true);
 
         if (alreadyExist.isPresent()) {
             alreadyExist.get().onIsShow();
             workspaceOrderRepository.findByWorkspaceUserAndIsShow(alreadyExist.get(), false).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER)).onIsShow();
+
+            workspaceInviteRepository.deleteByEmailAndWorkspace(user.getEmail(), workspace);
+
+            workspaceInviteRepository.deleteByEmailAndWorkspace(user.getEmail(), workspace);
+
+            if (workspaceInviteRepository.countByEmail(user.getEmail()) == 0) {
+                redisTemplate.convertAndSend("workspaceInviteAlarmMessageChannel", new WorkspaceInviteAlarmResponseDto.ConvertWorkspaceInviteAlarm(false, user.getId()));
+            }
+
+            return ResponseEntity.ok(SendMessageDto.of(SuccessCode.INVITE_SUCCESS));
+
         } else {
             WorkspaceUser workspaceUser = new WorkspaceUser(user, workspace);
             Long count = workspaceUserRepository.countByUserAndIsShow(user, true);
@@ -133,26 +144,24 @@ public class MypageService {
             workspaceUserRepository.save(workspaceUser);
             workspaceOrderRepository.save(workspaceOrder);
 
+            workspaceInviteRepository.deleteByEmailAndWorkspace(user.getEmail(), workspace);
+
+            if (workspaceInviteRepository.countByEmail(user.getEmail()) == 0) {
+                redisTemplate.convertAndSend("workspaceInviteAlarmMessageChannel", new WorkspaceInviteAlarmResponseDto.ConvertWorkspaceInviteAlarm(false, user.getId()));
+            }
+
             return ResponseEntity.ok(SendMessageDto.of(SuccessCode.INVITE_SUCCESS));
         }
-
-        workspaceInviteRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
-
-        if (workspaceInviteRepository.findByUser(user).isEmpty()) {
-            redisTemplate.convertAndSend("workspaceInviteAlarmMessageChannel", new WorkspaceInviteAlarmResponseDto.ConvertWorkspaceInviteAlarm(false, user.getId()));
-        }
-
-        return ResponseEntity.ok(SendMessageDto.of(SuccessCode.INVITE_SUCCESS));
     }
 
     @Transactional
     public ResponseEntity<SendMessageDto> rejectWorkspaceInvite(User user, long workspaceId) {
         Workspace workspace = validateWorkspace(workspaceId);
 
-        workspaceInviteRepository.findByWorkspace_IdAndUserId(workspaceId, user.getId()).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
-        workspaceInviteRepository.deleteByUser_IdAndWorkspace_Id(user.getId(), workspaceId);
+        workspaceInviteRepository.findByEmailAndWorkspace(user.getEmail(), workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+        workspaceInviteRepository.deleteByEmailAndWorkspace(user.getEmail(), workspace);
 
-        if (workspaceInviteRepository.findByUser(user).isEmpty()) {
+        if (workspaceInviteRepository.countByEmail(user.getEmail()) == 0) {
             redisTemplate.convertAndSend("workspaceInviteAlarmMessageChannel", new WorkspaceInviteAlarmResponseDto.ConvertWorkspaceInviteAlarm(false, user.getId()));
         }
 
