@@ -108,7 +108,7 @@ public class UserService {
         }
 
         if (!aesUtil.encrypt(loginDto.getPassword()).equals(user.getPassword())) {
-            throw new CustomException(ErrorCode.WRONG_PASSWORD);
+            throw new CustomException(ErrorCode.UNREGISTER_USER);
         }
 
         response.setHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(loginDto.getEmail()));

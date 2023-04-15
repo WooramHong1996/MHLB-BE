@@ -15,18 +15,17 @@ public enum ErrorCode {
 
     DUPLICATE_EMAIL(BAD_REQUEST, "U-01", "duplicate email"),
     UNREGISTER_USER(BAD_REQUEST, "U-02", "unregister user"),
-    WRONG_PASSWORD(BAD_REQUEST, "U-03", "wrong password"),
+    NOT_SAME_EMAIL(BAD_REQUEST, "U-03", "not same email"),
     SOCIAL_USER(BAD_REQUEST, "U-04", "social user"),
+    INVALID_CODE(BAD_REQUEST, "U-05", "invalid code"),
+    INVALID_INVITATION(BAD_REQUEST, "U-06", "Invalid invitation"),
+    NOT_SOCIAL_EMAIL(BAD_REQUEST, "U-07", "not social email"),
 
     WRONG_WORKSPACE_ID(BAD_REQUEST, "W-01", "wrong workspace id"),
     WRONG_USER(BAD_REQUEST, "W-02", "wrong user"),
-    NOT_SAME_EMAIL(BAD_REQUEST, "W-03", "not same email"),
-    SAME_PERMISSION(BAD_REQUEST, "W-04", "same role"),
-    NOT_SOCIAL_EMAIL(BAD_REQUEST, "W-05", "not social email"),
 
-    INVALID_CODE(BAD_REQUEST, "M-01", "invalid code"),
-    INVALID_INVITATION(BAD_REQUEST, "M-02", "Invalid invitation"),
-    ALREADY_INVITED(BAD_REQUEST, "M-03", "already invited"),
+    ALREADY_INVITED(BAD_REQUEST, "M-01", "already invited"),
+    SAME_PERMISSION(BAD_REQUEST, "M-02", "same role"),
 
     NULL_MULTIPART_FILE(BAD_REQUEST, "E-01", "null multipart file"),
     RESIZING_FAILED(BAD_REQUEST, "E-02", "resizing failed"),
