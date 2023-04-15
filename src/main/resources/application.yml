@@ -3,14 +3,24 @@ spring:
   profiles:
     active: local
 
-  h2:
-    console:
-      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
 
   datasource:
-    username: sa
-    url: jdbc:h2:mem:db;MODE=MYSQL;
-    password: ''
+    url: ${ RDS_URL }
+    username: ${ RDS_ID }
+    password: ${ RDS_PW }
+
+  data:
+    mongodb:
+      uri: ${ MONGODB_URL }
+      database: ${ MONGODB_DATABASE }
+
+  # redis
+  redis:
+    host: ${ REDIS_HOST }
+    port: 6379
 
   jackson:
     serialization:
@@ -34,10 +44,11 @@ spring:
     maxFileSize: 10MB
     maxRequestSize: 10MB
 
-  # redis
-  redis:
-    host: ${ REDIS_HOST }
-    port: 6379
+  # swagger
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
 
 # s3
 cloud.aws:
@@ -50,8 +61,39 @@ cloud.aws:
   s3.bucket: ${ S3_BUCKET }
 
 
-# 환경변수
-admin.token: {{ secrets.ADMIN_TOKEN }}
+# OAuth
+OAuth2:
+  google:
+    url: https://accounts.google.com/o/oauth2/v2/auth
+    client-id: ${ GOOGLE_OAUTH2_CLIENT_ID }
+    client-secret: ${ GOOGLE_OAUTH2_CLIENT_SECRET }
+    callback-url: ${ GOOGLE_OAUTH2_CALLBACK_URL }
+    scope: https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile
 
+
+# swaggerdoc
+springdoc:
+  version: v1.0.0
+  packages-to-scan: com.gigajet.mhlb
+  swagger-ui:
+    path: swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    display-request-duration: true
+  api-docs:
+    path: /api-docs/json
+    groups:
+      enabled: true
+  cache:
+    disabled: true
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+
+
+# 환경변수
 jwt.secret.key: ${ JWT_SECRET_KEY }
 
+workspace.default.image: ${ WORKSPACE_DEFAULT_IMAGE }
+user.default.image: ${ USER_DEFAULT_IMAGE }
+
+aes.key: ${ AES_KEY }
