@@ -69,6 +69,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
 	// System Manager & Parameter Store
+	implementation 'com.coveo:spring-boot-parameter-store-integration:1.1.2'
 
 	// s3
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'

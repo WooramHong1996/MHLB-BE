@@ -8,18 +8,18 @@ spring:
       ddl-auto: validate
 
   datasource:
-    url: ${ RDS_URL }
-    username: ${ RDS_ID }
-    password: ${ RDS_PW }
+    url: ${/pinme/rds-url}
+    username: ${/pinme/rds-id}
+    password: ${/pinme/rds-pw}
 
   data:
     mongodb:
-      uri: ${ MONGODB_URL }
-      database: ${ MONGODB_DATABASE }
+      uri: ${/pinme/mongodb-url}
+      database: ${/pinme/mongodb-database}
 
   # redis
   redis:
-    host: ${ REDIS_HOST }
+    host: ${/pinme/redis-host}
     port: 6379
 
   jackson:
@@ -30,8 +30,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${ GOOGLE_ID }
-    password: ${ GOOGLE_PW }
+    username: ${/pinme/google-id}
+    password: ${/pinme/google-pw}
     properties:
       debug: true
       mail.smtp:
@@ -51,11 +51,8 @@ spring:
 
 
 # paramter store
-aws:
-  paramstore:
-    name: pinme
-    enabled: true
-
+awsParameterStorePropertySource:
+  enabled: true
 
 # s3
 cloud:
@@ -63,19 +60,19 @@ cloud:
     stack.auto: false
     region.static: ap-northeast-2
     credentials:
-      access-key: ${ ACCESS_KEY }
-      secret-key: ${ SECRET_KEY }
+      access-key: ${/pinme/access-key}
+      secret-key: ${/pinme/secret-key}
       instance-profile: true
-    s3.bucket: ${ S3_BUCKET }
+    s3.bucket: ${/pinme/s3-bucket}
 
 
 # OAuth
 OAuth2:
   google:
     url: https://accounts.google.com/o/oauth2/v2/auth
-    client-id: ${ GOOGLE_OAUTH2_CLIENT_ID }
-    client-secret: ${ GOOGLE_OAUTH2_CLIENT_SECRET }
-    callback-url: ${ GOOGLE_OAUTH2_CALLBACK_URL }
+    client-id: ${/pinme/google-oauth2-client-id}
+    client-secret: ${/pinme/google-oauth2-client-secret}
+    callback-url: ${/pinme/google-oauth2-callback-url}
     scope: https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile
 
 
@@ -99,9 +96,9 @@ springdoc:
 
 
 # 환경변수
-jwt.secret.key: ${ JWT_SECRET_KEY }
+jwt.secret.key: ${/pinme/jwt-secret-key}
 
-workspace.default.image: ${ WORKSPACE_DEFAULT_IMAGE }
-user.default.image: ${ USER_DEFAULT_IMAGE }
+workspace.default.image: ${/pinme/workspace-default-image}
+user.default.image: ${/pinme/user-default-image}
 
-aes.key: ${ AES_KEY }
+aes.key: ${/pinme/aes-key}
