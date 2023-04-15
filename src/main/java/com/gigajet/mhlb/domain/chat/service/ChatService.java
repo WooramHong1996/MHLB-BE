@@ -33,7 +33,6 @@ public class ChatService {
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
-    private final StatusRepository statusRepository;
 
     //이전 채팅목록 불러오기
     @Transactional
@@ -123,7 +122,7 @@ public class ChatService {
                 }
                 Optional<User> opponents = userRepository.findById(userAndMessage.getUserId());
                 //퇴사한 유저인지 확인하여 퇴사한 경우 채팅 보낼 수 없도록 기능 수정 필요
-                inbox.inbox(chatRoom, opponents.get(), statusRepository.findTopByUserIdOrderByUpdateDayDescUpdateTimeDesc(userAndMessage.getUserId()).getStatus().getColor());
+                inbox.inbox(chatRoom, opponents.get());
             }
             response.add(inbox);
         }

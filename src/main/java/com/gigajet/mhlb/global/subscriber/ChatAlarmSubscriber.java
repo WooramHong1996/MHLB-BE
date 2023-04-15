@@ -22,12 +22,10 @@ public class ChatAlarmSubscriber implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         try {
             String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(message.getBody());
-            log.info(publishMessage);
 
             ChatAlarmResponseDto.ConvertChatAlarm convertChatAlarm = objectMapper.readValue(publishMessage, ChatAlarmResponseDto.ConvertChatAlarm.class);
 
             messagingTemplate.convertAndSend("/sub/unread-message/" + convertChatAlarm.getReceiverId(), convertChatAlarm.getT());
-            log.info("alarm 보내기 성공!");
         } catch (Exception exception) {
             log.error(exception.getMessage());
 //            throw new CustomException(ErrorCode.UNDEFINED_REQUEST);

@@ -35,7 +35,6 @@ public class StatusSubscriber implements MessageListener {
             StatusResponseDto.StatusInfo statusInfo = objectMapper.readValue(publishMessage, StatusResponseDto.StatusInfo.class);
             List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findAllByUser_IdAndIsShowTrue(statusInfo.getUserId());
 
-            log.info("status changed user : " + statusInfo.getUserId());
             for (WorkspaceUser workspaceUser : workspaceUserList) {
                 Long workspaceId = workspaceUser.getWorkspace().getId();
 
