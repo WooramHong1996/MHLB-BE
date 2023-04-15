@@ -8,13 +8,13 @@ spring:
       ddl-auto: validate
 
   datasource:
-    url: ${ RDS_URL }
+    url: jdbc:mysql://${ RDS_URL }:3306/${ RDS_DATABASE }
     username: ${ RDS_ID }
     password: ${ RDS_PW }
 
   data:
     mongodb:
-      uri: ${ MONGODB_URL }
+      uri: mongodb+srv://${ MONGODB_ID }:${ MONGODB_PW }@${ MONGODB_URL }/?retryWrites=true&w=majority
       database: ${ MONGODB_DATABASE }
 
   # redis
