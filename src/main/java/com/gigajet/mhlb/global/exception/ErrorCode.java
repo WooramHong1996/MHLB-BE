@@ -11,7 +11,7 @@ import static org.springframework.http.HttpStatus.*;
 public enum ErrorCode {
 
     /* 400 BAD_REQUEST : 잘못된 요청 */
-    PERMISSION_DINED(BAD_REQUEST, "SC-11", "forbidden"),
+    ACCESS_DENIED(BAD_REQUEST, "E-11", "access denied"),
 
     DUPLICATE_EMAIL(BAD_REQUEST, "U-01", "duplicate email"),
     UNREGISTER_USER(BAD_REQUEST, "U-02", "unregister user"),
