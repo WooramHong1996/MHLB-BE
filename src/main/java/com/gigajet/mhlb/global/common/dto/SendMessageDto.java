@@ -15,16 +15,19 @@ public class SendMessageDto {
     private final String message;
     @Schema(description = "상태코드", example = "")
     private final String code;
+    private final int statusCode;
 
     @Builder
-    public SendMessageDto(String message, String code) {
+    public SendMessageDto(String message, String code, int statusCode) {
         this.message = message;
         this.code = code;
+        this.statusCode = statusCode;
     }
 
     public static SendMessageDto of(SuccessCode successCode) {
         return SendMessageDto.builder()
                 .message(successCode.getMessage())
+                .statusCode(successCode.getHttpStatus().value())
                 .build();
     }
 
@@ -32,6 +35,7 @@ public class SendMessageDto {
         return SendMessageDto.builder()
                 .code(errorCode.getCode())
                 .message(errorCode.getMessage())
+                .statusCode(errorCode.getHttpStatus().value())
                 .build();
     }
 
@@ -39,6 +43,7 @@ public class SendMessageDto {
         return ResponseEntity.status(successCode.getHttpStatus().value())
                 .body(SendMessageDto.builder()
                         .message(successCode.getMessage())
+                        .statusCode(successCode.getHttpStatus().value())
                         .build());
     }
 
@@ -47,6 +52,7 @@ public class SendMessageDto {
                 .body(SendMessageDto.builder()
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage())
+                        .statusCode(errorCode.getHttpStatus().value())
                         .build());
     }
 }
