@@ -2,8 +2,11 @@ package com.gigajet.mhlb.domain.alarm.dto;
 
 import com.gigajet.mhlb.domain.alarm.Entity.Alarm;
 import com.gigajet.mhlb.domain.alarm.Entity.AlarmTypeEnum;
+import com.gigajet.mhlb.domain.chat.dto.ChatRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 public class ChatAlarmResponseDto {
 
@@ -17,15 +20,17 @@ public class ChatAlarmResponseDto {
         private String senderName;
         private String senderImage;
         private String lastMessage;
+        private String lastChat;
 
-        public NewMessageAlarm(Boolean unreadMessage, Long workspaceId, String uuid, Long senderId, String senderName, String senderImage, String lastMessage) {
+        public NewMessageAlarm(Boolean unreadMessage, Long workspaceId, ChatRequestDto.Chat message, Long senderId, String senderName, String senderImage) {
             this.unreadMessage = unreadMessage;
             this.workspaceId = workspaceId;
-            this.uuid = uuid;
+            this.uuid = message.getUuid();
             this.senderId = senderId;
             this.senderName = senderName;
             this.senderImage = senderImage;
-            this.lastMessage = lastMessage;
+            this.lastMessage = message.getMessage();
+            this.lastChat = LocalDateTime.now().toString();
         }
     }
 
@@ -34,10 +39,12 @@ public class ChatAlarmResponseDto {
     public static class ReadAllMessageAlarm {
         private Boolean unreadMessage;
         private Long workspaceId;
+        private String uuid;
 
-        public ReadAllMessageAlarm(Boolean unreadMessage, Long workspaceId) {
+        public ReadAllMessageAlarm(Boolean unreadMessage, Long workspaceId, String uuid) {
             this.unreadMessage = unreadMessage;
             this.workspaceId = workspaceId;
+            this.uuid = uuid;
         }
     }
 

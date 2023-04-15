@@ -43,7 +43,7 @@ public class StompEventListener {
 
     @EventListener(SessionConnectedEvent.class)
     public void connected(SessionConnectedEvent event) {
-        log.info("connected " + StompHeaderAccessor.wrap(event.getMessage()).getSessionId());
+//        log.info("connected " + StompHeaderAccessor.wrap(event.getMessage()).getSessionId());
     }
 
     // 이 부분이 비대해질 예정
@@ -58,7 +58,7 @@ public class StompEventListener {
                 chatMessageService.checkRoom(accessor);
                 chatMessageService.readMessages(accessor);
             } else if (accessor.getDestination().contains("/workspace-invite")) {
-                log.info("subscribe workspace-invite");
+//                log.info("subscribe workspace-invite");
             }
         } catch (Exception exception) {
 //            event.getMessage().getHeaders().put("stompCommand", StompCommand.ERROR);
@@ -74,7 +74,7 @@ public class StompEventListener {
             String destination = accessor.getFirstNativeHeader("destination");
 
             if (destination == null) {
-                log.info("destination null");
+//                log.info("destination null");
             } else if (destination.contains("/inbox")) {
                 chatMessageService.exitRoom(accessor);
             }

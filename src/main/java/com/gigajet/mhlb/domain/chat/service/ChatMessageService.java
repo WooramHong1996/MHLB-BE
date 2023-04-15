@@ -97,7 +97,6 @@ public class ChatMessageService {
 
         Map<Object, Object> room = redisTemplate.opsForHash().entries(endpoint);
         String sessionId = accessor.getSessionId();
-        log.info("subscribe session id : " + sessionId);
 
         if (room.size() == 0) {
             Map<String, Long> userSessionInfo = new HashMap<>();
@@ -129,11 +128,9 @@ public class ChatMessageService {
     @Transactional
     public void readMessages(StompHeaderAccessor accessor) {
         long userId = Long.parseLong(Objects.requireNonNull(accessor.getFirstNativeHeader("userId")));
-        log.info("read user id : " + userId);
 
         String destination = accessor.getDestination();
         String uuid = destination.substring(destination.lastIndexOf("/") + 1);
-        log.info(uuid);
 
         ChatRoom chatRoom = chatRoomRepository.findByInBoxId(uuid);
 
@@ -146,7 +143,7 @@ public class ChatMessageService {
         if (optionalAlarm.isPresent()) {
             Alarm alarm = optionalAlarm.get();
             alarm.toggleUnreadMessage();
-            checkReadMessage(userId, chatRoom.getWorkspaceId());
+            checkReadMessage(userId, chatRoom.getWorkspaceId(), uuid);
         }
 
         for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
@@ -155,7 +152,6 @@ public class ChatMessageService {
             }
 
             userAndMessage.resetUnread();
-            log.info(userId + " 모든 메세지 읽음");
         }
 
         chatRoomRepository.save(chatRoom);
@@ -164,10 +160,8 @@ public class ChatMessageService {
     @Transactional
     public void exitRoom(StompHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
-        log.info("unsubscribe session id : " + sessionId);
         String endpoint = (String) redisTemplate.opsForValue().get(sessionId);
         if (endpoint == null) {
-            log.error("null endpoint");
         }
 
         Map<Object, Object> room = redisTemplate.opsForHash().entries(endpoint);
@@ -187,7 +181,6 @@ public class ChatMessageService {
         Optional<Alarm> optionalAlarm = alarmRepository.findByUserIdAndWorkspaceIdAndUuid(receiverId, workspaceId, message.getUuid());
         if (optionalAlarm.isPresent() && !optionalAlarm.get().getUnreadMessage()) {
             optionalAlarm.get().toggleUnreadMessage();
-            log.info("읽음 -> 안 읽음");
         } else if (optionalAlarm.isEmpty()) {
             // 메시지를 받은 사용자
             User receiver = userRepository.findById(receiverId).orElseThrow();
@@ -200,15 +193,17 @@ public class ChatMessageService {
                     .build());
         }
 
-        ChatAlarmResponseDto.NewMessageAlarm newMessageAlarm = new ChatAlarmResponseDto.NewMessageAlarm(true, workspaceId, message.getUuid(), senderId, sender.getUsername(), sender.getImage(), message.getMessage());
+        ChatAlarmResponseDto.NewMessageAlarm newMessageAlarm = new ChatAlarmResponseDto.NewMessageAlarm(true, workspaceId, message, senderId, sender.getUsername(), sender.getImage());
         redisTemplate.convertAndSend("chatAlarmMessageChannel", new ChatAlarmResponseDto.ConvertChatAlarm<>(newMessageAlarm, receiverId));
     }
 
-    private void checkReadMessage(Long userId, Long workspaceId) {
+    private void checkReadMessage(Long userId, Long workspaceId, String uuid) {
         List<Alarm> alarmList = alarmRepository.findAllByUserIdAndWorkspaceIdAndUnreadMessage(userId, workspaceId, true);
 
         if (alarmList.size() == 0) {
-            redisTemplate.convertAndSend("chatAlarmMessageChannel", new ChatAlarmResponseDto.ConvertChatAlarm<>(new ChatAlarmResponseDto.ReadAllMessageAlarm(false, workspaceId), userId));
+            redisTemplate.convertAndSend("chatAlarmMessageChannel", new ChatAlarmResponseDto.ConvertChatAlarm<>(new ChatAlarmResponseDto.ReadAllMessageAlarm(false, workspaceId, uuid), userId));
+        } else {
+            redisTemplate.convertAndSend("chatAlarmMessageChannel", new ChatAlarmResponseDto.ConvertChatAlarm<>(new ChatAlarmResponseDto.ReadAllMessageAlarm(true, workspaceId, uuid), userId));
         }
     }
 }

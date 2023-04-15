@@ -25,7 +25,6 @@ public class WorkspaceInviteAlarmSubscriber implements MessageListener {
 
             WorkspaceInviteAlarmResponseDto.ConvertWorkspaceInviteAlarm convertWorkspaceInviteAlarm = objectMapper.readValue(publishMessage, WorkspaceInviteAlarmResponseDto.ConvertWorkspaceInviteAlarm.class);
             messagingTemplate.convertAndSend("/sub/workspace-invite/" + convertWorkspaceInviteAlarm.getUserId(), new WorkspaceInviteAlarmResponseDto.workspaceInviteAlarm(convertWorkspaceInviteAlarm.isInvitedWorkspace()));
-            log.info("초대 슝슝");
         } catch (Exception e) {
             log.error(e.getMessage());
 //            throw new CustomException(ErrorCode.UNDEFINED_REQUEST);
