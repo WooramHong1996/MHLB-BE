@@ -1,6 +1,8 @@
 package com.gigajet.mhlb.domain.user.entity;
 
+import com.gigajet.mhlb.domain.user.dto.GoogleOAuthRequestDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
+import com.gigajet.mhlb.domain.user.social.SocialType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,21 +25,36 @@ public class User {
     @Column(nullable = false)
     private String username;
 
-    @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
     private String job;
 
-    public User(UserRequestDto.Register registerDto, String password) {
-        this.image = registerDto.getUserImage();
+    private SocialType type;
+
+    @Column(nullable = false)
+    private Boolean isShow;
+
+    public User(UserRequestDto.Register registerDto, String password, String image) {
+        this.image = image;
         this.email = registerDto.getEmail();
         this.username = registerDto.getUserName();
         this.description = registerDto.getUserDesc();
         this.password = password;
         this.job = registerDto.getUserJob();
+        this.isShow = true;
+    }
+
+    public User(GoogleOAuthRequestDto.GoogleUser googleUserDto) {
+        this.image = googleUserDto.getPicture();
+        this.email = googleUserDto.getEmail();
+        this.username = googleUserDto.getName();
+        this.type = SocialType.GOOGLE;
+        this.isShow = true;
+    }
+
+    public void resetPassword(String password) {
+        this.password = password;
     }
 }

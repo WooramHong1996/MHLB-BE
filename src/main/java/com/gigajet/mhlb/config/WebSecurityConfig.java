@@ -13,8 +13,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -28,15 +26,11 @@ public class WebSecurityConfig {
     private final JwtUtil jwtUtil;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers(PathRequest.toH2Console())
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+//                .requestMatchers(PathRequest.toH2Console())
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                .antMatchers("/swagger-ui/**", "/api-docs/json/**");
     }
 
     @Bean
@@ -48,9 +42,10 @@ public class WebSecurityConfig {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests()
-                .antMatchers("/").permitAll()
                 .antMatchers("/api/users/**").permitAll()
-//                .antMatchers("/stomp/chat/**").permitAll()
+                .antMatchers("/stomp/**").permitAll()
+                .antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .antMatchers("/").permitAll()
                 .anyRequest().authenticated();
 
         http.cors();
@@ -73,9 +68,12 @@ public class WebSecurityConfig {
         config.addExposedHeader(JwtUtil.AUTHORIZATION_HEADER);
 
         config.addAllowedMethod("*");
+        config.addAllowedMethod("OPTIONS");
 
-        config.addAllowedHeader("Content-Type");
-        config.addAllowedHeader(JwtUtil.AUTHORIZATION_HEADER);
+        config.addAllowedHeader("*");
+        config.addAllowedHeader("Access-Control-Request-Headers");
+
+        config.setMaxAge(600L);
 
         config.setAllowCredentials(true);
 
@@ -83,7 +81,6 @@ public class WebSecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-//        source.registerCorsConfiguration("/stomp/chat", config);
 
         return source;
     }
