@@ -32,7 +32,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<SendMessageDto> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exception) {
         log.error("MaxUploadSizeExceededException throw Exception : {}", exception.getMessage());
-        return ResponseEntity.badRequest().body(new SendMessageDto("over max size", "E-99"));
+        return ResponseEntity.badRequest().body(new SendMessageDto("over max size", "E-99", 400));
     }
 
     @Override
