@@ -193,7 +193,7 @@ public class ChatMessageService {
                     .build());
         }
 
-        ChatAlarmResponseDto.NewMessageAlarm newMessageAlarm = new ChatAlarmResponseDto.NewMessageAlarm(true, workspaceId, message.getUuid(), senderId, sender.getUsername(), sender.getImage(), message.getMessage());
+        ChatAlarmResponseDto.NewMessageAlarm newMessageAlarm = new ChatAlarmResponseDto.NewMessageAlarm(true, workspaceId, message, senderId, sender.getUsername(), sender.getImage());
         redisTemplate.convertAndSend("chatAlarmMessageChannel", new ChatAlarmResponseDto.ConvertChatAlarm<>(newMessageAlarm, receiverId));
     }
 
