@@ -1,5 +1,6 @@
 package com.gigajet.mhlb.domain.chat.dto;
 
+import com.gigajet.mhlb.domain.chat.entity.Chat;
 import com.gigajet.mhlb.domain.chat.entity.ChatRoom;
 import com.gigajet.mhlb.domain.user.entity.User;
 import lombok.AllArgsConstructor;
@@ -49,20 +50,13 @@ public class ChatResponseDto {
     }
 
     @Getter
-    public static class Chat {
+    public static class ChatData {
         private Long messageId;
         private Long userId;
         private String message;
         private LocalDateTime createdAt;
 
-        public Chat(com.gigajet.mhlb.domain.chat.entity.Chat chat) {
-            this.messageId = chat.getMessageId();
-            this.message = chat.getMessage();
-            this.userId = chat.getSenderId();
-            this.createdAt = chat.getCreatedAt();
-        }
-
-        public Chat(Convert convert) {
+        public ChatData(Convert convert) {
             this.messageId = convert.getMessageId();
             this.message = convert.getMessage();
             this.userId = convert.getUserId();
@@ -72,6 +66,7 @@ public class ChatResponseDto {
 
     @Builder
     @Getter
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class Convert {
         private Long messageId;
@@ -80,7 +75,7 @@ public class ChatResponseDto {
         private String inboxId;
         private String createdAt;
 
-        public Convert(com.gigajet.mhlb.domain.chat.entity.Chat chat) {
+        public Convert(Chat chat) {
             this.messageId = chat.getMessageId();
             this.message = chat.getMessage();
             this.userId = chat.getSenderId();
@@ -97,7 +92,7 @@ public class ChatResponseDto {
         private String message;
         private LocalDateTime createdAt;
 
-        public Chatting(com.gigajet.mhlb.domain.chat.entity.Chat chat) {
+        public Chatting(Chat chat) {
             this.messageId = chat.getMessageId();
             this.message = chat.getMessage();
             this.userId = chat.getSenderId();

@@ -1,7 +1,7 @@
-package com.gigajet.mhlb.common.util;
+package com.gigajet.mhlb.global.common.util;
 
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.global.exception.CustomException;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -40,7 +40,7 @@ public class ImageUtil {
 
     public boolean checkMimeType(File file) throws IOException {
         try {
-            List<String> mimeTypeList = Arrays.asList("image/jpeg,", "image/png", "image/jpg", "image/gif");
+            List<String> mimeTypeList = Arrays.asList("image/jpeg", "image/png", "image/jpg", "image/gif");
 
             String fileMimeType = tika.detect(file);
             log.info("mime type : {}", fileMimeType);

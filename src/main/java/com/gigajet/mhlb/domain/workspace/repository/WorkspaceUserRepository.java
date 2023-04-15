@@ -9,17 +9,17 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WorkspaceUserRepository extends JpaRepository<WorkspaceUser, Long> {
+    Optional<WorkspaceUser> findByUserAndWorkspaceAndIsShowTrue(User user, Workspace workspace);
+
+    Optional<WorkspaceUser> findByUserAndWorkspaceAndIsShow(User user, Workspace workspace, Boolean isShow);
+
     Optional<WorkspaceUser> findByUserAndWorkspace(User user, Workspace workspace);
 
-    List<WorkspaceUser> findByUserAndIsShow(User user, Boolean isShow);
+    List<WorkspaceUser> findAllByUser_IdAndIsShowTrue(Long id);
 
-    List<WorkspaceUser> findByUserAndIsShowOrderByRoleDesc(User user, Boolean isShow);
+    List<WorkspaceUser> findByUserAndIsShowTrueOrderByRoleDesc(User user);
 
-    Optional<WorkspaceUser> findByUserAndWorkspaceId(User user, Long id);
-
-    List<WorkspaceUser> findByWorkspace_IdAndIsShow(Long id, Boolean isShow);
-
-    Optional<WorkspaceUser> findByUser_IdAndWorkspace_IdAndIsShow(Long userId, Long workspaceId, Boolean isShow);
+    List<WorkspaceUser> findByWorkspaceAndIsShow(Workspace workspace, Boolean isShow);
 
     Long countByUserAndIsShow(User user, Boolean isShow);
 }

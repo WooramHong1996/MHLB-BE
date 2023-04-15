@@ -10,9 +10,12 @@ public class UserResponseDto {
     private final String userImage;
     @Schema(description = "회원 id")
     private final Long userId;
+    @Schema(description = "초대 받은 워크스페이스 유무")
+    private final boolean invitedWorkspace;
 
-    public UserResponseDto(String userImage, Long userId) {
+    public UserResponseDto(String userImage, Long userId, boolean invitedWorkspace) {
         this.userImage = userImage;
         this.userId = userId;
+        this.invitedWorkspace = invitedWorkspace;
     }
 }

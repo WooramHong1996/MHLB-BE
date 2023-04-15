@@ -1,8 +1,8 @@
 package com.gigajet.mhlb.domain.workspace.service;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.common.util.S3Handler;
-import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.util.S3Handler;
+import com.gigajet.mhlb.global.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.alarm.Entity.Alarm;
 import com.gigajet.mhlb.domain.alarm.Repository.AlarmRepository;
 import com.gigajet.mhlb.domain.status.entity.Status;
@@ -16,8 +16,8 @@ import com.gigajet.mhlb.domain.workspace.entity.WorkspaceOrder;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceUser;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceOrderRepository;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.global.exception.CustomException;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -51,18 +51,17 @@ public class WorkspaceService {
         List<WorkspaceOrder> workspaceOrderList = workspaceOrderRepository.findByWorkspaceUser_UserAndIsShowOrderByOrders(user, true);
 
         for (WorkspaceOrder workspaceOrder : workspaceOrderList) {
-            Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user, workspaceOrder.getWorkspaceUser().getWorkspace().getId(), true);
-            if (alarm.isEmpty()) {
+            List<Alarm> alarmList = alarmRepository.findAllByUserAndWorkspaceIdAndUnreadMessage(user, workspaceOrder.getWorkspaceUser().getWorkspace().getId(), true);
+            if (alarmList.size() == 0) {
                 orderLists.add(new WorkspaceResponseDto.AllList(workspaceOrder.getWorkspaceUser().getWorkspace(), false));
             } else {
-                orderLists.add(new WorkspaceResponseDto.AllList(workspaceOrder.getWorkspaceUser().getWorkspace(), alarm.get().getUnreadMessage()));
+                orderLists.add(new WorkspaceResponseDto.AllList(workspaceOrder.getWorkspaceUser().getWorkspace(), true));
             }
         }
 
         return orderLists;
     }
 
-    //알림 가져오기 메소드 밑으로 빼둠
     @Transactional
     public WorkspaceResponseDto.Response createWorkspace(User user, MultipartFile image, WorkspaceRequestDto.Create workspaceDto) throws IOException {
         String imageUrl;
@@ -87,8 +86,9 @@ public class WorkspaceService {
     }
 
     @Transactional(readOnly = true)
-    public WorkspaceResponseDto.InfoAndRoll findWorkspaceInfoAndRoll(User user, Long id) {
-        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+    public WorkspaceResponseDto.InfoAndRoll findWorkspaceInfoAndRoll(User user, Long workspaceId) {
+        Workspace workspace = validateWorkspace(workspaceId);
+        WorkspaceUser workspaceUser = workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
         return new WorkspaceResponseDto.InfoAndRoll(workspaceUser.getWorkspace(), workspaceUser.getRole());
     }
 
@@ -121,11 +121,12 @@ public class WorkspaceService {
     }
 
     @Transactional(readOnly = true)
-    public List<WorkspaceResponseDto.People> findPeople(User user, Long id) {
-        workspaceUserRepository.findByUserAndWorkspaceId(user, id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+    public List<WorkspaceResponseDto.People> findPeople(User user, Long workspaceId) {
+        Workspace workspace = validateWorkspace(workspaceId);
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
 
         List<WorkspaceResponseDto.People> peopleList = new ArrayList<>();
-        List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspace_IdAndIsShow(id, true);
+        List<WorkspaceUser> workspaceUserList = workspaceUserRepository.findByWorkspaceAndIsShow(workspace, true);
 
         for (WorkspaceUser workspaceUser : workspaceUserList) {
             if (Objects.equals(workspaceUser.getUser().getId(), user.getId())) {
@@ -146,14 +147,8 @@ public class WorkspaceService {
 
         return peopleList;
     }
+
+    private Workspace validateWorkspace(Long workspaceId) {
+        return workspaceRepository.findByIdAndIsShowTrue(workspaceId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
+    }
 }
-//
-//class StatusComparator implements Comparator<WorkspaceResponseDto.People> {
-//    @Override
-//    public int compare(WorkspaceResponseDto.People o1, WorkspaceResponseDto.People o2) {
-//        if (Objects.equals(o1.getColor(), o2.getColor())) {
-//            return o1.getUserName().toLowerCase().compareTo(o2.getUserName().toLowerCase());
-//        }
-//        return Integer.compare(o1.getColor(), o2.getColor());
-//    }
-//}

@@ -1,16 +1,16 @@
 package com.gigajet.mhlb.domain.mail.service;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
-import com.gigajet.mhlb.common.util.AESUtil;
-import com.gigajet.mhlb.common.util.SuccessCode;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.util.AESUtil;
+import com.gigajet.mhlb.global.common.util.SuccessCode;
 import com.gigajet.mhlb.domain.mail.dto.MailResponseDto;
 import com.gigajet.mhlb.domain.user.dto.UserRequestDto;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
 import com.gigajet.mhlb.domain.user.social.SocialType;
 import com.gigajet.mhlb.domain.workspace.entity.WorkspaceInvite;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.global.exception.CustomException;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,7 +62,7 @@ public class MailService {
             mimeMessageHelper.setTo(email);
             mimeMessageHelper.setFrom(myAddress);
             mimeMessageHelper.setSubject("PIN ME :: 이메일 인증");
-            mimeMessageHelper.setText("<a href='http://localhost:3000/reset-password/" + uuid + "'>비밀번호 변경</a>", true);
+            mimeMessageHelper.setText("<h1><a href='http://localhost:3000/reset-password/" + uuid + "'>비밀번호 변경</a></h1>", true);
 
             mailSender.send(mimeMessage);
 
@@ -132,7 +132,7 @@ public class MailService {
             mimeMessageHelper.setTo(workspaceInvite.getEmail());
             mimeMessageHelper.setFrom(myAddress);
             mimeMessageHelper.setSubject("PIN ME :: 이메일 인증");
-            mimeMessageHelper.setText("<a href='http://localhost:8080/invite-workspace/" + uuid + "'>Workspace 참여</a>", true);
+            mimeMessageHelper.setText("<h1><a href='http://localhost:3000/invite-workspace/" + uuid + "'>Workspace 참여</a></h1>", true);
 
             mailSender.send(mimeMessage);
 

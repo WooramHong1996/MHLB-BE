@@ -1,105 +1,49 @@
 package com.gigajet.mhlb.domain.chat.service;
 
-import com.gigajet.mhlb.domain.alarm.Entity.Alarm;
-import com.gigajet.mhlb.domain.alarm.Entity.AlarmTypeEnum;
-import com.gigajet.mhlb.domain.alarm.Repository.AlarmRepository;
-import com.gigajet.mhlb.domain.alarm.dto.AlarmRequestDto;
-import com.gigajet.mhlb.domain.chat.dto.ChatRequestDto;
 import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
 import com.gigajet.mhlb.domain.chat.entity.Chat;
 import com.gigajet.mhlb.domain.chat.entity.ChatRoom;
-import com.gigajet.mhlb.domain.chat.entity.MessageId;
 import com.gigajet.mhlb.domain.chat.entity.UserAndMessage;
 import com.gigajet.mhlb.domain.chat.repository.ChatRepository;
 import com.gigajet.mhlb.domain.chat.repository.ChatRoomRepository;
-import com.gigajet.mhlb.domain.chat.repository.MessageIdRepository;
 import com.gigajet.mhlb.domain.status.repository.StatusRepository;
 import com.gigajet.mhlb.domain.user.entity.User;
 import com.gigajet.mhlb.domain.user.repository.UserRepository;
+import com.gigajet.mhlb.domain.workspace.entity.Workspace;
+import com.gigajet.mhlb.domain.workspace.repository.WorkspaceRepository;
 import com.gigajet.mhlb.domain.workspace.repository.WorkspaceUserRepository;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
-import com.gigajet.mhlb.security.jwt.JwtUtil;
+import com.gigajet.mhlb.global.exception.CustomException;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
+
     private final ChatRepository chatRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final WorkspaceRepository workspaceRepository;
     private final WorkspaceUserRepository workspaceUserRepository;
     private final UserRepository userRepository;
     private final StatusRepository statusRepository;
-    private final MessageIdRepository messageIdRepository;
-    private final AlarmRepository alarmRepository;
-
-    private final RedisTemplate<String, Object> redisTemplate;
-
-    private final JwtUtil jwtUtil;
-
-    //메시지 보내기
-    @Transactional
-    public Long getMessageId() {
-        MessageId messageId = messageIdRepository.findTopByKey(1);
-        if (messageId == null) {
-            messageId = new MessageId(1L);
-        } else {
-            messageId.addMessageId();
-        }
-        messageIdRepository.save(messageId);
-        return messageId.getMessageId();
-    }
-
-    @Transactional
-    public void sendMsg(ChatRequestDto.Chat message, String email, String sessionId, Long messageId) {
-        Long id = userRepository.findByEmail(email).get().getId();
-
-        Chat chat = Chat.builder()
-                .senderId(id)
-                .inBoxId(message.getUuid())
-                .workspaceId(message.getWorkspaceId())
-                .message(message.getMessage())
-                .messageId(messageId)
-                .build();
-        chat.setCreatedAt(LocalDateTime.now());
-
-        ChatRoom chatRoom = chatRoomRepository.findByInBoxId(chat.getInBoxId());
-
-        Map<Object, Object> room = redisTemplate.opsForHash().entries("/sub/inbox/" + message.getUuid());
-        if (room.size() == 1) { //방에 혼자일 경우 상대의 안읽은 메시지를 +1
-            for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
-                if (id == userAndMessage.getUserId()) {
-                    continue;
-                }
-                userAndMessage.addUnread();
-                checkUnreadMessage(userAndMessage.getUserId(), message.getWorkspaceId());
-            }
-        }
-
-        chatRoom.update(chat);
-        chatRoomRepository.save(chatRoom);
-
-        chatRepository.save(chat);
-
-        redisTemplate.convertAndSend("chatMessageChannel", new ChatResponseDto.Convert(chat));
-    }
 
     //이전 채팅목록 불러오기
     @Transactional
     public List<ChatResponseDto.Chatting> getChat(User user, Long workspaceId, Long opponentsId, Pageable pageable) {
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        User opponents = userRepository.findById(opponentsId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        Workspace workspace = validateWorkspace(workspaceId);
 
-        userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUserAndWorkspace(opponents, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+
 
         List<ChatResponseDto.Chatting> chatList = new ArrayList<>();
 
@@ -117,32 +61,23 @@ public class ChatService {
             chatList.add(new ChatResponseDto.Chatting(chat));
         }
 
-        Collections.sort(chatList, (a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()));
-
-        List<Alarm> alarmList = alarmRepository.findAllByUserIdAndWorkspaceIdAndUuidAndUnreadMessage(user.getId(), workspaceId, chatRoom.getInBoxId(), true);
-        alarmRepository.saveAll(alarmList);
-
-        Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user, workspaceId, true);
-        if (alarm.isEmpty()) {
-            AlarmRequestDto socket = new AlarmRequestDto(Alarm.builder()
-                    .unreadMessage(false)
-                    .type(AlarmTypeEnum.CHAT)
-                    .workspaceId(workspaceId)
-                    .user(user).build());
-            redisTemplate.convertAndSend("alarmMessageChannel", socket);
-        }
+        chatList.sort(Comparator.comparing(ChatResponseDto.Chatting::getCreatedAt));
 
         return chatList;
     }
 
-    //uuid 불러오기
+    //uuid 생성 또는 조회
     @Transactional
     public ChatResponseDto.GetUuid getUuid(User user, Long workspaceId, Long opponentsId) {
         if (user.getId() == opponentsId) {
             throw new CustomException(ErrorCode.WRONG_USER);
         }
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(opponentsId, workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+
+        User opponents = userRepository.findById(opponentsId).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        Workspace workspace = validateWorkspace(workspaceId);
+
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(opponents, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
         List<UserAndMessage> userIdList = new ArrayList<>();
         userIdList.add(new UserAndMessage(user.getId()));
@@ -172,11 +107,12 @@ public class ChatService {
     //인박스 불러오기
     @Transactional
     public List<ChatResponseDto.Inbox> getInbox(User user, Long workspaceId) {
-        workspaceUserRepository.findByUser_IdAndWorkspace_IdAndIsShow(user.getId(), workspaceId, true).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
+        Workspace workspace = validateWorkspace(workspaceId);
+
+        workspaceUserRepository.findByUserAndWorkspaceAndIsShowTrue(user, workspace).orElseThrow(() -> new CustomException(ErrorCode.WRONG_USER));
 
         List<ChatResponseDto.Inbox> response = new ArrayList<>();
         List<ChatRoom> list = chatRoomRepository.findByWorkspaceIdAndUserSetInOrderByLastChatDesc(workspaceId, user.getId());
-        //user 요청자
 
         for (ChatRoom chatRoom : list) {
             ChatResponseDto.Inbox inbox = new ChatResponseDto.Inbox();
@@ -194,125 +130,7 @@ public class ChatService {
         return response;
     }
 
-    //토큰 값 추출
-    public String resolveToken(String authorization) {
-        return jwtUtil.getUserEmail(authorization.substring(7));
-    }
-
-    //메시지 읽음 처리
-    @Transactional
-    public void readMessages(StompHeaderAccessor accessor) {
-        String email = String.valueOf(userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))));
-        User user = userRepository.findByEmail(email).get();
-
-        String uuid = accessor.getFirstNativeHeader("uuid");
-
-        ChatRoom chatRoom = chatRoomRepository.findByInBoxId(uuid);
-
-        for (UserAndMessage userAndMessage : chatRoom.getUserAndMessages()) {
-            if (user.getId() != userAndMessage.getUserId()) {
-                continue;
-            }
-            userAndMessage.resetUnread();
-        }
-        chatRoomRepository.save(chatRoom);
-        List<Alarm> alarms = alarmRepository.findAllByUserIdAndWorkspaceIdAndUuidAndUnreadMessage(user.getId(), chatRoom.getWorkspaceId(), uuid, true);
-        if (!alarms.isEmpty()) {
-            for (Alarm alarm : alarms) {
-                alarmRepository.update(false, alarm.getId());
-            }
-        }
-        Optional<Alarm> alarm = alarmRepository.findTopByUserAndWorkspaceIdAndUnreadMessage(user, chatRoom.getWorkspaceId(), true);
-        if (!alarm.isEmpty()) {
-            checkReadMessage(user, chatRoom.getWorkspaceId());
-        }
-    }
-
-    /**
-     * disconnect시 endpoint의 값을 받아올 수 없으므로 sessionId : endpoint의 데이터를 저장해둠
-     */
-    @Transactional
-    public void checkRoom(StompHeaderAccessor accessor) {
-        Long id = userRepository.findByEmail(resolveToken(accessor.getFirstNativeHeader("Authorization"))).get().getId();
-        String endpoint = accessor.getDestination();
-        if (!(endpoint.contains("/inbox/"))) {
-            return;
-        }
-        Map<Object, Object> room = redisTemplate.opsForHash().entries(endpoint);
-        if (room.size() == 0) {//해당 채팅방 최초 접속시
-            Map<String, Long> userSessionInfo = new HashMap<>();
-
-            userSessionInfo.put(accessor.getSessionId(), id);
-
-            redisTemplate.opsForHash().putAll(accessor.getDestination(), userSessionInfo);
-            redisTemplate.opsForValue().set(accessor.getSessionId(), accessor.getDestination());
-
-        } else {//채팅방에 이미 유저가 존재 할 경우
-            Map<String, Long> updatedData = new HashMap<>();
-            for (Map.Entry<Object, Object> entry : room.entrySet()) {
-                String key = (String) entry.getKey();
-                Long value = (Long) entry.getValue();
-                updatedData.put(key, value);
-            }
-            updatedData.put(accessor.getSessionId(), id);
-            redisTemplate.opsForHash().putAll(accessor.getDestination(), updatedData);
-
-            redisTemplate.opsForValue().set(accessor.getSessionId(), accessor.getDestination());
-        }
-    }
-
-    @Transactional
-    public void exitRoom(StompHeaderAccessor accessor) {
-        String sessionId = accessor.getSessionId();
-        String endpoint = (String) redisTemplate.opsForValue().get(sessionId);
-
-        Map<Object, Object> room = redisTemplate.opsForHash().entries(endpoint);
-
-        if (room.size() == 1) {//disconnect시 마지막 인원일 경우 바로 삭제
-            redisTemplate.delete(sessionId);
-            redisTemplate.delete(endpoint);
-        } else {
-            Map<String, Long> updatedData = new HashMap<>();
-
-            for (Map.Entry<Object, Object> entry : room.entrySet()) {
-                if ((entry.getValue()).equals(sessionId)) {
-                    continue;
-                }
-                String key = (String) entry.getKey();
-                Long value = (Long) entry.getValue();
-                updatedData.put(key, value);
-                System.out.println();
-            }
-
-            redisTemplate.delete(endpoint);
-            redisTemplate.opsForHash().putAll(endpoint, updatedData);//기존 값 제거 후 새 값 저장
-            redisTemplate.delete(sessionId);
-        }
-    }
-
-    private void checkUnreadMessage(Long id, Long workspaceId) {
-        //user -> 메시지를 읽지 않은 사람
-        User user = userRepository.findById(id).orElseThrow();
-
-        Alarm alarm = alarmRepository.save(Alarm.builder()
-                .unreadMessage(true)
-                .type(AlarmTypeEnum.CHAT)
-                .workspaceId(workspaceId)
-                .user(user).build());
-        AlarmRequestDto alarmRequestDto = new AlarmRequestDto(alarm);
-
-        redisTemplate.convertAndSend("alarmMessageChannel", alarmRequestDto);
-    }
-
-    private void checkReadMessage(User user, Long workspaceId) {
-
-        Alarm alarm = alarmRepository.save(Alarm.builder()
-                .unreadMessage(false)
-                .type(AlarmTypeEnum.CHAT)
-                .workspaceId(workspaceId)
-                .user(user).build());
-        AlarmRequestDto alarmRequestDto = new AlarmRequestDto(alarm);
-
-        redisTemplate.convertAndSend("alarmMessageChannel", alarmRequestDto);
+    private Workspace validateWorkspace(Long id) {
+        return workspaceRepository.findByIdAndIsShowTrue(id).orElseThrow(() -> new CustomException(ErrorCode.WRONG_WORKSPACE_ID));
     }
 }

@@ -1,18 +1,18 @@
-package com.gigajet.mhlb.config;
+package com.gigajet.mhlb.global.subscriber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gigajet.mhlb.domain.chat.dto.ChatResponseDto;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
+@Slf4j
+@Component
 @RequiredArgsConstructor
-@Service
 public class ChatSubscriber implements MessageListener {
     private final ObjectMapper objectMapper;
     private final RedisTemplate redisTemplate;
@@ -24,12 +24,12 @@ public class ChatSubscriber implements MessageListener {
             String publishMessage = (String) redisTemplate.getStringSerializer().deserialize(message.getBody());
 
             ChatResponseDto.Convert chat = objectMapper.readValue(publishMessage, ChatResponseDto.Convert.class);
-            ChatResponseDto.Chat response = new ChatResponseDto.Chat(chat);
+            ChatResponseDto.ChatData response = new ChatResponseDto.ChatData(chat);
 
             messagingTemplate.convertAndSend("/sub/inbox/" + chat.getInboxId(), response);
-
         } catch (Exception e) {
-            throw new CustomException(ErrorCode.UNDEFINED_REQUEST);
+            log.error(e.getMessage());
+//            throw new CustomException(ErrorCode.UNDEFINED_REQUEST);
         }
     }
 }

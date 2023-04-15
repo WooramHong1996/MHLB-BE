@@ -11,13 +11,13 @@ public class WorkspaceResponseDto {
     @Schema(description = "메인 페이지 워크스페이스 정보 DTO")
     @Getter
     public static class Response {
-        @Schema(description = "워크스페이스 id")
+        @Schema(description = "워크스페이스 id", example = "1")
         private final Long workspaceId;
-        @Schema(description = "워크스페이스 이미지")
+        @Schema(description = "워크스페이스 이미지", example = "url")
         private final String workspaceImage;
-        @Schema(description = "워크스페이스 타이틀")
+        @Schema(description = "워크스페이스 타이틀", example = "Workspace title")
         private final String workspaceTitle;
-        @Schema(description = "워크스페이스 상세정보")
+        @Schema(description = "워크스페이스 상세정보", example = "Workspace description")
         private final String workspaceDesc;
 
         public Response(Workspace workspace) {
@@ -31,15 +31,15 @@ public class WorkspaceResponseDto {
     @Schema(description = "메인 페이지 워크스페이스 정보 DTO")
     @Getter
     public static class AllList {
-        @Schema(description = "워크스페이스 id")
+        @Schema(description = "워크스페이스 id", example = "1")
         private final Long workspaceId;
-        @Schema(description = "워크스페이스 이미지")
+        @Schema(description = "워크스페이스 이미지", example = "url")
         private final String workspaceImage;
-        @Schema(description = "워크스페이스 타이틀")
+        @Schema(description = "워크스페이스 타이틀", example = "Workspace title")
         private final String workspaceTitle;
-        @Schema(description = "워크스페이스 상세정보")
+        @Schema(description = "워크스페이스 상세정보", example = "Workspace description")
         private final String workspaceDesc;
-        @Schema(description = "안읽은 메시지")
+        @Schema(description = "안 읽은 메시지", example = "true")
         private final Boolean unreadMessage;
 
         public AllList(Workspace workspace, Boolean unreadMessage) {
@@ -54,15 +54,15 @@ public class WorkspaceResponseDto {
     @Schema(description = "메인 페이지 워크스페이스 정보, 회원 권한 DTO")
     @Getter
     public static class InfoAndRoll {
-        @Schema(description = "워크스페이스 id")
+        @Schema(description = "워크스페이스 id", example = "1")
         private final Long workspaceId;
-        @Schema(description = "워크스페이스 이미지")
+        @Schema(description = "워크스페이스 이미지", example = "url")
         private final String workspaceImage;
-        @Schema(description = "워크스페이스 타이틀")
+        @Schema(description = "워크스페이스 타이틀", example = "Workspace title")
         private final String workspaceTitle;
-        @Schema(description = "워크스페이스 상세정보")
+        @Schema(description = "워크스페이스 상세정보", example = "Workspace description")
         private final String workspaceDesc;
-        @Schema(description = "회원 권한")
+        @Schema(description = "회원 권한", example = "ADMIN")
         private final WorkspaceUserRole userRole;
 
         public InfoAndRoll(Workspace workspace, WorkspaceUserRole role) {
@@ -77,9 +77,9 @@ public class WorkspaceResponseDto {
     @Schema(description = "워크스페이스 초대 DTO")
     @Getter
     public static class Invite {
-        @Schema(description = "WorkspaceUser 테이블 id")
+        @Schema(description = "WorkspaceUser id", example = "1")
         private final Long inviteId;
-        @Schema(description = "초대 회원 이메일")
+        @Schema(description = "초대 회원 이메일", example = "test@test.com")
         private final String email;
 
         public Invite(WorkspaceInvite invite) {
@@ -91,15 +91,15 @@ public class WorkspaceResponseDto {
     @Schema(description = "정렬된 워크스페이스 DTO")
     @Getter
     public static class OrderList {
-        @Schema(description = "워크스페이스 id")
+        @Schema(description = "워크스페이스 id", example = "1")
         private final Long workspaceId;
-        @Schema(description = "워크스페이스 이미지")
+        @Schema(description = "워크스페이스 이미지", example = "url")
         private final String workspaceImage;
-        @Schema(description = "워크스페이스 타이틀")
+        @Schema(description = "워크스페이스 타이틀", example = "Workspace title")
         private final String workspaceTitle;
-        @Schema(description = "워크스페이스 상세정보")
+        @Schema(description = "워크스페이스 상세정보", example = "Workspace description")
         private final String workspaceDesc;
-        @Schema(description = "워크스페이스 순서")
+        @Schema(description = "워크스페이스 순서", example = "1")
         private final Long orders;
 
         public OrderList(Workspace workspace, Long orders) {
@@ -114,21 +114,21 @@ public class WorkspaceResponseDto {
     @Schema(description = "워크스페이스에 속한 회원정보 DTO")
     @Getter
     public static class People {
-        @Schema(description = "회원 id")
+        @Schema(description = "회원 id", example = "1")
         private final Long userId;
-        @Schema(description = "회원 프로필 이미지")
+        @Schema(description = "회원 프로필 이미지", example = "url")
         private final String userImage;
-        @Schema(description = "회원 이름")
+        @Schema(description = "회원 이름", example = "User name")
         private final String userName;
-        @Schema(description = "회원 직업")
+        @Schema(description = "회원 직업", example = "User job")
         private final String userJob;
-        @Schema(description = "회원 이메일")
+        @Schema(description = "회원 이메일", example = "test@test.com")
         private final String userEmail;
-        @Schema(description = "회원 상태 메세지")
+        @Schema(description = "회원 상태 메세지", example = "User status message")
         private final String userDesc;
-        @Schema(description = "회원 상태")
+        @Schema(description = "회원 상태", example = "User status")
         private final String status;
-        @Schema(description = "회원 상태 색깔")
+        @Schema(description = "회원 상태 색깔", example = "1")
         private final Integer color;
 
         public People(Status status) {

@@ -1,5 +1,9 @@
 package com.gigajet.mhlb.config;
 
+import com.gigajet.mhlb.global.subscriber.ChatAlarmSubscriber;
+import com.gigajet.mhlb.global.subscriber.ChatSubscriber;
+import com.gigajet.mhlb.global.subscriber.StatusSubscriber;
+import com.gigajet.mhlb.global.subscriber.WorkspaceInviteAlarmSubscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,22 +29,24 @@ public class RedisConfig {
     private int port;
 
     /**
-    redis의 pub/sub 기능을 이용하기 위해 MessageListener 설정 추가
-    메시지 발행이 오면 Listener가 처리함
+     * redis의 pub/sub 기능을 이용하기 위해 MessageListener 설정 추가
+     * 메시지 발행이 오면 Listener가 처리함
      */
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(
             RedisConnectionFactory connectionFactory,
             @Qualifier("chatMessageListenerAdapter") MessageListenerAdapter chatMessageListenerAdapter,
             @Qualifier("statusMessageListenerAdapter") MessageListenerAdapter handleMessageListenerAdapter,
-            @Qualifier("alarmMessageListenerAdapter") MessageListenerAdapter alarmMessageListenerAdapter
+            @Qualifier("chatAlarmMessageListenerAdapter") MessageListenerAdapter chatAlarmMessageListenerAdapter,
+            @Qualifier("workspaceInviteAlarmMessageListenerAdapter") MessageListenerAdapter workspaceInviteAlarmMessageListenerAdapter
     ) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // RedisMessageListenerContainer 에 Bean 으로 등록한 listenerAdapter, channelTopic 추가
         container.addMessageListener(chatMessageListenerAdapter, new ChannelTopic("chatMessageChannel"));
         container.addMessageListener(handleMessageListenerAdapter, new ChannelTopic("statusMessageChannel"));
-        container.addMessageListener(alarmMessageListenerAdapter, new ChannelTopic("alarmMessageChannel"));
+        container.addMessageListener(chatAlarmMessageListenerAdapter, new ChannelTopic("chatAlarmMessageChannel"));
+        container.addMessageListener(workspaceInviteAlarmMessageListenerAdapter, new ChannelTopic("workspaceInviteAlarmMessageChannel"));
         return container;
     }
 
@@ -55,7 +61,12 @@ public class RedisConfig {
     }
 
     @Bean
-    public MessageListenerAdapter alarmMessageListenerAdapter(AlarmSubscriber subscriber) {
+    public MessageListenerAdapter chatAlarmMessageListenerAdapter(ChatAlarmSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber);
+    }
+
+    @Bean
+    public MessageListenerAdapter workspaceInviteAlarmMessageListenerAdapter(WorkspaceInviteAlarmSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber);
     }
 

@@ -17,7 +17,7 @@ public interface WorkspaceOrderRepository extends JpaRepository<WorkspaceOrder, 
     List<WorkspaceOrder> findByWorkspaceUser_UserAndIsShowOrderByOrders(User user, Boolean isShow);
 
     @Modifying
-    @Query("UPDATE WorkspaceOrder SET orders = :orders WHERE workspaceUser.id = :id")
+    @Query("UPDATE WorkspaceOrder SET orders = ?1 WHERE workspaceUser.id = ?2")
     void orderUpdate(Long orders, Long id);
 
     Optional<WorkspaceOrder> findByWorkspaceUserAndIsShow(WorkspaceUser workspaceUser, Boolean isShow);

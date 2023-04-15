@@ -1,6 +1,6 @@
-package com.gigajet.mhlb.exception;
+package com.gigajet.mhlb.global.exception;
 
-import com.gigajet.mhlb.common.dto.SendMessageDto;
+import com.gigajet.mhlb.global.common.dto.SendMessageDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<SendMessageDto> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exception) {
         log.error("MaxUploadSizeExceededException throw Exception : {}", exception.getMessage());
-        return ResponseEntity.badRequest().body(new SendMessageDto("over max size", 400));
+        return ResponseEntity.badRequest().body(new SendMessageDto("over max size", "E-99"));
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.gigajet.mhlb.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gigajet.mhlb.exception.CustomException;
-import com.gigajet.mhlb.exception.ErrorCode;
+import com.gigajet.mhlb.global.exception.CustomException;
+import com.gigajet.mhlb.global.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
